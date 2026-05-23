@@ -33,122 +33,48 @@
 #' @export
 ats_classification <- function(data) {
 
-  ## Get number of instances
-  n <- nrow(data)
+  # The pattern label for every (fev1, fvc, fev1fvc, tlc) abnormal/normal
+  # combination. The 4-character key positions correspond to FEV1, FVC,
+  # FEV1/FVC, TLC respectively (A = below LLN, N = at-or-above LLN). The
+  # mapping mirrors the spirometry interpretation flowchart in Stanojevic
+  # et al. ERJ 2022 (Figure 8) and the pattern definitions in Tables 5 / 8:
+  #   - FEV1/FVC < LLN with normal TLC  --> Obstructed
+  #   - FEV1/FVC < LLN with low    TLC  --> Mixed
+  #   - FEV1/FVC normal, low TLC        --> Restricted (regardless of FVC)
+  #   - FEV1/FVC normal, normal TLC, low FVC --> Non-specific
+  #   - everything else                  --> Normal
+  pattern_lookup <- c(
+    NNNN = "Normal",       ANNN = "Normal",
+    NANN = "Non-specific", AANN = "Non-specific",
+    NNAN = "Obstructed",   ANAN = "Obstructed",
+    NAAN = "Obstructed",   AAAN = "Obstructed",
+    NNNA = "Restricted",   ANNA = "Restricted",
+    NANA = "Restricted",   AANA = "Restricted",
+    NNAA = "Mixed",        ANAA = "Mixed",
+    NAAA = "Mixed",        AAAA = "Mixed"
+  )
 
-  ## Initialize output vector
-  ats_vector <- rep(NA_character_, n)
-  combo_vector <- rep(NA_character_, n)
-
-  ## Extract variables for comparison
-  fev1 <- data$fev1
-  fev1_lln <- data$fev1_lln
-  fvc <- data$fvc
-  fvc_lln <- data$fvc_lln
-  fev1fvc <- data$fev1fvc
-  fev1fvc_lln <- data$fev1fvc_lln
-  tlc <- data$tlc
-  tlc_lln <- data$tlc_lln
-
-  ## Assign ATS classifications
-  for (i in seq_len(n)) {
-
-    if ( sum( is.na( c(fev1[i], fev1_lln[i], fvc[i], fvc_lln[i], fev1fvc[i], fev1fvc_lln[i], tlc[i], tlc_lln[i]) ) ) > 0) {
-
-      ats_vector[i] <- NA
-      combo_vector[i] <- NA
-
-    } else if ( (fev1[i] >= fev1_lln[i]) && (fvc[i] >= fvc_lln[i]) && (fev1fvc[i] >= fev1fvc_lln[i]) && (tlc[i] >= tlc_lln[i])) {
-
-      ats_vector[i] <- "Normal"
-      combo_vector[i] <- "NNNN"
-
-    } else if ( (fev1[i] < fev1_lln[i]) && (fvc[i] >= fvc_lln[i]) && (fev1fvc[i] >= fev1fvc_lln[i]) && (tlc[i] >= tlc_lln[i])) {
-
-      ats_vector[i] <- "Normal"
-      combo_vector[i] <- "ANNN"
-
-    } else if ( (fev1[i] >= fev1_lln[i]) && (fvc[i] < fvc_lln[i]) && (fev1fvc[i] >= fev1fvc_lln[i]) && (tlc[i] >= tlc_lln[i])) {
-
-      ats_vector[i] <- "Non-specific"
-      combo_vector[i] <- "NANN"
-
-    } else if ( (fev1[i] < fev1_lln[i]) && (fvc[i] < fvc_lln[i]) && (fev1fvc[i] >= fev1fvc_lln[i]) && (tlc[i] >= tlc_lln[i])) {
-
-      ats_vector[i] <- "Non-specific"
-      combo_vector[i] <- "AANN"
-
-    } else if ( (fev1[i] >= fev1_lln[i]) && (fvc[i] >= fvc_lln[i]) && (fev1fvc[i] < fev1fvc_lln[i]) && (tlc[i] >= tlc_lln[i])) {
-
-      ats_vector[i] <- "Obstructed"
-      combo_vector[i] <- "NNAN"
-
-    } else if ( (fev1[i] < fev1_lln[i]) && (fvc[i] >= fvc_lln[i]) && (fev1fvc[i] < fev1fvc_lln[i]) && (tlc[i] >= tlc_lln[i])) {
-
-      ats_vector[i] <- "Obstructed"
-      combo_vector[i] <- "ANAN"
-
-    } else if ( (fev1[i] >= fev1_lln[i]) && (fvc[i] < fvc_lln[i]) && (fev1fvc[i] < fev1fvc_lln[i]) && (tlc[i] >= tlc_lln[i])) {
-
-      ats_vector[i] <- "Obstructed"
-      combo_vector[i] <- "NAAN"
-
-    } else if ( (fev1[i] < fev1_lln[i]) && (fvc[i] < fvc_lln[i]) && (fev1fvc[i] < fev1fvc_lln[i]) && (tlc[i] >= tlc_lln[i])) {
-
-      ats_vector[i] <- "Obstructed"
-      combo_vector[i] <- "AAAN"
-
-    } else if ( (fev1[i] >= fev1_lln[i]) && (fvc[i] >= fvc_lln[i]) && (fev1fvc[i] >= fev1fvc_lln[i]) && (tlc[i] < tlc_lln[i])) {
-
-      ats_vector[i] <- "Restricted"
-      combo_vector[i] <- "NNNA"
-
-    } else if ( (fev1[i] < fev1_lln[i]) && (fvc[i] >= fvc_lln[i]) && (fev1fvc[i] >= fev1fvc_lln[i]) && (tlc[i] < tlc_lln[i])) {
-
-      ats_vector[i] <- "Restricted"
-      combo_vector[i] <- "ANNA"
-
-    } else if ( (fev1[i] >= fev1_lln[i]) && (fvc[i] < fvc_lln[i]) && (fev1fvc[i] >= fev1fvc_lln[i]) && (tlc[i] < tlc_lln[i])) {
-
-      ats_vector[i] <- "Restricted"
-      combo_vector[i] <- "NANA"
-
-    } else if ( (fev1[i] < fev1_lln[i]) && (fvc[i] < fvc_lln[i]) && (fev1fvc[i] >= fev1fvc_lln[i]) && (tlc[i] < tlc_lln[i])) {
-
-      ats_vector[i] <- "Restricted"
-      combo_vector[i] <- "AANA"
-
-    } else if ( (fev1[i] >= fev1_lln[i]) && (fvc[i] >= fvc_lln[i]) && (fev1fvc[i] < fev1fvc_lln[i]) && (tlc[i] < tlc_lln[i])) {
-
-      ats_vector[i] <- "Mixed"
-      combo_vector[i] <- "NNAA"
-
-    } else if ( (fev1[i] < fev1_lln[i]) && (fvc[i] >= fvc_lln[i]) && (fev1fvc[i] < fev1fvc_lln[i]) && (tlc[i] < tlc_lln[i])) {
-
-      ats_vector[i] <- "Mixed"
-      combo_vector[i] <- "ANAA"
-
-    } else if ( (fev1[i] >= fev1_lln[i]) && (fvc[i] < fvc_lln[i]) && (fev1fvc[i] < fev1fvc_lln[i]) && (tlc[i] < tlc_lln[i])) {
-
-      ats_vector[i] <- "Mixed"
-      combo_vector[i] <- "NAAA"
-
-    } else if ( (fev1[i] < fev1_lln[i]) && (fvc[i] < fvc_lln[i]) && (fev1fvc[i] < fev1fvc_lln[i]) && (tlc[i] < tlc_lln[i])) {
-
-      ats_vector[i] <- "Mixed"
-      combo_vector[i] <- "AAAA"
-
-    } else {
-
-      ats_vector[i] <- NA
-      combo_vector[i] <- NA
-
-    }
-
+  # Per-column "A" if measured value is below its LLN, "N" otherwise; NA if
+  # either input is NA. Vectorised over the whole data frame -- no R-level
+  # loop required.
+  status <- function(x, lln) {
+    out <- ifelse(x < lln, "A", "N")
+    out[is.na(x) | is.na(lln)] <- NA_character_
+    out
   }
+  fev1_s    <- status(data$fev1,    data$fev1_lln)
+  fvc_s     <- status(data$fvc,     data$fvc_lln)
+  fev1fvc_s <- status(data$fev1fvc, data$fev1fvc_lln)
+  tlc_s     <- status(data$tlc,     data$tlc_lln)
 
-  data["ats_classification"] <- ats_vector
-  data["ats_pattern_combination"] <- combo_vector
-  return(data)
+  # paste0 converts NA to the literal characters "NA", which would corrupt
+  # combos like "NNNA" / "ANNA" if used as a mask. Compute the per-row
+  # any-NA mask up front and apply after pasting.
+  any_na <- is.na(fev1_s) | is.na(fvc_s) | is.na(fev1fvc_s) | is.na(tlc_s)
+  combo  <- paste0(fev1_s, fvc_s, fev1fvc_s, tlc_s)
+  combo[any_na] <- NA_character_
 
+  data[["ats_classification"]] <- unname(pattern_lookup[combo])
+  data[["ats_pattern_combination"]] <- combo
+  data
 }
