@@ -65,15 +65,36 @@ gli_test_grid <- read_csv("data-raw/gli_test_grid.csv")
 gli_test_groundtruth <- read_csv("data-raw/gli_test_grid_GLI.csv")
 
 # Parameter grid for testing ATS classification function
-ats_test_grid <- tibble(fev1 = c(10, 10, 5, 5, 5, NA),
-                        fev1_lln = c(5, 5, 10, 10, 10, NA),
-                        fvc = c(10, 10, 5, 5, 5, NA),
-                        fvc_lln = c(5, 5, 10, 10, 10, NA),
-                        fev1fvc = c(10, 5, 10, 10, 5, NA),
-                        fev1fvc_lln = c(5, 10, 5, 5, 10, NA),
-                        tlc = c(10, 10, 5, 10, 5, NA),
-                        tlc_lln = c(5, 5, 10, 5, 10, NA),
-                        ats_true = c("Normal","Obstruction","Restriction","Non-specific Pattern","Mixed Defect",NA))
+ats_test_grid <- tribble(
+  ~fev1, ~fev1_lln, ~fvc, ~fvc_lln, ~fev1fvc, ~fev1fvc_lln, ~tlc, ~tlc_lln, ~ats_true,      ~combo_true,
+  10,    5,         10,   5,        10,       5,            10,   5,        "Normal",       "NNNN",
+  1,     5,         10,   5,        10,       5,            10,   5,        "Non-specific", "ANNN",
+  10,    5,         1,    5,        10,       5,            10,   5,        "Normal",       "NANN",
+  1,     5,         1,    5,        10,       5,            10,   5,        "Non-specific", "AANN",
+  10,    5,         10,   5,        1,        5,            10,   5,        "Obstructed",   "NNAN",
+  1,     5,         10,   5,        1,        5,            10,   5,        "Obstructed",   "ANAN",
+  10,    5,         1,    5,        1,        5,            10,   5,        "Obstructed",   "NAAN",
+  1,     5,         1,    5,        1,        5,            10,   5,        "Obstructed",   "AAAN",
+  10,    5,         10,   5,        10,       5,            1,    5,        "Restricted",   "NNNA",
+  1,     5,         10,   5,        10,       5,            1,    5,        "Restricted",   "ANNA",
+  10,    5,         1,    5,        10,       5,            1,    5,        "Restricted",   "NANA",
+  1,     5,         1,    5,        10,       5,            1,    5,        "Restricted",   "AANA",
+  10,    5,         10,   5,        1,        5,            1,    5,        "Mixed",        "NNAA",
+  1,     5,         10,   5,        1,        5,            1,    5,        "Mixed",        "ANAA",
+  10,    5,         1,    5,        1,        5,            1,    5,        "Mixed",        "NAAA",
+  1,     5,         1,    5,        1,        5,            1,    5,        "Mixed",        "AAAA",
+  NA,    5,         10,   5,        10,       5,            10,   5,         NA,            NA
+)
+
+# ats_test_grid <- tibble(fev1 = c(10, 10, 5, 5, 5, NA),
+#                         fev1_lln = c(5, 5, 10, 10, 10, NA),
+#                         fvc = c(10, 10, 5, 5, 5, NA),
+#                         fvc_lln = c(5, 5, 10, 10, 10, NA),
+#                         fev1fvc = c(10, 5, 10, 10, 5, NA),
+#                         fev1fvc_lln = c(5, 10, 5, 5, 10, NA),
+#                         tlc = c(10, 10, 5, 10, 5, NA),
+#                         tlc_lln = c(5, 5, 10, 5, 10, NA),
+#                         ats_true = c("Normal","Obstruction","Restriction","Non-specific Pattern","Mixed Disorder",NA))
 
 # Add to sysdata.rda for internal use within the package
 usethis::use_data(volume_splines,

@@ -2,20 +2,28 @@
 % Please edit documentation in R/ats_classification.R
 \name{ats_classification}
 \alias{ats_classification}
-\title{ATS classification via Spirometry}
+\title{ATS Patterns via Spirometry}
 \usage{
 ats_classification(data)
 }
 \arguments{
-\item{data}{A data frame containing columns for fev1, fvc, fev1fvc, tlc, and their associated LLNs.}
+\item{data}{A data frame containing columns for fev1, fvc, fev1fvc, and their associated LLNs.}
 }
 \value{
-The original data frame with an extra column for ATS classification.
+The original data frame with an extra column for ATS spirometry patterns.
 }
 \description{
-Generates ATS classifications via spirometry and lung volume data.
+`ats_classification()` assigns ATS patterns using spirometry and lung volume data.
 }
 \examples{
-data <- data.frame(fev1,); ats_classification(data)
+data <- data.frame(fev1 = c(3.453, 2.385),
+                             fev1_lln = c(3.303, 3.384),
+                             fvc = c(4.733, 3.485),
+                             fvc_lln = c(4.214, 4.24),
+                             fev1fvc = c(0.600, 0.827),
+                             fev1fvc_lln = c(0.681, 0.700),
+                             tlc = c(1.5, 2.3),
+                             tlc_lln = c(2, 2.5))
+          ats_classification(data)
 
 }
