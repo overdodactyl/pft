@@ -67,6 +67,36 @@ test_that("va_pred",      { expect_equal(preds_traditional_units$va_pred,      g
 test_that("kco_tr_pred",  { expect_equal(preds_traditional_units$kco_tr_pred,  gli_test_groundtruth$kcotr_predicted)   })
 test_that("kco_si_pred",  { expect_equal(preds_si_units$kco_si_pred,           gli_test_groundtruth$kcosi_predicted)   })
 
+## --- z-score and % predicted (formula sanity) --------------------------
+
+test_that("diffusion z-score is 0 at predicted and ~+/-1.645 at LLN/ULN (traditional units)", {
+  d <- data.frame(sex="M", age=45, height=178)
+  ref <- diffusion_normals(d, SI.units = FALSE)
+  for (m in c("dlco","kco_tr","va")) {
+    d_at_pred <- d; d_at_pred[[paste0(m, "_measured")]] <- ref[[paste0(m, "_pred")]]
+    d_at_lln  <- d; d_at_lln [[paste0(m, "_measured")]] <- ref[[paste0(m, "_lln")]]
+    d_at_uln  <- d; d_at_uln [[paste0(m, "_measured")]] <- ref[[paste0(m, "_uln")]]
+    expect_equal(diffusion_normals(d_at_pred, SI.units=FALSE)[[paste0(m, "_zscore")]],   0,     tolerance = 1e-8, label = m)
+    expect_equal(diffusion_normals(d_at_lln,  SI.units=FALSE)[[paste0(m, "_zscore")]], -1.645, tolerance = 1e-4, label = m)
+    expect_equal(diffusion_normals(d_at_uln,  SI.units=FALSE)[[paste0(m, "_zscore")]],  1.645, tolerance = 1e-4, label = m)
+  }
+})
+
+test_that("diffusion z-score is 0 at predicted (SI units, sanity)", {
+  d <- data.frame(sex="M", age=45, height=178)
+  ref <- diffusion_normals(d, SI.units = TRUE)
+  d_at <- d; d_at$tlco_measured <- ref$tlco_pred; d_at$kco_si_measured <- ref$kco_si_pred
+  out <- diffusion_normals(d_at, SI.units = TRUE)
+  expect_equal(out$tlco_zscore, 0, tolerance = 1e-8)
+  expect_equal(out$kco_si_zscore, 0, tolerance = 1e-8)
+})
+
+test_that("diffusion: zscore/pctpred columns absent without measured cols", {
+  d <- data.frame(sex="M", age=45, height=178)
+  out <- diffusion_normals(d)
+  expect_false("dlco_zscore" %in% colnames(out))
+})
+
 ## --- NA-propagation tests ------------------------------------------------
 ## NA in any of sex / age / height must yield NA outputs without crashing
 ## under either unit system.

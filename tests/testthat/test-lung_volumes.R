@@ -74,6 +74,37 @@ test_that("erv_pred",    { expect_equal(preds$erv_pred,    gli_test_groundtruth$
 test_that("ic_pred",     { expect_equal(preds$ic_pred,     gli_test_groundtruth$ic_predicted)     })
 test_that("vc_pred",     { expect_equal(preds$vc_pred,     gli_test_groundtruth$vc_predicted)     })
 
+## --- z-score and % predicted (formula sanity) --------------------------
+
+test_that("volumes z-score is 0 at predicted and ~+/-1.645 at LLN/ULN", {
+  d <- data.frame(sex="M", age=45, height=178)
+  ref <- volume_normals(d)
+  for (m in c("frc","tlc","rv","rv_tlc","erv","ic","vc")) {
+    d_at_pred <- d; d_at_pred[[paste0(m, "_measured")]] <- ref[[paste0(m, "_pred")]]
+    d_at_lln  <- d; d_at_lln [[paste0(m, "_measured")]] <- ref[[paste0(m, "_lln")]]
+    d_at_uln  <- d; d_at_uln [[paste0(m, "_measured")]] <- ref[[paste0(m, "_uln")]]
+    expect_equal(volume_normals(d_at_pred)[[paste0(m, "_zscore")]],   0,     tolerance = 1e-8, label = m)
+    expect_equal(volume_normals(d_at_lln )[[paste0(m, "_zscore")]], -1.645, tolerance = 1e-4, label = m)
+    expect_equal(volume_normals(d_at_uln )[[paste0(m, "_zscore")]],  1.645, tolerance = 1e-4, label = m)
+  }
+})
+
+test_that("volumes pctpred is 100 at predicted", {
+  d <- data.frame(sex="M", age=45, height=178)
+  ref <- volume_normals(d)
+  for (m in c("frc","tlc")) {
+    d_at_pred <- d; d_at_pred[[paste0(m, "_measured")]] <- ref[[paste0(m, "_pred")]]
+    expect_equal(volume_normals(d_at_pred)[[paste0(m, "_pctpred")]], 100, tolerance = 1e-8, label = m)
+  }
+})
+
+test_that("volumes: zscore/pctpred columns absent without measured cols", {
+  d <- data.frame(sex="M", age=45, height=178)
+  out <- volume_normals(d)
+  expect_false("frc_zscore" %in% colnames(out))
+  expect_false("frc_pctpred" %in% colnames(out))
+})
+
 ## --- NA-propagation tests ------------------------------------------------
 ## NA in any of sex / age / height must yield NA outputs without crashing.
 

@@ -169,6 +169,48 @@ test_that("year = 2022 emits the 2022 reference columns", {
   expect_true(all(expected %in% colnames(out)))
 })
 
+## --- z-score and % predicted (formula sanity, GLI 2012) ----------------
+## Anchored on LMS properties: z is 0 when measured equals predicted,
+## approximately -1.645 at LLN and +1.645 at ULN, and pctpred is 100% at
+## predicted. Independent of any external oracle.
+
+test_that("year=2012: z-score is 0 at predicted and ~+/-1.645 at LLN/ULN", {
+  d <- data.frame(sex="M", age=45, height=178, race="Caucasian")
+  ref <- spirometry_normals(d, year = 2012)
+  for (m in c("fev1","fvc","fev1fvc","fef2575","fef75")) {
+    d_at_pred <- d; d_at_pred[[paste0(m, "_measured")]] <- ref[[paste0(m, "_pred")]]
+    d_at_lln  <- d; d_at_lln [[paste0(m, "_measured")]] <- ref[[paste0(m, "_lln")]]
+    d_at_uln  <- d; d_at_uln [[paste0(m, "_measured")]] <- ref[[paste0(m, "_uln")]]
+    expect_equal(spirometry_normals(d_at_pred, 2012)[[paste0(m, "_zscore")]],   0,      tolerance = 1e-8, label = m)
+    expect_equal(spirometry_normals(d_at_lln,  2012)[[paste0(m, "_zscore")]], -1.645, tolerance = 1e-4, label = m)
+    expect_equal(spirometry_normals(d_at_uln,  2012)[[paste0(m, "_zscore")]],  1.645, tolerance = 1e-4, label = m)
+  }
+})
+
+test_that("year=2012: pctpred is 100 at predicted, 80 at 0.8*predicted", {
+  d <- data.frame(sex="M", age=45, height=178, race="Caucasian")
+  ref <- spirometry_normals(d, year = 2012)
+  d_at_pred <- d; d_at_pred$fev1_measured <- ref$fev1_pred
+  d_at_80   <- d; d_at_80$fev1_measured   <- ref$fev1_pred * 0.8
+  expect_equal(spirometry_normals(d_at_pred, 2012)$fev1_pctpred, 100, tolerance = 1e-8)
+  expect_equal(spirometry_normals(d_at_80,   2012)$fev1_pctpred,  80, tolerance = 1e-8)
+})
+
+test_that("z-score / pctpred columns absent when no measured cols supplied", {
+  d <- data.frame(sex="M", age=45, height=178, race="Caucasian")
+  out <- spirometry_normals(d, year = 2012)
+  expect_false("fev1_zscore" %in% colnames(out))
+  expect_false("fev1_pctpred" %in% colnames(out))
+})
+
+test_that("NA measured value propagates to NA z-score and pctpred", {
+  d <- data.frame(sex="M", age=45, height=178, race="Caucasian",
+                  fev1_measured = NA_real_)
+  out <- spirometry_normals(d, year = 2012)
+  expect_true(is.na(out$fev1_zscore))
+  expect_true(is.na(out$fev1_pctpred))
+})
+
 ## --- GLI 2022 cross-implementation oracle -------------------------------
 ## Bowerman 2023 has no extractable worked numerical examples, so the
 ## GLI 2022 predictions in tests/testthat/gli_2022_oracle.csv were
@@ -181,10 +223,18 @@ test_that("year = 2022 emits the 2022 reference columns", {
 
 test_that("year=2022 matches the GLI Global oracle (rspiro-derived)", {
   oracle <- read.csv(test_path("gli_2022_oracle.csv"), stringsAsFactors = FALSE)
-  out <- spirometry_normals(oracle[, c("sex","age","height")], year = 2022)
-  for (col in c("fev1_pred_2022","fev1_lln_2022",
-                "fvc_pred_2022","fvc_lln_2022",
-                "fev1fvc_pred_2022","fev1fvc_lln_2022")) {
+  # Pass demographics AND measured values so spirometry_normals also emits
+  # zscore + pctpred columns.
+  input_cols <- c("sex","age","height",
+                  "fev1_measured","fvc_measured","fev1fvc_measured")
+  out <- spirometry_normals(oracle[, input_cols], year = 2022)
+  check_cols <- c("fev1_pred_2022","fev1_lln_2022",
+                  "fev1_zscore_2022","fev1_pctpred_2022",
+                  "fvc_pred_2022","fvc_lln_2022",
+                  "fvc_zscore_2022","fvc_pctpred_2022",
+                  "fev1fvc_pred_2022","fev1fvc_lln_2022",
+                  "fev1fvc_zscore_2022","fev1fvc_pctpred_2022")
+  for (col in check_cols) {
     expect_equal(out[[col]], oracle[[col]], tolerance = 1e-8, label = col)
   }
 })

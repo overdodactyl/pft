@@ -8,10 +8,22 @@ volume_normals(data)
 }
 \arguments{
 \item{data}{A data frame containing columns for sex ("M","F"),
-age (in years, range 5 - 80) and height (in centimeters).}
+age (in years, range 5 - 80) and height (in centimeters). If `data`
+also contains any of `frc_measured`, `tlc_measured`, `rv_measured`,
+`rv_tlc_measured`, `erv_measured`, `ic_measured`, `vc_measured`,
+the corresponding measured value is used to compute a z-score and
+percent-predicted (see Value).}
 }
 \value{
-The original data frame with extra columns appended for each reference value computed.
+The original data frame with extra columns appended for each
+  measure:
+  - `<measure>_pred`: predicted (median) value.
+  - `<measure>_lln`:  lower limit of normal (5th percentile).
+  - `<measure>_uln`:  upper limit of normal (95th percentile).
+  If a `<measure>_measured` column was supplied in `data`, two
+  additional columns are emitted:
+  - `<measure>_zscore`:  LMS z-score `((measured/M)^L - 1) / (L*S)`.
+  - `<measure>_pctpred`: percent predicted `(measured / pred) * 100`.
 }
 \description{
 `volume_normals()` computes ATS-compliant upper and lower normal limits

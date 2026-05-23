@@ -16,6 +16,27 @@
   never used (the lookup-table approach in `R/spirometry.R` interpolates
   directly from spline values instead).
 
+## New outputs: z-score and percent predicted
+
+* `spirometry_normals()`, `volume_normals()`, and `diffusion_normals()`
+  now optionally compute z-scores and percent predicted. Supply a
+  `<measure>_measured` column in the input data frame (e.g.
+  `fev1_measured`, `frc_measured`, `dlco_measured`) and the function
+  appends `<measure>_zscore` and `<measure>_pctpred` columns alongside
+  the existing `<measure>_pred` / `<measure>_lln` / `<measure>_uln`.
+  Backwards compatible: callers who only supply demographics continue
+  to get the three existing reference-value columns and nothing else.
+* z-score uses the LMS formula `((measured/M)^L - 1) / (L*S)`; percent
+  predicted is `(measured / M) * 100`. Both propagate `NA` from the
+  measured value, the LMS parameters, or the LLN as expected.
+* This makes pft a superset of the per-equation calls in `rspiro`
+  (`pred_*`, `LLN_*`, `zscore_*`, `pctpred_*`) without taking a
+  dependency on it. The GLI 2022 oracle CSV at
+  `tests/testthat/gli_2022_oracle.csv` now also includes
+  rspiro-derived z-score and pctpred columns, validated at tolerance
+  `1e-8`. Z-score formula sanity (z = 0 at predicted, ~+/-1.645 at
+  LLN/ULN) is tested for every measure across the three functions.
+
 ## Reference-function robustness
 
 * **Bug fix:** `spirometry_normals()`, `volume_normals()`, and

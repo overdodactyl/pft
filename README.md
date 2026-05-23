@@ -33,6 +33,8 @@ Four exported functions, one per measure group:
 | `diffusion_normals()` | TLCO/DLCO, KCO, VA (SI or traditional units) | GLI 2017 TLCO (Stanojevic, corrected 2020) |
 | `ats_classification()` | Pattern label (Normal / Non-specific / Obstructed / Restricted / Mixed) | ERS/ATS 2022 (Stanojevic) |
 
+For each measure, the three reference-value functions emit predicted (`*_pred`), LLN (`*_lln`), and ULN (`*_uln`) columns. If the input data also contains a `<measure>_measured` column (e.g. `fev1_measured`), two additional columns are emitted: `<measure>_zscore` (LMS z-score) and `<measure>_pctpred` (percent predicted).
+
 All four functions are data-frame in, data-frame out — composable with `dplyr`.
 
 ## Quick start
@@ -54,6 +56,13 @@ patients |>
   spirometry_normals(year = 2022) |>
   volume_normals() |>
   diffusion_normals(SI.units = TRUE)
+
+# Add measured values to also get z-scores and percent predicted
+patients$fev1_measured <- c(3.2, 2.1)
+patients$fvc_measured  <- c(4.5, 2.8)
+spirometry_normals(patients, year = 2022)
+# -> adds fev1_pred_2022, fev1_lln_2022, fev1_uln_2022,
+#         fev1_zscore_2022, fev1_pctpred_2022, and equivalents for fvc.
 ```
 
 To classify a patient's pattern, attach their measured values plus LLNs and

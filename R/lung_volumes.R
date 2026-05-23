@@ -5,9 +5,21 @@
 #' for lung volume measures including FRC, TLC, RV, ERV, IC, and VC.
 #'
 #' @param data A data frame containing columns for sex ("M","F"),
-#'   age (in years, range 5 - 80) and height (in centimeters).
+#'   age (in years, range 5 - 80) and height (in centimeters). If `data`
+#'   also contains any of `frc_measured`, `tlc_measured`, `rv_measured`,
+#'   `rv_tlc_measured`, `erv_measured`, `ic_measured`, `vc_measured`,
+#'   the corresponding measured value is used to compute a z-score and
+#'   percent-predicted (see Value).
 #'
-#' @return The original data frame with extra columns appended for each reference value computed.
+#' @return The original data frame with extra columns appended for each
+#'   measure:
+#'   - `<measure>_pred`: predicted (median) value.
+#'   - `<measure>_lln`:  lower limit of normal (5th percentile).
+#'   - `<measure>_uln`:  upper limit of normal (95th percentile).
+#'   If a `<measure>_measured` column was supplied in `data`, two
+#'   additional columns are emitted:
+#'   - `<measure>_zscore`:  LMS z-score `((measured/M)^L - 1) / (L*S)`.
+#'   - `<measure>_pctpred`: percent predicted `(measured / pred) * 100`.
 #'
 #' @references
 #' Hall GL, Filipow N, Ruppel G, et al. Official ERS technical standard:
@@ -117,41 +129,12 @@ volume_normals <- function(data) {
     }
   }
 
-  results <- data
-
-  results$frc_pred <- M.vector[,1]
-  results$frc_lln <- Lower.vector[,1]
-  results$frc_uln <- Upper.vector[,1]
-
-
-  results$tlc_pred <- M.vector[,2]
-  results$tlc_lln <- Lower.vector[,2]
-  results$tlc_uln <- Upper.vector[,2]
-
-  results$rv_pred <- M.vector[,3]
-  results$rv_lln <- Lower.vector[,3]
-  results$rv_uln <- Upper.vector[,3]
-
-  results$rv_tlc_pred <- M.vector[,4]
-  results$rv_tlc_lln <- Lower.vector[,4]
-  results$rv_tlc_uln <- Upper.vector[,4]
-
-  results$erv_pred <- M.vector[,5]
-  results$erv_lln <- Lower.vector[,5]
-  results$erv_uln <- Upper.vector[,5]
-
-  results$ic_pred <- M.vector[,6]
-  results$ic_lln <- Lower.vector[,6]
-  results$ic_uln <- Upper.vector[,6]
-
-  results$vc_pred <- M.vector[,7]
-  results$vc_lln <- Lower.vector[,7]
-  results$vc_uln <- Upper.vector[,7]
-
-  return(results)
-
-
-
+  bind_lms_outputs(
+    data,
+    M = M.vector, S = S.vector, L = L.vector,
+    lower = Lower.vector, upper = Upper.vector,
+    measures = c("frc", "tlc", "rv", "rv_tlc", "erv", "ic", "vc")
+  )
 }
 
 

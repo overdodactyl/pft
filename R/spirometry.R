@@ -11,11 +11,25 @@
 #'    are returned with `NA` reference values. Race is ignored when
 #'    year = 2022 (GLI Global equations are race-neutral).
 #'
+#'    If `data` also contains any of `fev1_measured`, `fvc_measured`,
+#'    `fev1fvc_measured`, `fef2575_measured`, `fef75_measured`, the
+#'    corresponding measured value is used to compute a z-score and
+#'    percent-predicted for that measure (see Value).
+#'
 #' @param year The year of GLI published equations. Valid options are
 #'    2012 (multi-ethnic, requires a `race` column) and 2022 (race-neutral
 #'    "GLI Global"; the `race` column, if present, is ignored).
 #'
-#' @return The original data frame with extra columns appended for each reference value computed.
+#' @return The original data frame with extra columns appended for each
+#'    measure:
+#'    - `<measure>_pred`: predicted (median) value.
+#'    - `<measure>_lln`:  lower limit of normal (5th percentile).
+#'    - `<measure>_uln`:  upper limit of normal (95th percentile).
+#'    If a `<measure>_measured` column was supplied in `data`, two
+#'    additional columns are emitted:
+#'    - `<measure>_zscore`:  LMS z-score `((measured/M)^L - 1) / (L*S)`.
+#'    - `<measure>_pctpred`: percent predicted `(measured / pred) * 100`.
+#'    For `year = 2022` the output column names carry a `_2022` suffix.
 #'
 #' @references
 #' Quanjer PH, Stanojevic S, Cole TJ, et al. Multi-ethnic reference values for
@@ -48,8 +62,10 @@ spirometry_normals <- function(data, year = 2012) {
       female_indices = c(2, 4, 6, 8, 10),
       race_levels = c("AfrAm", "NEAsia", "SEAsia", "Other/mixed", "Caucasian")
     )
-    results <- bind_spirometry_outputs(
-      data, fits,
+    results <- bind_lms_outputs(
+      data,
+      M = fits$M, S = fits$S, L = fits$L,
+      lower = fits$lower, upper = fits$upper,
       measures = c("fev1", "fvc", "fev1fvc", "fef2575", "fef75"),
       suffix = ""
     )
@@ -64,8 +80,10 @@ spirometry_normals <- function(data, year = 2012) {
       female_indices = c(2, 4, 6),
       race_levels = NULL  # GLI Global / 2022 is race-neutral
     )
-    results <- bind_spirometry_outputs(
-      data, fits,
+    results <- bind_lms_outputs(
+      data,
+      M = fits$M, S = fits$S, L = fits$L,
+      lower = fits$lower, upper = fits$upper,
       measures = c("fev1", "fvc", "fev1fvc"),
       suffix = "_2022"
     )
@@ -179,15 +197,3 @@ spirometry_lms_fit <- function(data, splines, coeff_m, coeff_s, coeff_l,
   list(M = M, S = S, L = L, lower = lower, upper = upper)
 }
 
-# Append the LMS fit matrices to the original data as `<measure>_pred`,
-# `<measure>_lln`, `<measure>_uln` columns (optionally with a suffix such
-# as "_2022"). Internal helper.
-bind_spirometry_outputs <- function(data, fits, measures, suffix = "") {
-  results <- data
-  for (j in seq_along(measures)) {
-    results[[paste0(measures[j], "_pred", suffix)]] <- fits$M[, j]
-    results[[paste0(measures[j], "_lln",  suffix)]] <- fits$lower[, j]
-    results[[paste0(measures[j], "_uln",  suffix)]] <- fits$upper[, j]
-  }
-  results
-}

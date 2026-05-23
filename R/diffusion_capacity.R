@@ -7,10 +7,23 @@
 #'
 #' @param data A data frame containing columns for sex ("M","F"),
 #'   age (in years, in the range 5-90) and height (in centimeters).
+#'   If `data` also contains a `<measure>_measured` column for any of
+#'   the active measures (`tlco`, `kco_si`, `va` under SI units;
+#'   `dlco`, `kco_tr`, `va` under traditional), the measured value is
+#'   used to compute z-score and percent-predicted (see Value).
+#'
 #' @param SI.units A boolean. Returns the reference values in SI units if TRUE
 #'.  and Traditional units if FALSE.
 #'
-#' @return The original data frame with extra columns appended for each reference value computed.
+#' @return The original data frame with extra columns appended for each
+#'   measure:
+#'   - `<measure>_pred`: predicted (median) value.
+#'   - `<measure>_lln`:  lower limit of normal (5th percentile).
+#'   - `<measure>_uln`:  upper limit of normal (95th percentile).
+#'   If a `<measure>_measured` column was supplied in `data`, two
+#'   additional columns are emitted:
+#'   - `<measure>_zscore`:  LMS z-score `((measured/M)^L - 1) / (L*S)`.
+#'   - `<measure>_pctpred`: percent predicted `(measured / pred) * 100`.
 #'
 #' @references
 #' Stanojevic S, Graham BL, Cooper BG, et al. Official ERS technical standards:
@@ -99,34 +112,24 @@ diffusion_normals <- function(data, SI.units = FALSE) {
     }
   }
 
-  results <- data
-
-  if (SI.units == TRUE) {
-
-    results$tlco_pred <- M.vector[,1]
-    results$tlco_lln <- Lower.vector[,1]
-    results$tlco_uln <- Upper.vector[,1]
-
-    results$kco_si_pred <- M.vector[,3]
-    results$kco_si_lln <- Lower.vector[,3]
-    results$kco_si_uln <- Upper.vector[,3]
-
+  # The 5 spline-list columns are TLCO (SI), DLCO (Traditional), KCO_SI,
+  # KCO_Tr, VA. Pick the 3 measures that match the requested unit system
+  # plus VA (unit-independent).
+  if (SI.units) {
+    measures <- c("tlco", "kco_si", "va")
+    cols     <- c(1, 3, 5)
   } else {
-
-    results$dlco_pred <- M.vector[,2]
-    results$dlco_lln <- Lower.vector[,2]
-    results$dlco_uln <- Upper.vector[,2]
-
-    results$kco_tr_pred <- M.vector[,4]
-    results$kco_tr_lln <- Lower.vector[,4]
-    results$kco_tr_uln <- Upper.vector[,4]
-
+    measures <- c("dlco", "kco_tr", "va")
+    cols     <- c(2, 4, 5)
   }
 
-  results$va_pred <- M.vector[,5]
-  results$va_lln <- Lower.vector[,5]
-  results$va_uln <- Upper.vector[,5]
-
-  return(results)
-
+  bind_lms_outputs(
+    data,
+    M = M.vector[, cols, drop = FALSE],
+    S = S.vector[, cols, drop = FALSE],
+    L = L.vector[, cols, drop = FALSE],
+    lower = Lower.vector[, cols, drop = FALSE],
+    upper = Upper.vector[, cols, drop = FALSE],
+    measures = measures
+  )
 }

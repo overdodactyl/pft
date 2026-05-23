@@ -13,15 +13,14 @@
 #' is NOT run as part of the package build, and rspiro is NOT a runtime
 #' or test-time dependency of pft.
 #'
-#' Output: tests/testthat/gli_2022_oracle.csv
+#' Output: tests/testthat/gli_2022_oracle.csv with columns:
+#'   sex, age, height,
+#'   fev1_pred_2022, fev1_lln_2022, fev1_measured, fev1_zscore_2022, fev1_pctpred_2022,
+#'   fvc_pred_2022,  fvc_lln_2022,  fvc_measured,  fvc_zscore_2022,  fvc_pctpred_2022,
+#'   fev1fvc_pred_2022, fev1fvc_lln_2022, fev1fvc_measured, fev1fvc_zscore_2022, fev1fvc_pctpred_2022
 #'
-#' rspiro reference:
-#'   https://cran.r-project.org/package=rspiro
-#'   The rspiro::pred_GLIgl and rspiro::LLN_GLIgl functions implement the
-#'   GLI Global (2022) equations from the same published coefficients as
-#'   pft uses, but via an independently authored R implementation. When
-#'   this oracle was generated, both implementations agreed to machine
-#'   precision (max absolute difference 0) on the grid below.
+#' Measured values are set to 85% of the predicted value to give a non-trivial
+#' z-score (not 0) but well within the supported numerical range.
 
 if (!requireNamespace("rspiro", quietly = TRUE)) {
   stop("Install rspiro before running this script: install.packages('rspiro')")
@@ -38,17 +37,38 @@ grid <- expand.grid(
 gender <- ifelse(grid$sex == "M", 1, 2)
 hm     <- grid$height / 100
 
-for (param in c("FEV1", "FVC", "FEV1FVC")) {
-  col_pfx <- tolower(gsub("FEV1FVC", "fev1fvc", param))
-  grid[[paste0(col_pfx, "_pred_2022")]] <-
-    mapply(rspiro::pred_GLIgl, age = grid$age, height = hm,
-           gender = gender, param = param)
-  grid[[paste0(col_pfx, "_lln_2022")]] <-
-    mapply(rspiro::LLN_GLIgl,  age = grid$age, height = hm,
-           gender = gender, param = param)
-}
+# Per-measure: pred + lln from rspiro, measured at 85% pred, z-score + %pred.
+# rspiro::zscore_GLIgl takes the measured value via the FEV1/FVC/FEV1FVC
+# named argument (not a generic `param`), so we unroll per measure.
+
+# FEV1
+grid$fev1_pred_2022    <- mapply(rspiro::pred_GLIgl, age = grid$age, height = hm, gender = gender, param = "FEV1")
+grid$fev1_lln_2022     <- mapply(rspiro::LLN_GLIgl,  age = grid$age, height = hm, gender = gender, param = "FEV1")
+grid$fev1_measured     <- grid$fev1_pred_2022 * 0.85
+grid$fev1_zscore_2022  <- mapply(rspiro::zscore_GLIgl,
+                                  age = grid$age, height = hm, gender = gender,
+                                  FEV1 = grid$fev1_measured)
+grid$fev1_pctpred_2022 <- (grid$fev1_measured / grid$fev1_pred_2022) * 100
+
+# FVC
+grid$fvc_pred_2022     <- mapply(rspiro::pred_GLIgl, age = grid$age, height = hm, gender = gender, param = "FVC")
+grid$fvc_lln_2022      <- mapply(rspiro::LLN_GLIgl,  age = grid$age, height = hm, gender = gender, param = "FVC")
+grid$fvc_measured      <- grid$fvc_pred_2022 * 0.85
+grid$fvc_zscore_2022   <- mapply(rspiro::zscore_GLIgl,
+                                  age = grid$age, height = hm, gender = gender,
+                                  FVC = grid$fvc_measured)
+grid$fvc_pctpred_2022  <- (grid$fvc_measured / grid$fvc_pred_2022) * 100
+
+# FEV1/FVC
+grid$fev1fvc_pred_2022    <- mapply(rspiro::pred_GLIgl, age = grid$age, height = hm, gender = gender, param = "FEV1FVC")
+grid$fev1fvc_lln_2022     <- mapply(rspiro::LLN_GLIgl,  age = grid$age, height = hm, gender = gender, param = "FEV1FVC")
+grid$fev1fvc_measured     <- grid$fev1fvc_pred_2022 * 0.85
+grid$fev1fvc_zscore_2022  <- mapply(rspiro::zscore_GLIgl,
+                                     age = grid$age, height = hm, gender = gender,
+                                     FEV1FVC = grid$fev1fvc_measured)
+grid$fev1fvc_pctpred_2022 <- (grid$fev1fvc_measured / grid$fev1fvc_pred_2022) * 100
 
 write.csv(grid, "tests/testthat/gli_2022_oracle.csv", row.names = FALSE)
-cat("wrote tests/testthat/gli_2022_oracle.csv: ",
+cat("wrote tests/testthat/gli_2022_oracle.csv:",
     nrow(grid), "rows,", ncol(grid), "columns\n",
-    "rspiro version: ", as.character(packageVersion("rspiro")), "\n")
+    "rspiro version:", as.character(packageVersion("rspiro")), "\n")
