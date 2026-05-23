@@ -68,20 +68,27 @@ test_that("kco_tr_pred",  { expect_equal(preds_traditional_units$kco_tr_pred,  g
 test_that("kco_si_pred",  { expect_equal(preds_si_units$kco_si_pred,           gli_test_groundtruth$kcosi_predicted)   })
 
 ## --- NA-propagation tests ------------------------------------------------
-## NA in height is handled gracefully (cascades through arithmetic).
-## NA in sex or age crashes diffusion_normals() -- robustness gap to address
-## separately; not asserted here.
+## NA in any of sex / age / height must yield NA outputs without crashing
+## under either unit system.
 
-test_that("NA in height produces NA outputs (diffusion, traditional)", {
-  d <- data.frame(sex = "M", age = 30, height = NA_real_)
+test_that("NA in sex / age / height produces NA outputs (diffusion, traditional)", {
+  d <- data.frame(
+    sex    = c(NA, "F", "M"),
+    age    = c(30, NA_real_, 30),
+    height = c(170, 170, NA_real_)
+  )
   out <- diffusion_normals(d)
-  expect_true(is.na(out$dlco_pred))
+  expect_true(all(is.na(out$dlco_pred)))
 })
 
-test_that("NA in height produces NA outputs (diffusion, SI)", {
-  d <- data.frame(sex = "M", age = 30, height = NA_real_)
+test_that("NA in sex / age / height produces NA outputs (diffusion, SI)", {
+  d <- data.frame(
+    sex    = c(NA, "F", "M"),
+    age    = c(30, NA_real_, 30),
+    height = c(170, 170, NA_real_)
+  )
   out <- diffusion_normals(d, SI.units = TRUE)
-  expect_true(is.na(out$tlco_pred))
+  expect_true(all(is.na(out$tlco_pred)))
 })
 
 ## --- Out-of-range tests --------------------------------------------------

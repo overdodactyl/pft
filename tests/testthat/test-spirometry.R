@@ -83,24 +83,35 @@ test_that("fef75_pred", {
 })
 
 ## --- NA-propagation tests ------------------------------------------------
-## NA in race or height is handled gracefully and yields NA outputs.
-##
-## NA in sex or age currently *crashes* the function (the
-## `if (data$sex[i] == "M")` and `if (data[i,]$age == 3)` branches fail on
-## NA). That is a robustness gap to address separately; not asserted here.
+## NA in any of sex / age / height / race must yield NA outputs without
+## crashing. (The defensive is.na() check at the top of the inner loop in
+## R/spirometry.R handles sex/age/height; the existing race check handles
+## NA-in-race.)
 
-test_that("NA in race produces NA outputs (spirometry 2012)", {
-  d <- data.frame(sex = "M", age = 30, height = 170, race = NA_character_)
+test_that("NA in sex / age / height / race produces NA outputs (spirometry 2012)", {
+  d <- data.frame(
+    sex    = c("M",       NA,          "M",      "M"),
+    age    = c(30,        30,          NA_real_, 30),
+    height = c(170,       170,         170,      NA_real_),
+    race   = c(NA,        "Caucasian", "Caucasian", "Caucasian")
+  )
   out <- spirometry_normals(d, year = 2012)
-  expect_true(is.na(out$fev1_pred))
-  expect_true(is.na(out$fev1_lln))
-  expect_true(is.na(out$fev1_uln))
+  expect_true(all(is.na(out$fev1_pred)))
+  expect_true(all(is.na(out$fev1_lln)))
+  expect_true(all(is.na(out$fev1_uln)))
 })
 
-test_that("NA in height produces NA outputs (spirometry 2012)", {
-  d <- data.frame(sex = "M", age = 30, height = NA_real_, race = "Caucasian")
+test_that("mixed valid and NA rows: valid rows still get predictions", {
+  d <- data.frame(
+    sex    = c("M",       NA,  "F"),
+    age    = c(30,        30,  30),
+    height = c(170,       170, 165),
+    race   = c("Caucasian","Caucasian","Caucasian")
+  )
   out <- spirometry_normals(d, year = 2012)
-  expect_true(is.na(out$fev1_pred))
+  expect_false(is.na(out$fev1_pred[1]))   # valid row
+  expect_true(is.na(out$fev1_pred[2]))    # NA sex
+  expect_false(is.na(out$fev1_pred[3]))   # valid row
 })
 
 ## --- Out-of-range tests --------------------------------------------------

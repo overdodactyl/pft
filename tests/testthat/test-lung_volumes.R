@@ -75,15 +75,17 @@ test_that("ic_pred",     { expect_equal(preds$ic_pred,     gli_test_groundtruth$
 test_that("vc_pred",     { expect_equal(preds$vc_pred,     gli_test_groundtruth$vc_predicted)     })
 
 ## --- NA-propagation tests ------------------------------------------------
-## NA in height is handled gracefully (cascades to NA via arithmetic).
-## NA in sex or age currently crashes volume_normals() -- robustness gap to
-## address separately; not asserted here.
+## NA in any of sex / age / height must yield NA outputs without crashing.
 
-test_that("NA in height produces NA outputs (volumes)", {
-  d <- data.frame(sex = "M", age = 30, height = NA_real_)
+test_that("NA in sex / age / height produces NA outputs (volumes)", {
+  d <- data.frame(
+    sex    = c(NA, "F", "M"),
+    age    = c(30, NA_real_, 30),
+    height = c(170, 170, NA_real_)
+  )
   out <- volume_normals(d)
-  expect_true(is.na(out$frc_pred))
-  expect_true(is.na(out$tlc_pred))
+  expect_true(all(is.na(out$frc_pred)))
+  expect_true(all(is.na(out$tlc_pred)))
 })
 
 ## --- Out-of-range tests --------------------------------------------------

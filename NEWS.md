@@ -16,6 +16,17 @@
   never used (the lookup-table approach in `R/spirometry.R` interpolates
   directly from spline values instead).
 
+## Reference-function robustness
+
+* **Bug fix:** `spirometry_normals()`, `volume_normals()`, and
+  `diffusion_normals()` previously crashed with a "missing value where
+  TRUE/FALSE needed" error when any row had a missing value (`NA`) in
+  `sex`, `age`, or `height`. They now skip such rows and emit `NA` for
+  the reference values on that row, matching the behaviour already
+  provided for missing `race` (spirometry) and for `ats_classification()`.
+  Real clinical PFT data routinely contains missing demographics; the
+  prior behaviour required callers to filter `NA`s themselves.
+
 ## ATS classification
 
 * **Bug fix (clinically meaningful):** the `ANNN` and `NANN` pattern

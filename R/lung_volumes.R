@@ -48,6 +48,12 @@ volume_normals <- function(data) {
 
   for (i in 1:n) {
 
+    # Skip rows with missing demographics; outputs stay NA via the
+    # pre-allocated NA matrices above.
+    if (is.na(data$sex[i]) || is.na(data$age[i]) || is.na(data$height[i])) {
+      next
+    }
+
     if (data$sex[i] == "M") {
 
       g.index <- c(1,3,5,7,9,11,13)

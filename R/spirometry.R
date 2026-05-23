@@ -65,6 +65,12 @@ spirometry_normals <- function(data, year = 2012) {
 
     for (i in 1:n) {
 
+      # Skip rows with missing demographics; outputs stay NA via the
+      # pre-allocated NA matrices above.
+      if (is.na(data$sex[i]) || is.na(data$age[i]) || is.na(data$height[i])) {
+        next
+      }
+
       # Select appropriate spline indexes for males or females
       if (data$sex[i] == "M") {
         g.index <- c(1,3,5,7,9)
@@ -179,6 +185,12 @@ spirometry_normals <- function(data, year = 2012) {
     Upper.vector <- matrix(NA, nrow = n, ncol = 3)
 
     for (i in 1:n) {
+
+      # Skip rows with missing demographics; outputs stay NA via the
+      # pre-allocated NA matrices above.
+      if (is.na(data$sex[i]) || is.na(data$age[i]) || is.na(data$height[i])) {
+        next
+      }
 
       # Select appropriate spline indexes for males or females
       if (data$sex[i] == "M") {
