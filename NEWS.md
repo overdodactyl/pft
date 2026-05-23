@@ -16,6 +16,36 @@
   never used (the lookup-table approach in `R/spirometry.R` interpolates
   directly from spline values instead).
 
+## New interpretation primitives
+
+* `severity_grade(zscore)` returns one of `"normal"`, `"mild"`,
+  `"moderate"`, `"severe"` per the Stanojevic et al. ERJ 2022 z-score
+  cut points (>= -1.645, > -2.5, > -4, <= -4).
+* `bronchodilator_response(pre, post, predicted)` classifies BDR per
+  the 2022 criterion (>10% change relative to predicted, replacing the
+  earlier 12%/200 mL rule).
+* `prism_screen(data)` adds a `prism` logical column flagging
+  Preserved Ratio Impaired Spirometry (FEV1 below LLN, FEV1/FVC at or
+  above LLN). Requires only spirometry; does not need TLC.
+* `serial_change_score(z1, z2, r)` computes the conditional change
+  z-score recommended by Stanojevic 2022 for interpreting serial PFT
+  measurements over time. Configurable autocorrelation `r`.
+
+## Workflow wrappers
+
+* `pft_interpret(data)` is a single-call workflow that auto-detects
+  which inputs are present and emits a complete Stanojevic
+  2022-compliant interpretation: reference values, z-scores, percent
+  predicted, severity grading, ATS pattern, PRISm flag, and
+  bronchodilator response. This is the recommended entry point for
+  clinical-style reporting.
+* `validate_pft(data)` flags biologically implausible inputs (FEV1 >
+  FVC, out-of-range demographics, swapped pre/post columns, unknown
+  sex/race) without erroring. Returns the original data frame with
+  `qc_pass` and `qc_issues` columns appended.
+* `plot_pft(result)` generates a clinical-style z-score lollipop plot
+  with severity-band shading. Requires `ggplot2` (Suggests).
+
 ## New outputs: z-score and percent predicted
 
 * `spirometry_normals()`, `volume_normals()`, and `diffusion_normals()`

@@ -19,23 +19,39 @@ remotes::install_github("<your-org>/pft")
 
 ## What it does
 
-`pft` takes a data frame of patient demographics (and optionally measured PFT
-values) and appends predicted values, lower limits of normal (LLN), and upper
-limits of normal (ULN). It also assigns ATS interpretive pattern labels from
-spirometry and lung-volume measurements.
+`pft` is a comprehensive R toolkit for ERS/ATS 2022-compliant
+pulmonary function test interpretation. It covers the full Stanojevic
+2022 interpretive standard end-to-end: reference values across
+spirometry (GLI 2012 + GLI Global 2022), static lung volumes
+(GLI 2021), and diffusion capacity (GLI 2017 TLCO); plus z-scores,
+percent predicted, ATS pattern classification, severity grading,
+bronchodilator response, PRISm screening, conditional change scores
+for serial measurements, and clinical-style visualisation.
 
-Four exported functions, one per measure group:
+### Reference value functions
 
 | Function | Computes | Source standard |
 |---|---|---|
 | `spirometry_normals()` | FEV1, FVC, FEV1/FVC, FEF25-75, FEF75 | GLI 2012 (Quanjer) or GLI Global 2022 (Bowerman) |
 | `volume_normals()` | FRC, TLC, RV, RV/TLC, ERV, IC, VC | GLI 2021 static lung volumes (Hall) |
 | `diffusion_normals()` | TLCO/DLCO, KCO, VA (SI or traditional units) | GLI 2017 TLCO (Stanojevic, corrected 2020) |
-| `ats_classification()` | Pattern label (Normal / Non-specific / Obstructed / Restricted / Mixed) | ERS/ATS 2022 (Stanojevic) |
 
-For each measure, the three reference-value functions emit predicted (`*_pred`), LLN (`*_lln`), and ULN (`*_uln`) columns. If the input data also contains a `<measure>_measured` column (e.g. `fev1_measured`), two additional columns are emitted: `<measure>_zscore` (LMS z-score) and `<measure>_pctpred` (percent predicted).
+Each emits `*_pred`, `*_lln`, `*_uln`. If a `<measure>_measured` column is also present, `*_zscore` and `*_pctpred` are appended automatically.
 
-All four functions are data-frame in, data-frame out — composable with `dplyr`.
+### Interpretation functions
+
+| Function | Purpose | Source |
+|---|---|---|
+| `pft_interpret()` | Single-call wrapper combining all of the below | Stanojevic 2022 |
+| `ats_classification()` | Normal / Non-specific / Obstructed / Restricted / Mixed | Stanojevic 2022 Fig 8, Tables 5/8 |
+| `severity_grade()` | normal / mild / moderate / severe from z-score | Stanojevic 2022 (severity section) |
+| `bronchodilator_response()` | >10% of predicted change in FEV1 or FVC | Stanojevic 2022 (BDR section) |
+| `prism_screen()` | Preserved Ratio Impaired Spirometry flag | Stanojevic 2022 |
+| `serial_change_score()` | Conditional change z-score for serial measurements | Stanojevic 2022 |
+| `validate_pft()` | QC checks on PFT inputs (FEV1 > FVC, out-of-range demographics, etc.) | — |
+| `plot_pft()` | Clinical-style z-score figure | — |
+
+All functions are data-frame in, data-frame out — composable with `dplyr`.
 
 ## Quick start
 
