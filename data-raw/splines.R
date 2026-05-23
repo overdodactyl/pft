@@ -25,38 +25,29 @@ spirometry_coeff_l = coeffs_L
 spirometry_coeff_m = coeffs_M
 spirometry_coeff_s = coeffs_S
 
-## GLI 2022 Equations
-spirometry_2022_splines = list(read_csv("data-raw/GLI_2022_FEV1_MALE.csv") %>% select(age, Lspline, Mspline, Sspline) %>% data.frame(),
-                               read_csv("data-raw/GLI_2022_FEV1_FEMALE.csv") %>% select(age, Lspline, Mspline, Sspline) %>% data.frame(),
-                               read_csv("data-raw/GLI_2022_FVC_MALE.csv") %>% select(age, Lspline, Mspline, Sspline) %>% data.frame(),
-                               read_csv("data-raw/GLI_2022_FVC_FEMALE.csv") %>% select(age, Lspline, Mspline, Sspline) %>% data.frame(),
-                               read_csv("data-raw/GLI_2022_FEV1FVC_MALE.csv") %>% select(age, Lspline, Mspline, Sspline) %>% data.frame(),
-                               read_csv("data-raw/GLI_2022_FEV1FVC_FEMALE.csv") %>% select(age, Lspline, Mspline, Sspline) %>% data.frame())
-names(spirometry_2022_splines) <- c("FEV1.M","FEV1.F","FVC.M","FVC.F","FEV1FVC.M","FEV1FVC.F")
+## GLI 2022 (GLI Global) Equations
+##
+## The GLI_2022_*.csv spline lookup tables and coeffs_spiro_2022.RData are
+## reproducibly built by data-raw/build_gli_2022.R from the official ERS
+## lookup-tables workbook at
+## papers/gli_2022/gli_global_lookuptables_dec6.xlsx (Bowerman et al. 2023,
+## AJRCCM, doi:10.1164/rccm.202205-0963OC). The workbook is not committed
+## (copyrighted AJRCCM content); the CSVs and .RData are the build artifacts.
+## To regenerate: place the .xlsx under papers/gli_2022/ and run:
+##   Rscript data-raw/build_gli_2022.R
+spirometry_2022_splines = list(
+  FEV1.M    = read_csv("data-raw/GLI_2022_FEV1_MALE.csv",     show_col_types = FALSE) %>% select(age, Lspline, Mspline, Sspline) %>% data.frame(),
+  FEV1.F    = read_csv("data-raw/GLI_2022_FEV1_FEMALE.csv",   show_col_types = FALSE) %>% select(age, Lspline, Mspline, Sspline) %>% data.frame(),
+  FVC.M     = read_csv("data-raw/GLI_2022_FVC_MALE.csv",      show_col_types = FALSE) %>% select(age, Lspline, Mspline, Sspline) %>% data.frame(),
+  FVC.F     = read_csv("data-raw/GLI_2022_FVC_FEMALE.csv",    show_col_types = FALSE) %>% select(age, Lspline, Mspline, Sspline) %>% data.frame(),
+  FEV1FVC.M = read_csv("data-raw/GLI_2022_FEV1FVC_MALE.csv",  show_col_types = FALSE) %>% select(age, Lspline, Mspline, Sspline) %>% data.frame(),
+  FEV1FVC.F = read_csv("data-raw/GLI_2022_FEV1FVC_FEMALE.csv",show_col_types = FALSE) %>% select(age, Lspline, Mspline, Sspline) %>% data.frame()
+)
 
-spirometry_2022_coeff_l = tibble(FEV1.M = c(1.22703, 0),
-                                 FEV1.F = c(1.21388, 0),
-                                 FVC.M = c(0.9346, 0),
-                                 FVC.F = c(0.899, 0),
-                                 FEV1FVC.M = c(3.8243, -0.3328),
-                                 FEV1FVC.F = c(6.6490, -0.992)) %>%
-  data.frame()
-
-spirometry_2022_coeff_m = tibble(FEV1.M = c(-11.399108, 2.462664, -0.011394),
-                                 FEV1.F = c(-10.901689, 2.385928, -0.076386),
-                                 FVC.M = c(-12.629131, 2.727421, 0.009174),
-                                 FVC.F = c(-12.055901, 2.621579, -0.035975),
-                                 FEV1FVC.M = c(1.022608, -0.218592, -0.027586),
-                                 FEV1FVC.F = c(0.9189568, -0.1840671, -0.0461306)) %>%
-  data.frame()
-
-spirometry_2022_coeff_s = tibble(FEV1.M = c(-2.256278, 0.080729),
-                                 FEV1.F = c(-2.364047, 0.129402),
-                                 FVC.M = c(-2.195595, 0.068466),
-                                 FVC.F = c(-2.310148, 0.120428),
-                                 FEV1FVC.M = c(-2.882025, 0.068889),
-                                 FEV1FVC.F = c(-3.171582, 0.144358)) %>%
-  data.frame()
+load("data-raw/coeffs_spiro_2022.RData")
+spirometry_2022_coeff_l <- coeffs_2022_L
+spirometry_2022_coeff_m <- coeffs_2022_M
+spirometry_2022_coeff_s <- coeffs_2022_S
 
 # Prepare splines and model coefficients for DLCO calculations
 load("data-raw/splines_transfer_diff.RData")
