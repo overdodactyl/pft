@@ -10,6 +10,13 @@ volume_coeff = coeff
 # Prepare splines and model coefficients for spirometry calculations
 
 ## GLI 2012 Equations
+##
+## The .RData blobs loaded below are reproducibly built by
+## data-raw/build_gli_2012.R from the official ERS lookup-tables workbook at
+## papers/gli_2012/erj___suppl___2013___04___19___09031936.00080312.DC1___lookuptables.xls.
+## The workbook is not committed (copyrighted ERJ content); the .RData files
+## are kept in the repo as the build artifact. To regenerate, place the .xls
+## under papers/gli_2012/ and run: Rscript data-raw/build_gli_2012.R
 load("data-raw/splines_spiro.RData")
 spirometry_splines = splines.spiro
 
