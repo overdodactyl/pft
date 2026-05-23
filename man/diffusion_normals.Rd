@@ -18,7 +18,7 @@ The original data frame with extra columns appended for each reference value com
 }
 \description{
 `diffusion_normals()` computes ATS-compliant upper and lower normal limits
-for carbon monoxide measured diffusion capacity and european equivalents
+for carbon monoxide measured diffusion capacity and European equivalents
 including DLCO (or TLCO), KCO, and VA.
 }
 \examples{
