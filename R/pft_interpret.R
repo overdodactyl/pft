@@ -138,5 +138,5 @@ pft_interpret <- function(data, year = 2012, SI.units = FALSE) {
     }
   }
 
-  data
+  new_pft_result(data)
 }

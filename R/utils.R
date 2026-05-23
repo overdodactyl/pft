@@ -42,5 +42,5 @@ bind_lms_outputs <- function(data, M, S, L, lower, upper, measures,
         (measured / m_vec) * 100
     }
   }
-  results
+  tibble::as_tibble(results)
 }

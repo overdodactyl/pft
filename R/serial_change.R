@@ -43,7 +43,7 @@
 serial_change_score <- function(z1, z2, r = 0.7) {
   if (r <= -1 || r >= 1) stop("r must lie strictly between -1 and 1")
   ccs <- (z2 - r * z1) / sqrt(1 - r^2)
-  data.frame(
+  tibble::tibble(
     ccs = ccs,
     is_significant = abs(ccs) > 1.645
   )

@@ -70,7 +70,7 @@ severity_grade <- function(zscore) {
 #' @export
 bronchodilator_response <- function(pre, post, predicted, threshold = 10) {
   pct <- (post - pre) / predicted * 100
-  data.frame(
+  tibble::tibble(
     pct_pred_change = pct,
     is_significant  = pct > threshold
   )
@@ -112,5 +112,5 @@ prism_screen <- function(data) {
   fev1_low      <- data$fev1    <  data$fev1_lln
   ratio_normal  <- data$fev1fvc >= data$fev1fvc_lln
   data$prism <- fev1_low & ratio_normal
-  data
+  tibble::as_tibble(data)
 }

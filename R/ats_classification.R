@@ -76,5 +76,5 @@ ats_classification <- function(data) {
 
   data[["ats_classification"]] <- unname(pattern_lookup[combo])
   data[["ats_pattern_combination"]] <- combo
-  data
+  tibble::as_tibble(data)
 }

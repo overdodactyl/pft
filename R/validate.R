@@ -85,5 +85,5 @@ validate_pft <- function(data) {
 
   data$qc_issues <- vapply(issues, paste, character(1), collapse = "; ")
   data$qc_pass   <- data$qc_issues == ""
-  data
+  tibble::as_tibble(data)
 }
