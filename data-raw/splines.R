@@ -1,6 +1,15 @@
 library(tidyverse)
 
 # Prepare splines and model coefficients for lung volume calculations
+#
+# The .RData blobs loaded below are reproducibly built by
+# data-raw/build_gli_2021_volumes.R from the GLI 2021 static lung volumes
+# supplement xlsx and Table 3 of Hall et al. ERJ 2021
+# (doi:10.1183/13993003.00289-2020). The paper PDF and supplement
+# live under papers/gli_2021_volumes/ (not committed -- copyrighted ERJ
+# content). To regenerate the .RData artifacts, place those files in
+# papers/gli_2021_volumes/ and run:
+#   Rscript data-raw/build_gli_2021_volumes.R
 load("data-raw/splines_lung.RData")
 volume_splines = splines
 
