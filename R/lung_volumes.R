@@ -9,6 +9,12 @@
 #'
 #' @return The original data frame with extra columns appended for each reference value computed.
 #'
+#' @references
+#' Hall GL, Filipow N, Ruppel G, et al. Official ERS technical standard:
+#' Global Lung Function Initiative reference values for static lung volumes
+#' in individuals of European ancestry. Eur Respir J. 2021;57(3):2000289.
+#' \doi{10.1183/13993003.00289-2020}.
+#'
 #' @examples
 #' data <- data.frame(sex=c("M","F"),
 #'                    age=c(30,5.1),
