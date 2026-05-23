@@ -6,11 +6,18 @@
 #' including DLCO (or TLCO), KCO, and VA.
 #'
 #' @param data A data frame containing columns for sex ("M","F"),
-#'   age (in years, in the range 4.5-91) and height (in centimeters).
+#'   age (in years, in the range 5-90) and height (in centimeters).
 #' @param SI.units A boolean. Returns the reference values in SI units if TRUE
 #'.  and Traditional units if FALSE.
 #'
 #' @return The original data frame with extra columns appended for each reference value computed.
+#'
+#' @references
+#' Stanojevic S, Graham BL, Cooper BG, et al. Official ERS technical standards:
+#' Global Lung Function Initiative reference values for the carbon monoxide
+#' transfer factor for Caucasians. Eur Respir J. 2017;50(3):1700010.
+#' \doi{10.1183/13993003.00010-2017}. (Author correction:
+#' \doi{10.1183/13993003.50010-2017}, applied here.)
 #'
 #' @examples
 #' data <- data.frame(sex=c("M","F"),

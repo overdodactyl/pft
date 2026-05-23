@@ -8,7 +8,7 @@ diffusion_normals(data, SI.units = FALSE)
 }
 \arguments{
 \item{data}{A data frame containing columns for sex ("M","F"),
-age (in years, in the range 4.5-91) and height (in centimeters).}
+age (in years, in the range 5-90) and height (in centimeters).}
 
 \item{SI.units}{A boolean. Returns the reference values in SI units if TRUE
 .  and Traditional units if FALSE.}
@@ -27,4 +27,11 @@ data <- data.frame(sex=c("M","F"),
                    height=c(178,50))
 diffusion_normals(data)
 
+}
+\references{
+Stanojevic S, Graham BL, Cooper BG, et al. Official ERS technical standards:
+Global Lung Function Initiative reference values for the carbon monoxide
+transfer factor for Caucasians. Eur Respir J. 2017;50(3):1700010.
+\doi{10.1183/13993003.00010-2017}. (Author correction:
+\doi{10.1183/13993003.50010-2017}, applied here.)
 }
