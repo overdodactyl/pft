@@ -9,10 +9,14 @@ spirometry_normals(data, year = 2012)
 \arguments{
 \item{data}{A data frame containing columns for sex ("M","F"),
 race ("AfrAm","NEAsia","SEAsia","Other/mixed", "Caucasian"),
-age (in years, in the range 3-95), and height (in centimeters).}
+age (in years, in the range 3-95), and height (in centimeters).
+Rows with `NA` in sex, age, or height (or, for GLI 2012, in race)
+are returned with `NA` reference values. Race is ignored when
+year = 2022 (GLI Global equations are race-neutral).}
 
-\item{year}{The year of GLI published equations to use in computing
-spirometry  measures. Valid options are "2012" and "2022"}
+\item{year}{The year of GLI published equations. Valid options are
+2012 (multi-ethnic, requires a `race` column) and 2022 (race-neutral
+"GLI Global"; the `race` column, if present, is ignored).}
 }
 \value{
 The original data frame with extra columns appended for each reference value computed.

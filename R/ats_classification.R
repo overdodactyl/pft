@@ -1,4 +1,4 @@
-#' @title ATS Patterns via Spirometry
+#' @title Classify ATS spirometry patterns from spirometry and lung-volume measurements
 #'
 #' @description
 #' `ats_classification()` assigns ATS patterns using spirometry and lung volume data.
@@ -51,7 +51,7 @@ ats_classification <- function(data) {
   tlc_lln <- data$tlc_lln
 
   ## Assign ATS classifications
-  for (i in 1:n) {
+  for (i in seq_len(n)) {
 
     if ( sum( is.na( c(fev1[i], fev1_lln[i], fvc[i], fvc_lln[i], fev1fvc[i], fev1fvc_lln[i], tlc[i], tlc_lln[i]) ) ) > 0) {
 

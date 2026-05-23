@@ -2,7 +2,7 @@
 % Please edit documentation in R/ats_classification.R
 \name{ats_classification}
 \alias{ats_classification}
-\title{ATS Patterns via Spirometry}
+\title{Classify ATS spirometry patterns from spirometry and lung-volume measurements}
 \usage{
 ats_classification(data)
 }

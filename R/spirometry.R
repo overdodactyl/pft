@@ -7,9 +7,13 @@
 #' @param data A data frame containing columns for sex ("M","F"),
 #'    race ("AfrAm","NEAsia","SEAsia","Other/mixed", "Caucasian"),
 #'    age (in years, in the range 3-95), and height (in centimeters).
+#'    Rows with `NA` in sex, age, or height (or, for GLI 2012, in race)
+#'    are returned with `NA` reference values. Race is ignored when
+#'    year = 2022 (GLI Global equations are race-neutral).
 #'
-#' @param year The year of GLI published equations to use in computing
-#'    spirometry  measures. Valid options are "2012" and "2022"
+#' @param year The year of GLI published equations. Valid options are
+#'    2012 (multi-ethnic, requires a `race` column) and 2022 (race-neutral
+#'    "GLI Global"; the `race` column, if present, is ignored).
 #'
 #' @return The original data frame with extra columns appended for each reference value computed.
 #'
@@ -33,17 +37,6 @@
 #' @export
 spirometry_normals <- function(data, year = 2012) {
 
-  # load("data-raw/splines_spiro.RData")
-  # spirometry_splines = splines.spiro
-  # load("data-raw/coeffs_spiro.RData")
-  # spirometry_coeff_l = coeffs_L
-  # spirometry_coeff_m = coeffs_M
-  # spirometry_coeff_s = coeffs_S
-  # data <- data.frame(sex = c("M","F"),
-  #                    age = c(95,5.1),
-  #                    height = c(178,50),
-  #                    race = c("SEAsia","NEAsia"))
-
   n <- nrow(data)
 
   if (year == 2012) {
@@ -63,7 +56,7 @@ spirometry_normals <- function(data, year = 2012) {
     races <- matrix(NA, nrow = n, ncol = 5)
     group.races <- c("AfrAm","NEAsia","SEAsia","Other/mixed","Caucasian")
 
-    for (i in 1:n) {
+    for (i in seq_len(n)) {
 
       # Skip rows with missing demographics; outputs stay NA via the
       # pre-allocated NA matrices above.
@@ -135,37 +128,22 @@ spirometry_normals <- function(data, year = 2012) {
 
     results <- data
 
-    #results$fev1_m <- M.vector[,1]
-    #results$fev1_s <- S.vector[,1]
-    #results$fev1_l <- L.vector[,1]
     results$fev1_pred <- M.vector[,1]
     results$fev1_lln <- Lower.vector[,1]
     results$fev1_uln <- Upper.vector[,1]
 
-    #results$M.FVC <- M.vector[,2]
-    #results$S.FVC <- S.vector[,2]
-    #results$L.FVC <- L.vector[,2]
     results$fvc_pred <- M.vector[,2]
     results$fvc_lln <- Lower.vector[,2]
     results$fvc_uln <- Upper.vector[,2]
 
-    #results$M.FEV1FVC <- M.vector[,3]
-    #results$S.FEV1FVC <- S.vector[,3]
-    #results$L.FEV1FVC <- L.vector[,3]
     results$fev1fvc_pred <- M.vector[,3]
     results$fev1fvc_lln <- Lower.vector[,3]
     results$fev1fvc_uln <- Upper.vector[,3]
 
-    #results$M.FEF2575 <- M.vector[,4]
-    #results$S.FEF2575 <- S.vector[,4]
-    #results$L.FEF2575 <- L.vector[,4]
     results$fef2575_pred <- M.vector[,4]
     results$fef2575_lln <- Lower.vector[,4]
     results$fef2575_uln <- Upper.vector[,4]
 
-    #results$M.FEF75 <- M.vector[,5]
-    #results$S.FEF75 <- S.vector[,5]
-    #results$L.FEF75 <- L.vector[,5]
     results$fef75_pred <- M.vector[,5]
     results$fef75_lln <- Lower.vector[,5]
     results$fef75_uln <- Upper.vector[,5]
@@ -184,7 +162,7 @@ spirometry_normals <- function(data, year = 2012) {
     Lower.vector <- matrix(NA, nrow = n, ncol = 3)
     Upper.vector <- matrix(NA, nrow = n, ncol = 3)
 
-    for (i in 1:n) {
+    for (i in seq_len(n)) {
 
       # Skip rows with missing demographics; outputs stay NA via the
       # pre-allocated NA matrices above.
@@ -246,23 +224,14 @@ spirometry_normals <- function(data, year = 2012) {
 
     results <- data
 
-    #results$fev1_m_2022 <- M.vector[,1]
-    #results$fev1_s_2022 <- S.vector[,1]
-    #results$fev1_l_2022 <- L.vector[,1]
     results$fev1_pred_2022 <- M.vector[,1]
     results$fev1_lln_2022 <- Lower.vector[,1]
     results$fev1_uln_2022 <- Upper.vector[,1]
 
-    #results$M.FVC_2022 <- M.vector[,2]
-    #results$S.FVC_2022 <- S.vector[,2]
-    #results$L.FVC_2022 <- L.vector[,2]
     results$fvc_pred_2022 <- M.vector[,2]
     results$fvc_lln_2022 <- Lower.vector[,2]
     results$fvc_uln_2022 <- Upper.vector[,2]
 
-    #results$M.FEV1FVC_2022 <- M.vector[,3]
-    #results$S.FEV1FVC_2022 <- S.vector[,3]
-    #results$L.FEV1FVC_2022 <- L.vector[,3]
     results$fev1fvc_pred_2022 <- M.vector[,3]
     results$fev1fvc_lln_2022 <- Lower.vector[,3]
     results$fev1fvc_uln_2022 <- Upper.vector[,3]

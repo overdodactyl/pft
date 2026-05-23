@@ -24,14 +24,6 @@
 #' @export
 volume_normals <- function(data) {
 
-  # load("data-raw/splines_lung.RData")
-  # volume_splines = splines
-  # load("data-raw/coeff_lung.RData")
-  # volume_coeff = coeff
-  # data <- data.frame(sex = c("F","M","M"),
-  #                    age = c(5, 80, 82),
-  #                    height = c(150, 110, 110))
-
   n <- nrow(data)
 
   index.spline <- matrix(NA, nrow = n, ncol = 7)
@@ -46,7 +38,7 @@ volume_normals <- function(data) {
   Lower.vector <- matrix(NA, nrow = n, ncol = 7)
   Upper.vector <- matrix(NA, nrow = n, ncol = 7)
 
-  for (i in 1:n) {
+  for (i in seq_len(n)) {
 
     # Skip rows with missing demographics; outputs stay NA via the
     # pre-allocated NA matrices above.
@@ -127,52 +119,31 @@ volume_normals <- function(data) {
 
   results <- data
 
-  #results$M.FRC <- M.vector[,1]
-  #results$S.FRC <- S.vector[,1]
-  #results$L.FRC <- L.vector[,1]
   results$frc_pred <- M.vector[,1]
   results$frc_lln <- Lower.vector[,1]
   results$frc_uln <- Upper.vector[,1]
 
 
-  #results$M.TLC <- M.vector[,2]
-  #results$S.TLC <- S.vector[,2]
-  #results$L.TLC <- L.vector[,2]
   results$tlc_pred <- M.vector[,2]
   results$tlc_lln <- Lower.vector[,2]
   results$tlc_uln <- Upper.vector[,2]
 
-  #results$M.RV <- M.vector[,3]
-  #results$S.RV <- S.vector[,3]
-  #results$L.RV <- L.vector[,3]
   results$rv_pred <- M.vector[,3]
   results$rv_lln <- Lower.vector[,3]
   results$rv_uln <- Upper.vector[,3]
 
-  #results$M.RV.TLC <- M.vector[,4]
-  #results$S.RV.TLC <- S.vector[,4]
-  #results$L.RV.TLC <- L.vector[,4]
   results$rv_tlc_pred <- M.vector[,4]
   results$rv_tlc_lln <- Lower.vector[,4]
   results$rv_tlc_uln <- Upper.vector[,4]
 
-  #results$M.ERV <- M.vector[,5]
-  #results$S.ERV <- S.vector[,5]
-  #results$L.ERV <- L.vector[,5]
   results$erv_pred <- M.vector[,5]
   results$erv_lln <- Lower.vector[,5]
   results$erv_uln <- Upper.vector[,5]
 
-  #results$M.IC <- M.vector[,6]
-  #results$S.IC <- S.vector[,6]
-  #results$L.IC <- L.vector[,6]
   results$ic_pred <- M.vector[,6]
   results$ic_lln <- Lower.vector[,6]
   results$ic_uln <- Upper.vector[,6]
 
-  #results$M.VC <- M.vector[,7]
-  #results$S.VC <- S.vector[,7]
-  #results$L.VC <- L.vector[,7]
   results$vc_pred <- M.vector[,7]
   results$vc_lln <- Lower.vector[,7]
   results$vc_uln <- Upper.vector[,7]

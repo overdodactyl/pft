@@ -28,15 +28,6 @@
 #' @export
 diffusion_normals <- function(data, SI.units = FALSE) {
 
-  # load("data-raw/coeff_transfer_diff.RData")
-  # transfer_coeff <- coeff_transfer_diff
-  # load("data-raw/splines_transfer_diff.RData")
-  # transfer_splines <- splines_transfer_diff
-  # SI.units <- FALSE
-  # data <- data.frame(sex = c("M","F"),
-  #                    age = c(30,5.1),
-  #                    height = c(178,50))
-
   n <- nrow(data)
 
   index.spline <- matrix(NA,nrow=n,ncol=5)
@@ -51,7 +42,7 @@ diffusion_normals <- function(data, SI.units = FALSE) {
   Lower.vector <- matrix(NA,nrow=n,ncol=5)
   Upper.vector <- matrix(NA,nrow=n,ncol=5)
 
-  for (i in 1:n) {
+  for (i in seq_len(n)) {
 
     # Skip rows with missing demographics; outputs stay NA via the
     # pre-allocated NA matrices above.
@@ -112,41 +103,26 @@ diffusion_normals <- function(data, SI.units = FALSE) {
 
   if (SI.units == TRUE) {
 
-    #results$M.TLCO <- M.vector[,1]
-    #results$S.TLCO <- S.vector[,1]
-    #results$L.TLCO <- L.vector[,1]
     results$tlco_pred <- M.vector[,1]
     results$tlco_lln <- Lower.vector[,1]
     results$tlco_uln <- Upper.vector[,1]
 
-    #results$M.KCO.SI <- M.vector[,3]
-    #results$S.KCO.SI <- S.vector[,3]
-    #results$L.KCO.SI <- L.vector[,3]
     results$kco_si_pred <- M.vector[,3]
     results$kco_si_lln <- Lower.vector[,3]
     results$kco_si_uln <- Upper.vector[,3]
 
   } else {
 
-    #results$M.DLCO <- M.vector[,2]
-    #results$S.DLCO <- S.vector[,2]
-    #results$L.DLCO <- L.vector[,2]
     results$dlco_pred <- M.vector[,2]
     results$dlco_lln <- Lower.vector[,2]
     results$dlco_uln <- Upper.vector[,2]
 
-    #results$M.KCO.Tr <- M.vector[,4]
-    #results$S.KCO.Tr <- S.vector[,4]
-    #results$L.KCO.Tr <- L.vector[,4]
     results$kco_tr_pred <- M.vector[,4]
     results$kco_tr_lln <- Lower.vector[,4]
     results$kco_tr_uln <- Upper.vector[,4]
 
   }
 
-  #results$M.VA <- M.vector[,5]
-  #results$S.VA <- S.vector[,5]
-  #results$L.VA <- L.vector[,5]
   results$va_pred <- M.vector[,5]
   results$va_lln <- Lower.vector[,5]
   results$va_uln <- Upper.vector[,5]
