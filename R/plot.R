@@ -57,16 +57,16 @@ plot_pft <- function(data) {
     fill = c("#d73027", "#fc8d59", "#fee090", "#e0e0e0", "#abd9e9")
   )
 
-  ggplot2::ggplot(plot_df, ggplot2::aes(x = .data$measure, y = .data$zscore)) +
+  ggplot2::ggplot(plot_df, ggplot2::aes(x = measure, y = zscore)) +
     ggplot2::geom_rect(
       data = bands,
-      ggplot2::aes(ymin = .data$ymin, ymax = .data$ymax, fill = .data$fill),
+      ggplot2::aes(ymin = ymin, ymax = ymax, fill = fill),
       xmin = -Inf, xmax = Inf, alpha = 0.4, inherit.aes = FALSE
     ) +
     ggplot2::scale_fill_identity() +
     ggplot2::geom_hline(yintercept = 0, linetype = "dashed", colour = "gray40") +
     ggplot2::geom_segment(
-      ggplot2::aes(xend = .data$measure, yend = 0), colour = "black"
+      ggplot2::aes(xend = measure, yend = 0), colour = "black"
     ) +
     ggplot2::geom_point(size = 4, colour = "black") +
     ggplot2::coord_flip(ylim = c(-6, 6)) +
