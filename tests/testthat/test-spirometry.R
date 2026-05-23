@@ -211,17 +211,12 @@ test_that("NA measured value propagates to NA z-score and pctpred", {
   expect_true(is.na(out$fev1_pctpred))
 })
 
-## --- GLI 2022 cross-implementation oracle -------------------------------
-## Bowerman 2023 has no extractable worked numerical examples, so the
-## GLI 2022 predictions in tests/testthat/gli_2022_oracle.csv were
-## generated once from rspiro::pred_GLIgl / LLN_GLIgl (an independent R
-## implementation of the same published GLI Global coefficients) via
-## data-raw/build_gli_2022_oracle.R. The CSV is the canonical fixture
-## here; rspiro is NOT a runtime, test-time, or build-time dependency of
-## pft. Regenerate by re-running the build script if the oracle needs
-## refreshing.
+## --- GLI 2022 oracle ----------------------------------------------------
+## The fixture tests/testthat/gli_2022_oracle.csv is the canonical
+## reference; regenerate via data-raw/build_gli_2022_oracle.R if it ever
+## needs refreshing. See that script for provenance.
 
-test_that("year=2022 matches the GLI Global oracle (rspiro-derived)", {
+test_that("year=2022 matches the GLI Global oracle", {
   oracle <- read.csv(test_path("gli_2022_oracle.csv"), stringsAsFactors = FALSE)
   # Pass demographics AND measured values so spirometry_normals also emits
   # zscore + pctpred columns.

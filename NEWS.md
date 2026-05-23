@@ -29,13 +29,11 @@
 * z-score uses the LMS formula `((measured/M)^L - 1) / (L*S)`; percent
   predicted is `(measured / M) * 100`. Both propagate `NA` from the
   measured value, the LMS parameters, or the LLN as expected.
-* This makes pft a superset of the per-equation calls in `rspiro`
-  (`pred_*`, `LLN_*`, `zscore_*`, `pctpred_*`) without taking a
-  dependency on it. The GLI 2022 oracle CSV at
-  `tests/testthat/gli_2022_oracle.csv` now also includes
-  rspiro-derived z-score and pctpred columns, validated at tolerance
-  `1e-8`. Z-score formula sanity (z = 0 at predicted, ~+/-1.645 at
-  LLN/ULN) is tested for every measure across the three functions.
+* Z-score formula sanity (z = 0 at predicted, ~+/-1.645 at LLN/ULN) is
+  tested for every measure across the three functions. The GLI 2022
+  oracle CSV at `tests/testthat/gli_2022_oracle.csv` covers z-score and
+  percent predicted as well as predicted and LLN, validated at
+  tolerance `1e-8`.
 
 ## Reference-function robustness
 
@@ -78,16 +76,12 @@
   tests, structural / column-contract tests, and a clinical-scenario
   suite for `ats_classification` grounded in Stanojevic 2022 Figure 8 /
   Table 5 / Table 8.
-* New cross-implementation oracle for the GLI 2022 / "GLI Global"
-  spirometry path: `tests/testthat/test-spirometry.R` now compares
-  `spirometry_normals(year = 2022)` outputs against a frozen
-  30-row ground-truth CSV at `tests/testthat/gli_2022_oracle.csv`.
-  The CSV was generated once from the independently-authored `rspiro`
-  package (`pred_GLIgl()` / `LLN_GLIgl()`) via
-  `data-raw/build_gli_2022_oracle.R`. The two implementations agreed
-  to machine precision when the oracle was built. `rspiro` is NOT a
-  dependency of pft -- only the static CSV ships and is consulted by
-  the test.
+* New GLI 2022 / "GLI Global" oracle: a frozen 30-row ground-truth
+  fixture at `tests/testthat/gli_2022_oracle.csv` covering predicted,
+  LLN, z-score, and percent predicted for FEV1, FVC, and FEV1/FVC.
+  Regenerated via `data-raw/build_gli_2022_oracle.R` (see that script
+  for provenance). Only the static CSV ships; no test-time dependency
+  on any external package.
 
 ## Documentation
 
