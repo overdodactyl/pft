@@ -1,0 +1,108 @@
+citHeader("Please cite the underlying reference standard for whichever",
+          "function(s) you use, in addition to (or instead of) the pft",
+          "package itself.")
+
+bibentry(
+  bibtype = "Manual",
+  title   = "pft: Compute ATS-Compliant PFT Reference Values",
+  author  = c(person("Pat", "Johnson"),
+              person("Zach", "Quicksall"),
+              person("Jairo", "Pena")),
+  year    = format(Sys.Date(), "%Y"),
+  note    = sprintf("R package version %s", meta$Version),
+  url     = "https://github.com/<your-org>/pft"
+)
+
+bibentry(
+  bibtype = "Article",
+  key     = "Quanjer2012",
+  title   = paste("Multi-ethnic reference values for spirometry for the",
+                  "3-95-yr age range: the global lung function 2012 equations"),
+  author  = c(person("Philip H", "Quanjer"),
+              person("Sanja",     "Stanojevic"),
+              person("Tim J",     "Cole"),
+              person(family = "et al.")),
+  journal = "European Respiratory Journal",
+  year    = 2012,
+  volume  = 40,
+  number  = 6,
+  pages   = "1324-1343",
+  doi     = "10.1183/09031936.00080312",
+  header  = "GLI 2012 spirometry equations (year = 2012):"
+)
+
+bibentry(
+  bibtype = "Article",
+  key     = "Bowerman2023",
+  title   = paste("A race-neutral approach to the interpretation of lung",
+                  "function measurements"),
+  author  = c(person("Cole",   "Bowerman"),
+              person("Nirav R", "Bhakta"),
+              person("Danielle","Brazzale"),
+              person(family = "et al.")),
+  journal = "American Journal of Respiratory and Critical Care Medicine",
+  year    = 2023,
+  volume  = 207,
+  number  = 6,
+  pages   = "768-774",
+  doi     = "10.1164/rccm.202205-0963OC",
+  header  = "GLI Global 2022 spirometry equations (year = 2022):"
+)
+
+bibentry(
+  bibtype = "Article",
+  key     = "Hall2021",
+  title   = paste("Official ERS technical standard: Global Lung Function",
+                  "Initiative reference values for static lung volumes in",
+                  "individuals of European ancestry"),
+  author  = c(person("Graham L", "Hall"),
+              person("Nicole",   "Filipow"),
+              person("Gregg",    "Ruppel"),
+              person(family = "et al.")),
+  journal = "European Respiratory Journal",
+  year    = 2021,
+  volume  = 57,
+  number  = 3,
+  pages   = "2000289",
+  doi     = "10.1183/13993003.00289-2020",
+  header  = "GLI 2021 static lung volumes (volume_normals):"
+)
+
+bibentry(
+  bibtype = "Article",
+  key     = "Stanojevic2017",
+  title   = paste("Official ERS technical standards: Global Lung Function",
+                  "Initiative reference values for the carbon monoxide",
+                  "transfer factor for Caucasians"),
+  author  = c(person("Sanja",     "Stanojevic"),
+              person("Brian L",   "Graham"),
+              person("Brendan G", "Cooper"),
+              person(family = "et al.")),
+  journal = "European Respiratory Journal",
+  year    = 2017,
+  volume  = 50,
+  number  = 3,
+  pages   = "1700010",
+  doi     = "10.1183/13993003.00010-2017",
+  header  = paste("GLI 2017 TLCO / DLCO (diffusion_normals).",
+                  "Author correction (2020), doi:10.1183/13993003.50010-2017,",
+                  "is the version implemented here:")
+)
+
+bibentry(
+  bibtype = "Article",
+  key     = "Stanojevic2022",
+  title   = paste("ERS/ATS technical standard on interpretive strategies",
+                  "for routine lung function tests"),
+  author  = c(person("Sanja",     "Stanojevic"),
+              person("David A",   "Kaminsky"),
+              person("Martin R",  "Miller"),
+              person(family = "et al.")),
+  journal = "European Respiratory Journal",
+  year    = 2022,
+  volume  = 60,
+  number  = 1,
+  pages   = "2101499",
+  doi     = "10.1183/13993003.01499-2021",
+  header  = "Pattern interpretation algorithm (ats_classification):"
+)

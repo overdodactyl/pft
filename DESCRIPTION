@@ -2,18 +2,33 @@ Package: pft
 Type: Package
 Title: Compute ATS-Compliant PFT Reference Values
 Version: 0.1.0
-Author: Pat Johnson, Jairo Pena, and Zach Quicksall
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: Computes upper/lower limits of normal and predicted
-    values according to ATS-defined standards for pulmonary function tests.
-    This includes spirometry, lung volumes, and diffusion capacity.
+Authors@R: c(
+    person(given = "Pat",   family = "Johnson",   email = "johnson.pat@mayo.edu",
+           role = c("aut", "cre")),
+    person(given = "Zach",  family = "Quicksall",
+           role = "aut"),
+    person(given = "Jairo", family = "Pena",
+           role = "aut")
+    )
+Description: Computes predicted values and lower/upper limits of normal
+    for pulmonary function tests according to American Thoracic Society
+    and European Respiratory Society reference standards. Supports
+    spirometry (GLI 2012 and the race-neutral GLI 2022 / "GLI Global"
+    equations), static lung volumes (GLI 2021), and the carbon monoxide
+    transfer factor / diffusion capacity (GLI 2017 TLCO, including the
+    2020 author correction). Also assigns ATS/ERS interpretive
+    pattern labels (Normal, Non-specific, Obstructed, Restricted, Mixed)
+    from spirometry and lung-volume measurements following the
+    interpretation algorithm in Stanojevic et al. ERJ 2022.
 License: MIT + file LICENSE
+URL: https://github.com/<your-org>/pft
+BugReports: https://github.com/<your-org>/pft/issues
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.2
-Depends: 
+Depends:
     R (>= 2.10)
-Suggests: 
+Suggests:
     dplyr,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
