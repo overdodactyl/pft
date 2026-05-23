@@ -58,7 +58,18 @@ spirometry_2022_coeff_l <- coeffs_2022_L
 spirometry_2022_coeff_m <- coeffs_2022_M
 spirometry_2022_coeff_s <- coeffs_2022_S
 
-# Prepare splines and model coefficients for DLCO calculations
+# Prepare splines and model coefficients for DLCO/TLCO calculations
+#
+# The .RData blobs loaded below are reproducibly built by
+# data-raw/build_gli_2017_diffusion.R from the GLI 2017 carbon-monoxide
+# transfer factor supplement workbooks (papers/gli_2017_diffusion/
+# inline-supplementary-material-{2,3}.xlsx for SI/traditional units) and
+# the *corrected* Table 2 of Stanojevic et al. ERJ 2017
+# (doi:10.1183/13993003.00010-2017). The paper and supplements are not
+# committed (copyrighted ERJ content); the .RData files are kept in the
+# repo as the build artifacts. To regenerate, place the source files
+# under papers/gli_2017_diffusion/ and run:
+#   Rscript data-raw/build_gli_2017_diffusion.R
 load("data-raw/splines_transfer_diff.RData")
 transfer_splines = splines_transfer_diff
 
