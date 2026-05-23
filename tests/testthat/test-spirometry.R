@@ -169,36 +169,22 @@ test_that("year = 2022 emits the 2022 reference columns", {
   expect_true(all(expected %in% colnames(out)))
 })
 
-## --- GLI 2022 cross-implementation oracle (rspiro) ----------------------
-## The Bowerman 2023 paper contains no extractable worked numerical
-## examples, so we cross-check against rspiro::pred_GLIgl / LLN_GLIgl
-## (also implements GLI Global from the same published coefficients).
-## Independent code paths in the same language: catches algorithm bugs in
-## the year=2022 branch even though both implementations share data.
+## --- GLI 2022 cross-implementation oracle -------------------------------
+## Bowerman 2023 has no extractable worked numerical examples, so the
+## GLI 2022 predictions in tests/testthat/gli_2022_oracle.csv were
+## generated once from rspiro::pred_GLIgl / LLN_GLIgl (an independent R
+## implementation of the same published GLI Global coefficients) via
+## data-raw/build_gli_2022_oracle.R. The CSV is the canonical fixture
+## here; rspiro is NOT a runtime, test-time, or build-time dependency of
+## pft. Regenerate by re-running the build script if the oracle needs
+## refreshing.
 
-test_that("year=2022 matches rspiro::GLIgl on a demographic grid", {
-  skip_if_not_installed("rspiro")
-  grid <- expand.grid(
-    sex    = c("M","F"),
-    age    = c(10, 25, 45, 65, 85),
-    height = c(155, 170, 185),
-    stringsAsFactors = FALSE
-  )
-  out <- spirometry_normals(grid, year = 2022)
-
-  gender <- ifelse(grid$sex == "M", 1, 2)
-  hm     <- grid$height / 100
-  for (param in c("FEV1","FVC","FEV1FVC")) {
-    rsp_pred <- mapply(rspiro::pred_GLIgl, age = grid$age, height = hm,
-                       gender = gender, param = param)
-    rsp_lln  <- mapply(rspiro::LLN_GLIgl,  age = grid$age, height = hm,
-                       gender = gender, param = param)
-    col_pfx <- tolower(gsub("FEV1FVC", "fev1fvc", param))
-    expect_equal(out[[paste0(col_pfx, "_pred_2022")]], rsp_pred,
-                 tolerance = 1e-8,
-                 label = sprintf("%s_pred_2022 vs rspiro", col_pfx))
-    expect_equal(out[[paste0(col_pfx, "_lln_2022")]], rsp_lln,
-                 tolerance = 1e-8,
-                 label = sprintf("%s_lln_2022 vs rspiro", col_pfx))
+test_that("year=2022 matches the GLI Global oracle (rspiro-derived)", {
+  oracle <- read.csv(test_path("gli_2022_oracle.csv"), stringsAsFactors = FALSE)
+  out <- spirometry_normals(oracle[, c("sex","age","height")], year = 2022)
+  for (col in c("fev1_pred_2022","fev1_lln_2022",
+                "fvc_pred_2022","fvc_lln_2022",
+                "fev1fvc_pred_2022","fev1fvc_lln_2022")) {
+    expect_equal(out[[col]], oracle[[col]], tolerance = 1e-8, label = col)
   }
 })

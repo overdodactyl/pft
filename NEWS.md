@@ -59,12 +59,14 @@
   Table 5 / Table 8.
 * New cross-implementation oracle for the GLI 2022 / "GLI Global"
   spirometry path: `tests/testthat/test-spirometry.R` now compares
-  `spirometry_normals(year = 2022)` outputs against
-  `rspiro::pred_GLIgl()` / `LLN_GLIgl()` over a 30-row demographic grid.
-  Both implementations agree to machine precision. `rspiro` is a
-  Suggested dependency; the test is `skip_if_not_installed("rspiro")`-
-  gated so it runs everywhere `rspiro` is available without forcing it
-  as a hard dependency.
+  `spirometry_normals(year = 2022)` outputs against a frozen
+  30-row ground-truth CSV at `tests/testthat/gli_2022_oracle.csv`.
+  The CSV was generated once from the independently-authored `rspiro`
+  package (`pred_GLIgl()` / `LLN_GLIgl()`) via
+  `data-raw/build_gli_2022_oracle.R`. The two implementations agreed
+  to machine precision when the oracle was built. `rspiro` is NOT a
+  dependency of pft -- only the static CSV ships and is consulted by
+  the test.
 
 ## Documentation
 
