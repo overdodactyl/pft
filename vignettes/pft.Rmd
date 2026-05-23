@@ -1,0 +1,230 @@
+---
+title: "Getting started with pft"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with pft}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  fig.width  = 6,
+  fig.height = 4
+)
+```
+
+`pft` is an R toolkit for **ERS/ATS 2022-compliant pulmonary function
+test (PFT) interpretation**. It implements the full Stanojevic et al.
+ERJ 2022 interpretive strategy: reference values, z-scores, percent
+predicted, ATS pattern classification, severity grading, bronchodilator
+response, PRISm screening, and conditional change scores -- all from a
+data-frame-pipeline API.
+
+This vignette walks through the full workflow on a single patient and
+then on a small cohort.
+
+```{r}
+library(pft)
+```
+
+# 1. Reference values from demographics alone
+
+The simplest call: pass age, sex, height (and race for GLI 2012) and
+get predicted values, lower limits of normal (LLN), and upper limits of
+normal (ULN) for every measure.
+
+```{r}
+patient <- data.frame(
+  sex = "M", age = 45, height = 178, race = "Caucasian"
+)
+
+ref <- spirometry_normals(patient, year = 2012)
+ref[, c("fev1_pred", "fev1_lln", "fev1_uln",
+        "fvc_pred",  "fvc_lln",  "fvc_uln")]
+```
+
+The same pattern works for lung volumes and diffusion:
+
+```{r}
+volume_normals(patient)[, c("frc_pred", "tlc_pred", "rv_pred", "vc_pred")]
+diffusion_normals(patient)[, c("dlco_pred", "kco_tr_pred", "va_pred")]
+```
+
+# 2. Z-scores and percent predicted from measured values
+
+Add `<measure>_measured` columns and z-scores and percent-predicted
+appear automatically next to the reference values.
+
+```{r}
+patient_with_measurements <- data.frame(
+  sex = "M", age = 45, height = 178, race = "Caucasian",
+  fev1_measured = 2.5,
+  fvc_measured  = 3.8
+)
+
+out <- spirometry_normals(patient_with_measurements)
+out[, c("fev1_pred", "fev1_zscore", "fev1_pctpred",
+        "fvc_pred",  "fvc_zscore",  "fvc_pctpred")]
+```
+
+The z-score uses the standard LMS formula
+`((measured / M)^L - 1) / (L * S)`. Percent predicted is
+`(measured / M) * 100`.
+
+# 3. Severity grading
+
+`severity_grade()` maps a z-score to one of four categories per the
+Stanojevic 2022 cut points:
+
+```{r}
+severity_grade(c(0, -1.7, -3, -5))
+```
+
+You can grade any z-score column directly:
+
+```{r}
+out$fev1_severity <- severity_grade(out$fev1_zscore)
+out$fvc_severity  <- severity_grade(out$fvc_zscore)
+out[, c("fev1_zscore", "fev1_severity", "fvc_zscore", "fvc_severity")]
+```
+
+# 4. ATS pattern classification
+
+Given measured spirometry plus TLC and their LLNs, `ats_classification()`
+labels the pattern per Stanojevic 2022 Figure 8:
+
+```{r}
+classification_input <- data.frame(
+  fev1 = 2.5,  fev1_lln = 3.0,
+  fvc  = 3.8,  fvc_lln  = 3.5,
+  fev1fvc = 0.66, fev1fvc_lln = 0.70,
+  tlc  = 6.0,  tlc_lln = 5.0
+)
+ats_classification(classification_input)[
+  , c("ats_classification", "ats_pattern_combination")
+]
+```
+
+The 4-character `ats_pattern_combination` records which inputs drove the
+label (A = abnormal / below LLN, N = at or above LLN), in the order
+FEV1, FVC, FEV1/FVC, TLC. `ANAN` above means FEV1 and FEV1/FVC are low;
+FVC and TLC are normal.
+
+# 5. Bronchodilator response
+
+The Stanojevic 2022 BDR criterion is a >10% change relative to predicted
+in FEV1 or FVC (replacing the 2005 12% / 200 mL rule):
+
+```{r}
+bronchodilator_response(pre = 2.5, post = 3.0, predicted = 4.0)
+```
+
+# 6. PRISm screening
+
+Preserved Ratio Impaired Spirometry: low FEV1 with normal FEV1/FVC.
+Spirometry-only; no TLC needed.
+
+```{r}
+prism_screen(data.frame(
+  fev1 = 2.0,    fev1_lln = 2.5,
+  fev1fvc = 0.80, fev1fvc_lln = 0.70
+))
+```
+
+# 7. Serial change
+
+For longitudinal monitoring, the conditional change score (CCS)
+adjusts for regression to the mean using a within-subject z-score
+autocorrelation `r`. `|CCS| > 1.645` indicates an unusual change.
+
+```{r}
+# z dropped from -0.5 to -2.5 over 1 year; r ≈ 0.7 for adult FEV1
+serial_change_score(z1 = -0.5, z2 = -2.5, r = 0.7)
+```
+
+# 8. Input QC
+
+`validate_pft()` flags biologically implausible inputs without
+erroring -- handy for screening a real-world cohort before
+interpretation.
+
+```{r}
+cohort <- data.frame(
+  sex    = c("M", "X", "F"),
+  age    = c(45, 30, 250),
+  height = c(178, 30, 165),
+  fev1_measured = c(2.5, 4.0, 2.0),
+  fvc_measured  = c(3.8, 3.5, 2.5)
+)
+validate_pft(cohort)[, c("qc_pass", "qc_issues")]
+```
+
+# 9. The one-call workflow
+
+`pft_interpret()` auto-detects every available input and produces the
+full Stanojevic 2022-compliant interpretation in one call:
+
+```{r}
+patient <- data.frame(
+  sex = "M", age = 45, height = 178, race = "Caucasian",
+  fev1_measured     = 2.5,
+  fvc_measured      = 3.8,
+  fev1fvc_measured  = 2.5 / 3.8,
+  tlc_measured      = 6.0,
+  fev1_pre          = 2.5,
+  fev1_post         = 2.9
+)
+result <- pft_interpret(patient)
+
+# A clinically useful subset of the ~60 columns generated:
+result[, c("fev1_pred", "fev1_zscore", "fev1_severity",
+           "fvc_zscore", "fvc_severity",
+           "ats_classification", "prism",
+           "fev1_bdr_pct", "fev1_bdr_significant")]
+```
+
+# 10. Visualisation
+
+`plot_pft()` produces a clinical-style z-score lollipop figure with
+severity bands. Requires `ggplot2` (Suggests).
+
+```{r, eval = requireNamespace("ggplot2", quietly = TRUE)}
+plot_pft(result)
+```
+
+# 11. Cohort analyses
+
+Everything composes naturally in a pipeline. Apply `pft_interpret()`
+to a multi-row data frame and the output is the same data frame with
+~60 interpretation columns appended:
+
+```{r}
+cohort <- data.frame(
+  sex    = c("M", "F", "M"),
+  age    = c(45, 60, 30),
+  height = c(178, 165, 175),
+  race   = c("Caucasian", "AfrAm", "Caucasian"),
+  fev1_measured = c(2.5, 1.8, 4.0),
+  fvc_measured  = c(3.8, 2.4, 5.2),
+  fev1fvc_measured = c(2.5/3.8, 1.8/2.4, 4.0/5.2),
+  tlc_measured  = c(6.0, 4.5, 6.8)
+)
+
+interpreted <- pft_interpret(cohort)
+interpreted[, c("sex", "age",
+                "fev1_zscore", "fev1_severity",
+                "ats_classification", "prism")]
+```
+
+# Citations
+
+See `citation("pft")` for the package and underlying reference
+standards as `bibentry` objects, suitable for direct inclusion in
+publications.
+
+```{r}
+citation("pft")
+```
