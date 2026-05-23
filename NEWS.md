@@ -49,6 +49,23 @@
   output column. (Initial expansion: previous internal release; bug
   fixes: this release.)
 
+## Tests
+
+* Test coverage grew from 36 to 101 tests across all four test files.
+  Additions include predicted-value (median) comparisons against the GLI
+  web calculator ground truth, `NA`-propagation tests, out-of-range
+  tests, structural / column-contract tests, and a clinical-scenario
+  suite for `ats_classification` grounded in Stanojevic 2022 Figure 8 /
+  Table 5 / Table 8.
+* New cross-implementation oracle for the GLI 2022 / "GLI Global"
+  spirometry path: `tests/testthat/test-spirometry.R` now compares
+  `spirometry_normals(year = 2022)` outputs against
+  `rspiro::pred_GLIgl()` / `LLN_GLIgl()` over a 30-row demographic grid.
+  Both implementations agree to machine precision. `rspiro` is a
+  Suggested dependency; the test is `skip_if_not_installed("rspiro")`-
+  gated so it runs everywhere `rspiro` is available without forcing it
+  as a hard dependency.
+
 ## Documentation
 
 * New README with installation, usage, citations, and a research-use

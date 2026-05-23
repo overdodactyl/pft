@@ -168,3 +168,37 @@ test_that("year = 2022 emits the 2022 reference columns", {
                 "fev1fvc_pred_2022","fev1fvc_lln_2022","fev1fvc_uln_2022")
   expect_true(all(expected %in% colnames(out)))
 })
+
+## --- GLI 2022 cross-implementation oracle (rspiro) ----------------------
+## The Bowerman 2023 paper contains no extractable worked numerical
+## examples, so we cross-check against rspiro::pred_GLIgl / LLN_GLIgl
+## (also implements GLI Global from the same published coefficients).
+## Independent code paths in the same language: catches algorithm bugs in
+## the year=2022 branch even though both implementations share data.
+
+test_that("year=2022 matches rspiro::GLIgl on a demographic grid", {
+  skip_if_not_installed("rspiro")
+  grid <- expand.grid(
+    sex    = c("M","F"),
+    age    = c(10, 25, 45, 65, 85),
+    height = c(155, 170, 185),
+    stringsAsFactors = FALSE
+  )
+  out <- spirometry_normals(grid, year = 2022)
+
+  gender <- ifelse(grid$sex == "M", 1, 2)
+  hm     <- grid$height / 100
+  for (param in c("FEV1","FVC","FEV1FVC")) {
+    rsp_pred <- mapply(rspiro::pred_GLIgl, age = grid$age, height = hm,
+                       gender = gender, param = param)
+    rsp_lln  <- mapply(rspiro::LLN_GLIgl,  age = grid$age, height = hm,
+                       gender = gender, param = param)
+    col_pfx <- tolower(gsub("FEV1FVC", "fev1fvc", param))
+    expect_equal(out[[paste0(col_pfx, "_pred_2022")]], rsp_pred,
+                 tolerance = 1e-8,
+                 label = sprintf("%s_pred_2022 vs rspiro", col_pfx))
+    expect_equal(out[[paste0(col_pfx, "_lln_2022")]], rsp_lln,
+                 tolerance = 1e-8,
+                 label = sprintf("%s_lln_2022 vs rspiro", col_pfx))
+  }
+})
