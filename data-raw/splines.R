@@ -86,8 +86,8 @@ gli_test_groundtruth <- read_csv("data-raw/gli_test_grid_GLI.csv")
 ats_test_grid <- tribble(
   ~fev1, ~fev1_lln, ~fvc, ~fvc_lln, ~fev1fvc, ~fev1fvc_lln, ~tlc, ~tlc_lln, ~ats_true,      ~combo_true,
   10,    5,         10,   5,        10,       5,            10,   5,        "Normal",       "NNNN",
-  1,     5,         10,   5,        10,       5,            10,   5,        "Non-specific", "ANNN",
-  10,    5,         1,    5,        10,       5,            10,   5,        "Normal",       "NANN",
+  1,     5,         10,   5,        10,       5,            10,   5,        "Normal",       "ANNN",
+  10,    5,         1,    5,        10,       5,            10,   5,        "Non-specific", "NANN",
   1,     5,         1,    5,        10,       5,            10,   5,        "Non-specific", "AANN",
   10,    5,         10,   5,        1,        5,            10,   5,        "Obstructed",   "NNAN",
   1,     5,         10,   5,        1,        5,            10,   5,        "Obstructed",   "ANAN",

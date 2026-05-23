@@ -8,6 +8,18 @@
 #' @return The original data frame with an additional column for ATS spirometry pattern labels,
 #'         and a string indicating the normal/abnormal test values that assigned the pattern.
 #'
+#' @references
+#' Stanojevic S, Kaminsky DA, Miller MR, et al. ERS/ATS technical standard
+#' on interpretive strategies for routine lung function tests. Eur Respir J.
+#' 2022;60(1):2101499. \doi{10.1183/13993003.01499-2021}. The classifier
+#' follows the spirometry interpretation flowchart in Figure 8 and the
+#' pattern definitions in Tables 5 and 8.
+#'
+#' Pellegrino R, Viegi G, Brusasco V, et al. Interpretative strategies for
+#' lung function tests. Eur Respir J. 2005;26(5):948-968.
+#' \doi{10.1183/09031936.05.00035205}. The predecessor interpretation
+#' standard that this function's 5-category labelling derives from.
+#'
 #' @examples data <- data.frame(fev1 = c(3.453, 2.385),
 #'                              fev1_lln = c(3.303, 3.384),
 #'                              fvc = c(4.733, 3.485),
@@ -46,19 +58,19 @@ ats_classification <- function(data) {
       ats_vector[i] <- NA
       combo_vector[i] <- NA
 
-    } else if ( (fev1[i] >= fev1_lln[i]) && (fvc[i] >= fev1_lln[i]) && (fev1fvc[i] >= fev1fvc_lln[i]) && (tlc[i] >= tlc_lln[i])) {
+    } else if ( (fev1[i] >= fev1_lln[i]) && (fvc[i] >= fvc_lln[i]) && (fev1fvc[i] >= fev1fvc_lln[i]) && (tlc[i] >= tlc_lln[i])) {
 
       ats_vector[i] <- "Normal"
       combo_vector[i] <- "NNNN"
 
     } else if ( (fev1[i] < fev1_lln[i]) && (fvc[i] >= fvc_lln[i]) && (fev1fvc[i] >= fev1fvc_lln[i]) && (tlc[i] >= tlc_lln[i])) {
 
-      ats_vector[i] <- "Non-specific"
+      ats_vector[i] <- "Normal"
       combo_vector[i] <- "ANNN"
 
     } else if ( (fev1[i] >= fev1_lln[i]) && (fvc[i] < fvc_lln[i]) && (fev1fvc[i] >= fev1fvc_lln[i]) && (tlc[i] >= tlc_lln[i])) {
 
-      ats_vector[i] <- "Normal"
+      ats_vector[i] <- "Non-specific"
       combo_vector[i] <- "NANN"
 
     } else if ( (fev1[i] < fev1_lln[i]) && (fvc[i] < fvc_lln[i]) && (fev1fvc[i] >= fev1fvc_lln[i]) && (tlc[i] >= tlc_lln[i])) {

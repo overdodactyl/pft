@@ -28,3 +28,15 @@ data <- data.frame(fev1 = c(3.453, 2.385),
           ats_classification(data)
 
 }
+\references{
+Stanojevic S, Kaminsky DA, Miller MR, et al. ERS/ATS technical standard
+on interpretive strategies for routine lung function tests. Eur Respir J.
+2022;60(1):2101499. \doi{10.1183/13993003.01499-2021}. The classifier
+follows the spirometry interpretation flowchart in Figure 8 and the
+pattern definitions in Tables 5 and 8.
+
+Pellegrino R, Viegi G, Brusasco V, et al. Interpretative strategies for
+lung function tests. Eur Respir J. 2005;26(5):948-968.
+\doi{10.1183/09031936.05.00035205}. The predecessor interpretation
+standard that this function's 5-category labelling derives from.
+}
