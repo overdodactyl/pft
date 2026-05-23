@@ -37,211 +37,157 @@
 #' @export
 spirometry_normals <- function(data, year = 2012) {
 
-  n <- nrow(data)
-
   if (year == 2012) {
-
-    index.spline <- matrix(NA, nrow = n, ncol = 5)
-    Mspline <- matrix(NA, nrow = n, ncol = 5)
-    Sspline <- matrix(NA, nrow = n, ncol = 5)
-    Lspline <- matrix(NA, nrow = n, ncol = 5)
-
-    M.vector <- matrix(NA, nrow = n, ncol = 5)
-    S.vector <- matrix(NA, nrow = n, ncol = 5)
-    L.vector <- matrix(NA, nrow = n, ncol = 5)
-
-    Lower.vector <- matrix(NA, nrow = n, ncol = 5)
-    Upper.vector <- matrix(NA, nrow = n, ncol = 5)
-
-    races <- matrix(NA, nrow = n, ncol = 5)
-    group.races <- c("AfrAm","NEAsia","SEAsia","Other/mixed","Caucasian")
-
-    for (i in seq_len(n)) {
-
-      # Skip rows with missing demographics; outputs stay NA via the
-      # pre-allocated NA matrices above.
-      if (is.na(data$sex[i]) || is.na(data$age[i]) || is.na(data$height[i])) {
-        next
-      }
-
-      # Select appropriate spline indexes for males or females
-      if (data$sex[i] == "M") {
-        g.index <- c(1,3,5,7,9)
-      } else {
-        g.index <- c(2,4,6,8,10)
-      }
-
-      # Generate one-hot encoded race variables as appropriate
-      races[i,] <- data$race[i] == group.races
-
-      for (j in 1:5) {
-
-        if (data[i,]$age == 3) {
-
-          index.spline[i,j] <- 1
-
-        } else {
-
-          index.spline[i,j] <- which.min(!(data[i,]$age <= spirometry_splines[[g.index[j]]]$age)) - 1
-
-        }
-
-        # Skip computation of age is outside acceptable range
-        if (index.spline[i,j] == 0) {
-          next
-        }
-
-        # Skip computation if invalid race
-        if ((sum(races[i,]) == 0) | is.na(sum(races[i,]))) {
-          next
-        }
-
-        interp.factor <-
-          (data[i,]$age-spirometry_splines[[g.index[j]]]$age[index.spline[i,j]])/(spirometry_splines[[g.index[j]]]$age[index.spline[i,j]+1]-spirometry_splines[[g.index[j]]]$age[index.spline[i,j]])
-
-        Mspline[i,j] <- spirometry_splines[[g.index[j]]]$Mspline[index.spline[i,j]]+interp.factor*(spirometry_splines[[g.index[j]]]$Mspline[index.spline[i,j]+1]-spirometry_splines[[g.index[j]]]$Mspline[index.spline[i,j]])
-
-        Sspline[i,j] <- spirometry_splines[[g.index[j]]]$Sspline[index.spline[i,j]]+interp.factor*(spirometry_splines[[g.index[j]]]$Sspline[index.spline[i,j]+1]-spirometry_splines[[g.index[j]]]$Sspline[index.spline[i,j]])
-
-        Lspline[i,j] <- spirometry_splines[[g.index[j]]]$Lspline[index.spline[i,j]]+interp.factor*(spirometry_splines[[g.index[j]]]$Lspline[index.spline[i,j]+1]-spirometry_splines[[g.index[j]]]$Lspline[index.spline[i,j]])
-
-        M.vector[i,j] <- exp(spirometry_coeff_m[1,g.index[j]]+
-                               log(data[i,]$height)*spirometry_coeff_m[2,g.index[j]]+
-                               log(data[i,]$age)*spirometry_coeff_m[3,g.index[j]]+
-                               sum(races[i,]*spirometry_coeff_m[4:8,g.index[j]])+
-                               Mspline[i,j])
-
-        S.vector[i,j] <- exp(spirometry_coeff_s[1,g.index[j]]+
-                               log(data[i,]$age)*spirometry_coeff_s[2,g.index[j]]+
-                               sum(races[i,]*spirometry_coeff_s[3:7,g.index[j]])+
-                               Sspline[i,j])
-
-        L.vector[i,j] <- spirometry_coeff_l[1,g.index[j]]+
-          log(data[i,]$age)*spirometry_coeff_l[2,g.index[j]]+
-          Lspline[i,j]
-
-        Lower.vector[i,j] <- exp(log(M.vector[i,j])+log(1-1.645*L.vector[i,j]*S.vector[i,j])/L.vector[i,j])
-        Upper.vector[i,j] <- exp(log(M.vector[i,j])+log(1+1.645*L.vector[i,j]*S.vector[i,j])/L.vector[i,j])
-
-      }
-    }
-
-    results <- data
-
-    results$fev1_pred <- M.vector[,1]
-    results$fev1_lln <- Lower.vector[,1]
-    results$fev1_uln <- Upper.vector[,1]
-
-    results$fvc_pred <- M.vector[,2]
-    results$fvc_lln <- Lower.vector[,2]
-    results$fvc_uln <- Upper.vector[,2]
-
-    results$fev1fvc_pred <- M.vector[,3]
-    results$fev1fvc_lln <- Lower.vector[,3]
-    results$fev1fvc_uln <- Upper.vector[,3]
-
-    results$fef2575_pred <- M.vector[,4]
-    results$fef2575_lln <- Lower.vector[,4]
-    results$fef2575_uln <- Upper.vector[,4]
-
-    results$fef75_pred <- M.vector[,5]
-    results$fef75_lln <- Lower.vector[,5]
-    results$fef75_uln <- Upper.vector[,5]
-
+    fits <- spirometry_lms_fit(
+      data,
+      splines = spirometry_splines,
+      coeff_m = spirometry_coeff_m,
+      coeff_s = spirometry_coeff_s,
+      coeff_l = spirometry_coeff_l,
+      male_indices   = c(1, 3, 5, 7, 9),
+      female_indices = c(2, 4, 6, 8, 10),
+      race_levels = c("AfrAm", "NEAsia", "SEAsia", "Other/mixed", "Caucasian")
+    )
+    results <- bind_spirometry_outputs(
+      data, fits,
+      measures = c("fev1", "fvc", "fev1fvc", "fef2575", "fef75"),
+      suffix = ""
+    )
   } else if (year == 2022) {
-
-    index.spline <- matrix(NA, nrow = n, ncol = 3)
-    Mspline <- matrix(NA, nrow = n, ncol = 3)
-    Sspline <- matrix(NA, nrow = n, ncol = 3)
-    Lspline <- matrix(NA, nrow = n, ncol = 3)
-
-    M.vector <- matrix(NA, nrow = n, ncol = 3)
-    S.vector <- matrix(NA, nrow = n, ncol = 3)
-    L.vector <- matrix(NA, nrow = n, ncol = 3)
-
-    Lower.vector <- matrix(NA, nrow = n, ncol = 3)
-    Upper.vector <- matrix(NA, nrow = n, ncol = 3)
-
-    for (i in seq_len(n)) {
-
-      # Skip rows with missing demographics; outputs stay NA via the
-      # pre-allocated NA matrices above.
-      if (is.na(data$sex[i]) || is.na(data$age[i]) || is.na(data$height[i])) {
-        next
-      }
-
-      # Select appropriate spline indexes for males or females
-      if (data$sex[i] == "M") {
-        g.index <- c(1,3,5)
-      } else {
-        g.index <- c(2,4,6)
-      }
-
-      # Iterate through spirometry measures (FEV1, FVC, FEV1FVC)
-      for (j in 1:3) {
-
-        if (data[i,]$age == 3) {
-
-          index.spline[i,j] <- 1
-
-        } else {
-
-          index.spline[i,j] <- which.min(!(data[i,]$age <= spirometry_2022_splines[[g.index[j]]]$age)) - 1
-
-        }
-
-        # Skip computation of age is outside acceptable range
-        if (index.spline[i,j] == 0) {
-          next
-        }
-
-        interp.factor <- (data[i,]$age-spirometry_2022_splines[[g.index[j]]]$age[index.spline[i,j]])/(spirometry_2022_splines[[g.index[j]]]$age[index.spline[i,j]+1]-spirometry_2022_splines[[g.index[j]]]$age[index.spline[i,j]])
-
-        Mspline[i,j] <- spirometry_2022_splines[[g.index[j]]]$Mspline[index.spline[i,j]]+interp.factor*(spirometry_2022_splines[[g.index[j]]]$Mspline[index.spline[i,j]+1]-spirometry_2022_splines[[g.index[j]]]$Mspline[index.spline[i,j]])
-
-        Sspline[i,j] <- spirometry_2022_splines[[g.index[j]]]$Sspline[index.spline[i,j]]+interp.factor*(spirometry_2022_splines[[g.index[j]]]$Sspline[index.spline[i,j]+1]-spirometry_2022_splines[[g.index[j]]]$Sspline[index.spline[i,j]])
-
-        Lspline[i,j] <- spirometry_2022_splines[[g.index[j]]]$Lspline[index.spline[i,j]]+interp.factor*(spirometry_2022_splines[[g.index[j]]]$Lspline[index.spline[i,j]+1]-spirometry_2022_splines[[g.index[j]]]$Lspline[index.spline[i,j]])
-
-        M.vector[i,j] <- exp(spirometry_2022_coeff_m[1,g.index[j]] +
-                               log(data[i,]$height)*spirometry_2022_coeff_m[2,g.index[j]] +
-                               log(data[i,]$age)*spirometry_2022_coeff_m[3,g.index[j]] +
-                               Mspline[i,j])
-
-        S.vector[i,j] <- exp(spirometry_2022_coeff_s[1,g.index[j]]+
-                               log(data[i,]$age)*spirometry_2022_coeff_s[2,g.index[j]]+
-                               Sspline[i,j])
-
-        L.vector[i,j] <- spirometry_2022_coeff_l[1,g.index[j]]+
-          log(data[i,]$age)*spirometry_2022_coeff_l[2,g.index[j]]+
-          Lspline[i,j]
-
-        Lower.vector[i,j] <- exp(log(M.vector[i,j])+log(1-1.645*L.vector[i,j]*S.vector[i,j])/L.vector[i,j])
-        Upper.vector[i,j] <- exp(log(M.vector[i,j])+log(1+1.645*L.vector[i,j]*S.vector[i,j])/L.vector[i,j])
-
-      }
-    }
-
-    results <- data
-
-    results$fev1_pred_2022 <- M.vector[,1]
-    results$fev1_lln_2022 <- Lower.vector[,1]
-    results$fev1_uln_2022 <- Upper.vector[,1]
-
-    results$fvc_pred_2022 <- M.vector[,2]
-    results$fvc_lln_2022 <- Lower.vector[,2]
-    results$fvc_uln_2022 <- Upper.vector[,2]
-
-    results$fev1fvc_pred_2022 <- M.vector[,3]
-    results$fev1fvc_lln_2022 <- Lower.vector[,3]
-    results$fev1fvc_uln_2022 <- Upper.vector[,3]
-
+    fits <- spirometry_lms_fit(
+      data,
+      splines = spirometry_2022_splines,
+      coeff_m = spirometry_2022_coeff_m,
+      coeff_s = spirometry_2022_coeff_s,
+      coeff_l = spirometry_2022_coeff_l,
+      male_indices   = c(1, 3, 5),
+      female_indices = c(2, 4, 6),
+      race_levels = NULL  # GLI Global / 2022 is race-neutral
+    )
+    results <- bind_spirometry_outputs(
+      data, fits,
+      measures = c("fev1", "fvc", "fev1fvc"),
+      suffix = "_2022"
+    )
   } else {
-
     results <- data
-
   }
 
-  return(results)
+  results
+}
 
+# Compute LMS (median M, variability S, skewness L) and the resulting lower
+# and upper normal limits for a set of spirometry measures, using the GLI
+# LMS spline-lookup approach (Quanjer 2012; Bowerman 2023).
+#
+# Internal; not exported. Used by spirometry_normals() for both the GLI 2012
+# (race-adjusted) and GLI 2022 (race-neutral) codepaths.
+#
+# Inputs:
+#   data            -- the original demographics data frame.
+#   splines         -- list of per-(measure,sex) lookup tables, each a
+#                      data.frame with columns age, Mspline, Sspline, Lspline.
+#   coeff_m, coeff_s, coeff_l -- coefficient frames; one column per
+#                      (measure,sex) keyed by the indices in male_indices /
+#                      female_indices. coeff_m has rows: intercept,
+#                      log(height) coef, log(age) coef, then (optionally)
+#                      race dummies. coeff_s mirrors but without log(height).
+#                      coeff_l has rows: intercept, log(age) coef.
+#   male_indices    -- indices into `splines` / coefficient columns for males.
+#   female_indices  -- same, for females.
+#   race_levels     -- character vector of recognized race labels, in the
+#                      order matching the trailing rows of coeff_m / coeff_s.
+#                      Pass NULL to skip race adjustment (GLI 2022).
+#
+# Returns a list with 5 numeric matrices (M, S, L, lower, upper), each with
+# nrow(data) rows and length(male_indices) columns.
+spirometry_lms_fit <- function(data, splines, coeff_m, coeff_s, coeff_l,
+                                male_indices, female_indices, race_levels) {
+  n <- nrow(data)
+  n_measures <- length(male_indices)
+  use_race <- !is.null(race_levels)
+
+  shape <- c(n, n_measures)
+  M     <- matrix(NA_real_, nrow = shape[1], ncol = shape[2])
+  S     <- matrix(NA_real_, nrow = shape[1], ncol = shape[2])
+  L     <- matrix(NA_real_, nrow = shape[1], ncol = shape[2])
+  lower <- matrix(NA_real_, nrow = shape[1], ncol = shape[2])
+  upper <- matrix(NA_real_, nrow = shape[1], ncol = shape[2])
+
+  for (i in seq_len(n)) {
+
+    if (is.na(data$sex[i]) || is.na(data$age[i]) || is.na(data$height[i])) {
+      next
+    }
+
+    g_index <- if (data$sex[i] == "M") male_indices else female_indices
+
+    if (use_race) {
+      race_dummies <- as.numeric(data$race[i] == race_levels)
+      if (sum(race_dummies) == 0 || is.na(sum(race_dummies))) next
+      n_race <- length(race_levels)
+    }
+
+    age_i    <- data$age[i]
+    log_age  <- log(age_i)
+    log_height <- log(data$height[i])
+
+    for (j in seq_len(n_measures)) {
+      sp <- splines[[g_index[j]]]
+
+      # Spline-table index lookup. The first spline-table age is the
+      # lower bound of support; we set index to 1 exactly there and skip
+      # if the patient's age is below it.
+      idx <- if (age_i == sp$age[1]) {
+        1L
+      } else {
+        which.min(!(age_i <= sp$age)) - 1L
+      }
+      if (idx == 0) next
+
+      # Linear interpolation between adjacent spline-table rows.
+      interp <- (age_i - sp$age[idx]) / (sp$age[idx + 1] - sp$age[idx])
+      Mspline <- sp$Mspline[idx] + interp * (sp$Mspline[idx + 1] - sp$Mspline[idx])
+      Sspline <- sp$Sspline[idx] + interp * (sp$Sspline[idx + 1] - sp$Sspline[idx])
+      Lspline <- sp$Lspline[idx] + interp * (sp$Lspline[idx + 1] - sp$Lspline[idx])
+
+      # M = exp(intercept + log(height)*b1 + log(age)*b2 + race + Mspline)
+      m_lin <- coeff_m[1, g_index[j]] +
+               log_height * coeff_m[2, g_index[j]] +
+               log_age    * coeff_m[3, g_index[j]]
+      if (use_race) {
+        m_lin <- m_lin + sum(race_dummies * coeff_m[4:(3 + n_race), g_index[j]])
+      }
+      M[i, j] <- exp(m_lin + Mspline)
+
+      # S = exp(intercept + log(age)*b1 + race + Sspline)
+      s_lin <- coeff_s[1, g_index[j]] + log_age * coeff_s[2, g_index[j]]
+      if (use_race) {
+        s_lin <- s_lin + sum(race_dummies * coeff_s[3:(2 + n_race), g_index[j]])
+      }
+      S[i, j] <- exp(s_lin + Sspline)
+
+      # L = intercept + log(age)*b1 + Lspline (no race dummies in L)
+      L[i, j] <- coeff_l[1, g_index[j]] + log_age * coeff_l[2, g_index[j]] + Lspline
+
+      # 5th and 95th percentile limits from the LMS distribution
+      lower[i, j] <- exp(log(M[i, j]) + log(1 - 1.645 * L[i, j] * S[i, j]) / L[i, j])
+      upper[i, j] <- exp(log(M[i, j]) + log(1 + 1.645 * L[i, j] * S[i, j]) / L[i, j])
+    }
+  }
+
+  list(M = M, S = S, L = L, lower = lower, upper = upper)
+}
+
+# Append the LMS fit matrices to the original data as `<measure>_pred`,
+# `<measure>_lln`, `<measure>_uln` columns (optionally with a suffix such
+# as "_2022"). Internal helper.
+bind_spirometry_outputs <- function(data, fits, measures, suffix = "") {
+  results <- data
+  for (j in seq_along(measures)) {
+    results[[paste0(measures[j], "_pred", suffix)]] <- fits$M[, j]
+    results[[paste0(measures[j], "_lln",  suffix)]] <- fits$lower[, j]
+    results[[paste0(measures[j], "_uln",  suffix)]] <- fits$upper[, j]
+  }
+  results
 }
