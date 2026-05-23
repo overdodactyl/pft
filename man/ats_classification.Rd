@@ -10,7 +10,8 @@ ats_classification(data)
 \item{data}{A data frame containing columns for fev1, fvc, fev1fvc, and their associated LLNs.}
 }
 \value{
-The original data frame with an extra column for ATS spirometry patterns.
+The original data frame with an additional column for ATS spirometry pattern labels,
+        and a string indicating the normal/abnormal test values that assigned the pattern.
 }
 \description{
 `ats_classification()` assigns ATS patterns using spirometry and lung volume data.

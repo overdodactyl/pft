@@ -13,6 +13,16 @@
 #'
 #' @return The original data frame with extra columns appended for each reference value computed.
 #'
+#' @references
+#' Quanjer PH, Stanojevic S, Cole TJ, et al. Multi-ethnic reference values for
+#' spirometry for the 3-95-yr age range: the global lung function 2012
+#' equations. Eur Respir J. 2012;40(6):1324-1343.
+#' \doi{10.1183/09031936.00080312}.
+#'
+#' Bowerman C, Bhakta NR, Brazzale D, et al. A race-neutral approach to the
+#' interpretation of lung function measurements. Am J Respir Crit Care Med.
+#' 2023;207(6):768-774. \doi{10.1164/rccm.202205-0963OC}.
+#'
 #' @examples
 #' data <- data.frame(sex=c("M","F"),
 #'                    age=c(30.1,5.1),
