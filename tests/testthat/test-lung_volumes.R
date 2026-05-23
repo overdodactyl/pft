@@ -63,3 +63,63 @@ test_that("vc_lln", {
 test_that("vc_uln", {
   expect_equal(preds$vc_uln, gli_test_groundtruth$vc_uln)
 })
+
+## --- Predicted-value (median) tests against the GLI web calculator ------
+
+test_that("frc_pred",    { expect_equal(preds$frc_pred,    gli_test_groundtruth$frc_predicted)    })
+test_that("tlc_pred",    { expect_equal(preds$tlc_pred,    gli_test_groundtruth$tlc_predicted)    })
+test_that("rv_pred",     { expect_equal(preds$rv_pred,     gli_test_groundtruth$rv_predicted)     })
+test_that("rv_tlc_pred", { expect_equal(preds$rv_tlc_pred, gli_test_groundtruth$rvtlc_predicted)  })
+test_that("erv_pred",    { expect_equal(preds$erv_pred,    gli_test_groundtruth$erv_predicted)    })
+test_that("ic_pred",     { expect_equal(preds$ic_pred,     gli_test_groundtruth$ic_predicted)     })
+test_that("vc_pred",     { expect_equal(preds$vc_pred,     gli_test_groundtruth$vc_predicted)     })
+
+## --- NA-propagation tests ------------------------------------------------
+## NA in height is handled gracefully (cascades to NA via arithmetic).
+## NA in sex or age currently crashes volume_normals() -- robustness gap to
+## address separately; not asserted here.
+
+test_that("NA in height produces NA outputs (volumes)", {
+  d <- data.frame(sex = "M", age = 30, height = NA_real_)
+  out <- volume_normals(d)
+  expect_true(is.na(out$frc_pred))
+  expect_true(is.na(out$tlc_pred))
+})
+
+## --- Out-of-range tests --------------------------------------------------
+## GLI 2021 static lung volumes cover ages 5-80.
+
+test_that("ages below GLI 2021 lower bound produce NA", {
+  d <- data.frame(sex = "M", age = 4, height = 100)
+  out <- volume_normals(d)
+  expect_true(is.na(out$frc_pred))
+})
+
+test_that("ages above GLI 2021 upper bound produce NA", {
+  d <- data.frame(sex = "M", age = 81, height = 170)
+  out <- volume_normals(d)
+  expect_true(is.na(out$frc_pred))
+})
+
+## --- Structural / column-contract tests ----------------------------------
+
+test_that("volumes output preserves input columns and row count", {
+  d <- data.frame(sex = c("M","F"), age = c(30, 40), height = c(170, 165),
+                  patient_id = c(1, 2))
+  out <- volume_normals(d)
+  expect_equal(nrow(out), nrow(d))
+  expect_true(all(c("sex","age","height","patient_id") %in% colnames(out)))
+})
+
+test_that("volume_normals emits all 7 measure-x-3 reference columns", {
+  d <- data.frame(sex = "M", age = 30, height = 170)
+  out <- volume_normals(d)
+  expected <- c("frc_pred","frc_lln","frc_uln",
+                "tlc_pred","tlc_lln","tlc_uln",
+                "rv_pred","rv_lln","rv_uln",
+                "rv_tlc_pred","rv_tlc_lln","rv_tlc_uln",
+                "erv_pred","erv_lln","erv_uln",
+                "ic_pred","ic_lln","ic_uln",
+                "vc_pred","vc_lln","vc_uln")
+  expect_true(all(expected %in% colnames(out)))
+})
