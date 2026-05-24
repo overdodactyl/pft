@@ -63,6 +63,42 @@ untouched.
 
 Test count: 1146 -> 1170 (+24).
 
+### pft_volume_subpattern()
+
+Differentiates the six lung-volume sub-patterns described in
+Stanojevic 2022 Figure 10 (p. 21) and Table 7 (p. 22): **Normal
+lung volumes**, **Large lungs**, **Hyperinflation**, **Simple
+restriction**, **Complex restriction**, and **Mixed disorder**.
+`pft_classify()` collapses these into its five-band output for
+backward compatibility; the new sibling function recovers the
+finer-grained labels when lung-volume ratios are available.
+
+* `pft_volume_subpattern(data)` -- takes a data frame and appends a
+  `volume_subpattern` character column. Required columns: `tlc`,
+  `tlc_lln`, `tlc_uln`, `fev1fvc`, `fev1fvc_lln`, `rv_tlc`,
+  `rv_tlc_uln`. Optional: `frc_tlc`, `frc_tlc_uln` -- when supplied,
+  refines the elevated-volume OR-condition per Figure 10's
+  "FRC/TLC or RV/TLC > 95th percentile". When absent, only RV/TLC
+  is consulted (graceful degradation).
+* `pft_volumes()` already provides `rv_tlc_pred` / `rv_tlc_lln` /
+  `rv_tlc_uln` per Hall 2021 -- no new reference equations needed.
+  FRC/TLC has no Hall 2021 reference equation, hence the optional
+  treatment.
+* Boundary semantics ("< 5th percentile" / "> 95th percentile") use
+  strict `<` and `>` operators per Figure 10's wording. The exact-
+  at-threshold cases are pinned explicitly in the truth-table tests.
+* `pft_interpret()` auto-calls `pft_volume_subpattern()` when the
+  relevant `_measured` columns are present in the input. The new
+  `volume_subpattern` column appears in the output alongside the
+  existing `ats_classification` column.
+* Test count: 1170 -> 1195 (+25; 22 truth-table + 2 integration
+  + 1 column-preservation test).
+* `papers/ats_2022_interpretation/verification.md` updated --
+  dedicated "Lung-volume sub-patterns" section with the Figure 10
+  decision tree verbatim and the truth-table coverage.
+
+This is the third and last of the audit-follow-up implementations.
+
 ## Source-paper verification audit
 
 A line-by-line re-audit of every constant and algorithm in the
