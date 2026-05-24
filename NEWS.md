@@ -104,6 +104,63 @@ official GLI Global lookup-tables workbook.
 assertions and 104 structural / sentinel-cell assertions guarding
 the sysdata layer against silent regressions.
 
+### Stanojevic 2017 + 2020 correction (GLI 2017 carbon-monoxide transfer factor)
+
+Documented in `papers/gli_2017_diffusion/verification.md`. Audited
+the data-extraction layer (`data-raw/build_gli_2017_diffusion.R`)
+and the runtime equation (`R/diffusion_capacity.R::pft_diffusion()`)
+against the source paper (**post-2020 author correction**), its
+supplements, and the two official xlsx workbooks (SI and traditional
+units).
+
+* **The 2020 author correction is applied.** The 2017 paper was
+  amended in October 2020 after a sex-label error in one source
+  dataset was discovered; the correction updated **all coefficients
+  in Table 2** and **all spline lookup tables in the supplement
+  workbooks**. The package uses the post-correction values
+  throughout. Direct evidence: the supplement-1 PDF worked example
+  (p. 1) still uses the **original 2017** values, while the package
+  uses the **corrected** values printed in the article PDF's Table 2
+  (which has an explicit "this table has been amended" footnote).
+  Identified deltas for TLCO.M (the only measure where the
+  supplement explicitly documents the uncorrected originals):
+  Median1 +0.62936, Median2 -0.13280, Median3 +0.01550, S1 -0.00747,
+  S2 +0.00106, L +0.00769. Since TLCO/DLCO and KCO_SI/KCO_Tr share
+  most coefficients (differing only in Median1 by the unit
+  conversion factor), the same changes propagate across the
+  shared-coefficient measures.
+* Equation form (paper p. 6) — confirmed:
+  `ln(M) = a + b*ln(height) + c*ln(age) + Mspline`,
+  `ln(S) = p1 + p2*ln(age) + Sspline`, `L = constant`. All
+  log-transformed (no linear-vs-log conditional like Hall 2021).
+  Matches `R/diffusion_capacity.R` line-for-line.
+* Coefficient extraction — all 60 cells in `transfer_coeff` match
+  the corrected Table 2 verbatim (zero delta across all 10
+  measure-sex rows × 6 columns).
+* Spline tables — 14 random (sheet × age × column) cells
+  spot-checked across both xlsx workbooks (SI and traditional) vs
+  parsed `transfer_splines`. All match at machine precision. 12
+  sheets total, 341 rows each, age 5-90 yr at 0.25-yr knots.
+  Lspline identically zero across all sheets (L is constant per
+  measure).
+* Table 3 worked examples (paper p. 8) — three TLCO predictions
+  reproduce within ±0.2 L. The 178cm/64y M row is off by 0.17
+  (exceeding the paper's 1-dp precision), most likely because
+  Table 3 was not regenerated when Table 2 was amended in 2020
+  (Table 2's footnote calls out the amendment; Table 3's does not).
+* Unit conversion (paper p. 3): TLCO (traditional) =
+  2.986421 × TLCO (SI). Package's implicit ratio is 2.987 across
+  all demographics (a 5×10⁻⁴ rounding artifact in the corrected
+  Table 2 intercepts).
+
+**No corrections required.** The audit added 4 anchor-test
+assertions (3 Table 3 + 1 dedicated correction-applied check that
+explicitly distinguishes corrected-vs-uncorrected outputs) and 211
+structural / sentinel-cell assertions guarding the sysdata layer
+against silent regressions. The sysdata sentinels pin the
+*corrected* coefficient values explicitly so any future regression
+toward the 2017 originals fails loudly.
+
 ### Hall 2021 (GLI 2021 static lung volumes)
 
 Documented in `papers/gli_2021_volumes/verification.md`. Audited the
