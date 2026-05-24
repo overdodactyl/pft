@@ -4,50 +4,72 @@
 \alias{pft_gold}
 \title{Grade COPD severity by GOLD criteria}
 \usage{
-pft_gold(fev1_pctpred)
+pft_gold(fev1_pctpred, fev1fvc = NA_real_)
 }
 \arguments{
 \item{fev1_pctpred}{Numeric vector of FEV1 \% predicted values (e.g.
 the \code{fev1_pctpred} column from \code{\link[=pft_spirometry]{pft_spirometry()}} when measured
 values are supplied).}
+
+\item{fev1fvc}{Optional numeric vector of post-bronchodilator
+FEV1/FVC ratios (e.g. the \code{fev1fvc_measured} column). When
+supplied, rows with \code{fev1fvc >= 0.7} are returned as
+\code{NA_character_} -- per GOLD 2026 Figure 2.10, the grading applies
+only "In patients with COPD (FEV1/FVC < 0.7)". When omitted (the
+default \code{NA_real_}) or all-NA, no prerequisite check is performed
+and a grade is returned for every non-NA \code{fev1_pctpred}.}
 }
 \value{
-Character vector with values \code{"GOLD 1"}, \code{"GOLD 2"}, \code{"GOLD 3"},
-\code{"GOLD 4"}, or \code{NA}.
+Character vector with values \code{"GOLD 1"}, \code{"GOLD 2"},
+\code{"GOLD 3"}, \code{"GOLD 4"}, or \code{NA}. \code{NA} is returned for rows with
+missing \code{fev1_pctpred} OR (when \code{fev1fvc} is supplied) rows that
+fail the airflow-obstruction prerequisite.
 }
 \description{
 Returns the GOLD spirometric severity grade (1-4) for one or more
-patients given their FEV1 expressed as a percent of predicted.
+patients given their FEV1 expressed as a percent of predicted,
+optionally enforcing the GOLD-mandated prerequisite of confirmed
+airflow obstruction (FEV1/FVC < 0.7).
 }
 \details{
-GOLD severity grades for airflow obstruction (FEV1 \% predicted),
-matching the function's implementation:\tabular{ll}{
-   Grade \tab FEV1 \% predicted \cr
-   GOLD 1 \tab \verb{>= 80} \cr
-   GOLD 2 \tab \verb{>= 50 and < 80} \cr
-   GOLD 3 \tab \verb{>= 30 and < 50} \cr
-   GOLD 4 \tab \verb{< 30} \cr
+GOLD severity grades for airflow obstruction (Figure 2.10 of the
+GOLD 2026 report, content page 38):\tabular{lll}{
+   Grade \tab Severity \tab FEV1 \% predicted \cr
+   GOLD 1 \tab Mild \tab \verb{>= 80} \cr
+   GOLD 2 \tab Moderate \tab \verb{>= 50 and < 80} \cr
+   GOLD 3 \tab Severe \tab \verb{>= 30 and < 50} \cr
+   GOLD 4 \tab Very severe \tab \verb{< 30} \cr
 }
 
 
-These criteria apply only to patients with confirmed airflow
-obstruction (FEV1/FVC < lower limit of normal, or the GOLD-defined
-fixed cutoff of 0.70). \code{pft_gold()} does not verify that condition
-itself -- pair it with \code{\link[=pft_classify]{pft_classify()}} or a manual FEV1/FVC check.
+GOLD specifies the prerequisite "In patients with COPD (FEV1/FVC <
+0.7)" explicitly above Figure 2.10's grade table; the surrounding
+text (content p. 37) repeats this requirement. Supplying \code{fev1fvc}
+enforces the GOLD fixed-cutoff prerequisite. Callers wanting an
+LLN-based prerequisite instead should use \code{\link[=pft_classify]{pft_classify()}} to
+identify obstructed patients and mask \code{pft_gold()} output by hand.
 }
 \examples{
+# Without prerequisite check (backward-compatible): one grade per
+# non-NA input.
 pft_gold(c(85, 65, 40, 25))
 # -> "GOLD 1" "GOLD 2" "GOLD 3" "GOLD 4"
 
+# With prerequisite check: the third patient has FEV1/FVC = 0.75
+# (no airflow obstruction) and is returned NA.
+pft_gold(c(85, 65, 40, 25), fev1fvc = c(0.65, 0.60, 0.75, 0.55))
+# -> "GOLD 1" "GOLD 2" NA "GOLD 4"
+
 }
 \references{
-Global Initiative for Chronic Obstructive Lung Disease (GOLD). Global
-Strategy for Prevention, Diagnosis and Management of COPD. Annual
-reports available at \url{https://goldcopd.org}.
+Global Initiative for Chronic Obstructive Lung Disease (GOLD).
+Global Strategy for the Diagnosis, Management and Prevention of
+Chronic Obstructive Pulmonary Disease, 2026 Report. Figure 2.10.
+\url{https://goldcopd.org}.
 }
 \seealso{
-\code{\link[=pft_classify]{pft_classify()}} to confirm airflow obstruction before
-applying GOLD severity; \code{\link[=pft_severity]{pft_severity()}} for the Stanojevic 2022
+\code{\link[=pft_classify]{pft_classify()}} for LLN-based airflow obstruction
+identification (Stanojevic 2022); \code{\link[=pft_severity]{pft_severity()}} for the
 z-score-based severity scheme (which differs from GOLD's
 percent-predicted scheme).
 }

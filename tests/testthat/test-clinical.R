@@ -138,6 +138,57 @@ test_that("pft_gold propagates NA", {
   expect_equal(pft_gold(c(85, NA, 25)), c("GOLD 1", NA, "GOLD 4"))
 })
 
+## --- GOLD 2026 Figure 2.10 anchor + prerequisite tests ------------------
+
+test_that("pft_gold: Figure 2.10 grades match the report verbatim", {
+  # GOLD 2026 Figure 2.10 (content p. 38) verbatim grade rows.
+  expect_equal(pft_gold(90),    "GOLD 1")  # FEV1 >= 80% predicted
+  expect_equal(pft_gold(65),    "GOLD 2")  # 50% <= FEV1 < 80%
+  expect_equal(pft_gold(40),    "GOLD 3")  # 30% <= FEV1 < 50%
+  expect_equal(pft_gold(25),    "GOLD 4")  # FEV1 < 30%
+})
+
+test_that("pft_gold: prerequisite check when fev1fvc is supplied", {
+  # GOLD 2026 Figure 2.10 header row: "In patients with COPD (FEV1/FVC
+  # < 0.7):". When fev1fvc is supplied, rows >= 0.7 return NA.
+  expect_equal(pft_gold(65, fev1fvc = 0.65), "GOLD 2")  # FEV1/FVC < 0.7 -> graded
+  expect_equal(pft_gold(65, fev1fvc = 0.75), NA_character_)  # >= 0.7 -> NA
+  expect_equal(pft_gold(65, fev1fvc = 0.70), NA_character_)  # boundary: 0.70 fails (>= 0.7)
+  expect_equal(pft_gold(65, fev1fvc = 0.69), "GOLD 2")  # just under -> graded
+})
+
+test_that("pft_gold: vectorized prerequisite with mixed inputs", {
+  out <- pft_gold(
+    c(85, 65, 40, 25),
+    fev1fvc = c(0.60, 0.69, 0.75, 0.55)
+  )
+  # First, second, fourth: FEV1/FVC < 0.7 -> graded.
+  # Third: FEV1/FVC = 0.75 -> NA (not COPD per GOLD).
+  expect_equal(out, c("GOLD 1", "GOLD 2", NA, "GOLD 4"))
+})
+
+test_that("pft_gold: fev1fvc NA leaves the row graded (don't mask on missing prerequisite)", {
+  # If FEV1/FVC is unknown (NA), the function cannot rule out
+  # obstruction -- err on the side of returning a grade and let the
+  # caller decide.
+  out <- pft_gold(c(65, 65, 65), fev1fvc = c(0.60, NA, 0.80))
+  expect_equal(out, c("GOLD 2", "GOLD 2", NA))
+})
+
+test_that("pft_gold: backwards-compatible -- omitting fev1fvc behaves as before", {
+  # Pre-audit API used `pft_gold(fev1_pctpred)` only. New optional
+  # parameter must not change behavior when not supplied.
+  expect_equal(pft_gold(c(90, 65, 40, 25)),
+               c("GOLD 1", "GOLD 2", "GOLD 3", "GOLD 4"))
+  expect_equal(pft_gold(85),    "GOLD 1")
+  expect_equal(pft_gold(NA),    NA_character_)
+})
+
+test_that("pft_gold: all-NA fev1fvc is equivalent to omitting fev1fvc", {
+  expect_equal(pft_gold(c(85, 65), fev1fvc = c(NA, NA)),
+               pft_gold(c(85, 65)))
+})
+
 ## --- pft_cohort_summary ------------------------------------------------
 
 test_that("pft_cohort_summary returns expected list structure", {

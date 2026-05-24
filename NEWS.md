@@ -104,6 +104,43 @@ official GLI Global lookup-tables workbook.
 assertions and 104 structural / sentinel-cell assertions guarding
 the sysdata layer against silent regressions.
 
+### GOLD 2026 (COPD severity grading)
+
+Documented in `papers/gold_reports/verification.md`. Audited
+`R/clinical.R::pft_gold()` and `R/constants.R::GOLD_BOUNDARIES`
+against Figure 2.10 of the GOLD 2026 report ("GOLD Grades and
+Severity of Airflow Obstruction in COPD (based on
+post-bronchodilator FEV1)", content p. 38).
+
+* **Thresholds (30 / 50 / 80 % predicted) and boundary operators
+  (>= lower, < upper) match Figure 2.10 verbatim** across all four
+  grades. No change to `GOLD_BOUNDARIES` or to the grading logic.
+* **Airflow-obstruction prerequisite enforcement (new optional
+  argument).** Figure 2.10's header row explicitly states "In
+  patients with COPD (FEV1/FVC < 0.7):" and the surrounding text
+  (content p. 37) repeats the requirement. `pft_gold()` gains an
+  optional `fev1fvc` parameter that, when supplied, masks rows with
+  `fev1fvc >= 0.7` to `NA_character_`. The default (`NA_real_`)
+  preserves the pre-audit behavior, so existing callers are
+  unaffected. Recommended usage for routine clinical reporting:
+  pass the `fev1fvc_measured` column alongside `fev1_pctpred` so
+  non-obstructed patients are correctly returned NA rather than
+  receiving a spurious GOLD grade.
+* Constants-file comment updated to reference Figure 2.10 of the
+  GOLD 2026 report explicitly and to enumerate the four bands.
+* Test additions: 7 anchor / prerequisite tests covering
+  Figure 2.10 grades, the prerequisite-supplied path (including
+  the exact 0.70 boundary), vectorized mixed-prerequisite inputs,
+  NA-fev1fvc behavior (don't mask -- the prerequisite is unknown,
+  not failed), backwards compatibility when fev1fvc is omitted,
+  and all-NA fev1fvc as equivalent to omitting.
+
+No bugs found in the existing grading logic; the only audit
+change is the optional prerequisite parameter (added because
+Figure 2.10's explicit "In patients with COPD (FEV1/FVC < 0.7)"
+header row makes the prerequisite a canonical part of the GOLD
+specification).
+
 ### Graham 2019 (ATS/ERS 2019 spirometry quality grading)
 
 Documented in `papers/graham_2019/verification.md`. Audited
