@@ -244,6 +244,43 @@ test_that("Quanjer 2012 Table 4: Caucasian male predicted values", {
 ## reference; regenerate via data-raw/build_gli_2022_oracle.R if it ever
 ## needs refreshing. See that script for provenance.
 
+## --- Bowerman 2022 supplement Table E2 worked examples ----------------
+## Independent verification of the GLI Global (2022) path: applies the
+## supplement Table E2 coefficients directly to the workbook spline
+## values to obtain predicted M and LLN by hand, then confirms that
+## pft_spirometry(year = 2022) returns the same numbers. Six
+## representative (sex x age x height x measure) combinations are
+## covered; values were computed in notes/bowerman_2022_spotchecks.R
+## and double-checked against the supplement equations on p. E3.
+## Excludes Male FEV1/FVC, where the workbook and supplement Table E2
+## differ by 1 LSD in two coefficients (documented in
+## papers/gli_2022/verification.md).
+
+test_that("Bowerman 2022 Table E2: by-hand predictions match pft_spirometry", {
+  cases <- data.frame(
+    sex     = c("M",      "F",      "M",      "F",      "M",      "F"),
+    age     = c( 25,       25,       45,       45,       70,       70),
+    height  = c(170,      170,      170,      170,      170,      170),
+    measure = c("fev1",   "fev1",   "fvc",    "fvc",    "fev1",   "fev1fvc"),
+    expected_pred = c(3.89310, 3.43367, 4.23915, 3.75921, 2.74401, 0.78165),
+    expected_lln  = c(3.04580, 2.65032, 3.24460, 2.83731, 2.00588, 0.65394)
+  )
+  out <- pft_spirometry(cases[, c("sex","age","height")], year = 2022)
+  for (i in seq_len(nrow(cases))) {
+    m <- cases$measure[i]
+    expect_equal(out[[paste0(m, "_pred_2022")]][i], cases$expected_pred[i],
+                 tolerance = 1e-4,
+                 label = sprintf("%s age=%d ht=%d %s pred",
+                                 cases$sex[i], cases$age[i],
+                                 cases$height[i], m))
+    expect_equal(out[[paste0(m, "_lln_2022")]][i], cases$expected_lln[i],
+                 tolerance = 1e-4,
+                 label = sprintf("%s age=%d ht=%d %s lln",
+                                 cases$sex[i], cases$age[i],
+                                 cases$height[i], m))
+  }
+})
+
 test_that("year=2022 matches the GLI Global oracle", {
   oracle <- read.csv(test_path("gli_2022_oracle.csv"), stringsAsFactors = FALSE)
   # Pass demographics AND measured values so pft_spirometry also emits

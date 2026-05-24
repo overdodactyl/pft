@@ -54,8 +54,55 @@ both the published paper and the official ERS lookup-tables workbook.
 
 **No corrections required.** The data-extraction layer is faithful
 to the canonical source. The audit added the explicit
-paper-to-code traceability and 3 Table-4 anchor tests; test count
-grows 372 → 375.
+paper-to-code traceability, 3 Table-4 anchor tests, and 139
+structural / sentinel-cell assertions guarding the sysdata layer
+against silent regressions.
+
+### Bowerman 2022 (GLI Global / "GLI 2022" spirometry)
+
+Documented in `papers/gli_2022/verification.md`. Audited the
+data-extraction layer (`data-raw/build_gli_2022.R`) and the
+runtime equation (`R/spirometry.R`, `year = 2022` codepath) against
+the Bowerman 2023 AJRCCM paper, its online supplement, and the
+official GLI Global lookup-tables workbook.
+
+* Equation form (paper p. 770) — confirmed:
+  `ln(Y) = a + b*ln(height) + c*ln(age) + spline_age`, race-neutral
+  (no race-dummy term). The package's runtime path for
+  `year = 2022` matches this form and uses the standard 1.645 LMS
+  multiplier for LLN/ULN, consistent with the paper's "fifth centile
+  of the normal distribution" wording on p. 771.
+* Coefficient extraction — 24 of 26 coefficients in the workbook
+  match supplement Table E2 (p. E3) exactly. Two Male FEV1/FVC
+  coefficients (M log-age and S intercept) differ by exactly 1 LSD
+  in the 6th decimal place between workbook and supplement — a
+  publication artifact between two canonical sources by the same
+  authors. Relative impact on predictions: ~7 × 10⁻⁶ (≈6 ppm). The
+  package uses the workbook values (canonical lookup-table source
+  used by gli-calculator.ersnet.org and rspiro); documented for
+  transparency, no code change applied.
+* Spline tables — 13 random (sheet × age × column) cells
+  spot-checked from the xlsx workbook against parsed
+  `spirometry_2022_splines`. All match at machine precision. The
+  2022 workbook spline column order (age, M, S, L) differs from the
+  2012 layout (age, L, M, S); `build_gli_2022.R` reads by position
+  and correctly handles the difference.
+* By-hand reproduction from supplement Table E2 — 72 demographic
+  combinations (sex × age × height × measure) computed by applying
+  supplement coefficients to workbook spline values and compared to
+  `pft_spirometry(year = 2022)`. 60 of 72 match exactly; the 12
+  Male FEV1/FVC predictions differ by ~10⁻⁶ relative due to the
+  workbook-vs-supplement coefficient divergence above.
+* Race-neutral design — confirmed: the `race` column on the input
+  data frame is ignored on the 2022 codepath, consistent with the
+  paper's inverse-probability-weighted single-equation approach
+  (p. 769-770).
+* Age-range coverage — workbook covers 3-95 yrs for all 6 sheets,
+  matching the existing column-contract tests.
+
+**No corrections required.** The audit added 12 Table-E2 anchor-test
+assertions and 104 structural / sentinel-cell assertions guarding
+the sysdata layer against silent regressions.
 
 ## Predecessor 2005 standard
 
