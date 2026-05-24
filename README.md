@@ -48,8 +48,12 @@ Each emits `*_pred`, `*_lln`, `*_uln`. If a `<measure>_measured` column is also 
 | `pft_bdr()` | >10% of predicted change in FEV1 or FVC | Stanojevic 2022 (BDR section) |
 | `pft_prism()` | Preserved Ratio Impaired Spirometry flag | Stanojevic 2022 |
 | `pft_change()` | Conditional change z-score for serial measurements | Stanojevic 2022 |
+| `pft_quality()` | Spirometry quality grade (A-F) from a set of maneuvers | Graham 2019 |
+| `pft_gold()` | COPD severity (GOLD 1-4) from FEV1 % predicted | GOLD reports |
+| `pft_cohort_summary()` | Population-level z-score, pattern, and PRISm summary | — |
 | `pft_validate()` | QC checks on PFT inputs (FEV1 > FVC, out-of-range demographics, etc.) | — |
 | `pft_plot()` | Clinical-style z-score figure | — |
+| `pft_report()` | One-call HTML clinical report for a patient or cohort | — |
 
 All functions are data-frame in, data-frame out — composable with `dplyr`.
 

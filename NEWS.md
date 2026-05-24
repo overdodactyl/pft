@@ -16,6 +16,24 @@
   never used (the lookup-table approach in `R/spirometry.R` interpolates
   directly from spline values instead).
 
+## New clinical extensions
+
+* `pft_quality(values, age)` grades a set of acceptable spirometry
+  maneuvers A-F per the Graham et al. ATS/ERS 2019 spirometry
+  standardization update (doi:10.1164/rccm.201908-1590ST). Tighter
+  repeatability thresholds applied for children under 6.
+* `pft_gold(fev1_pctpred)` returns the GOLD COPD severity grade (1-4)
+  from FEV1 % predicted.
+* `pft_cohort_summary(data)` produces a population-level summary from
+  a `pft_interpret()` result over many patients: per-measure z-score
+  quantiles and percent-below-LLN, ATS pattern frequencies, and PRISm
+  prevalence.
+* `pft_report(result)` renders a self-contained HTML clinical report
+  from a `pft_interpret()` result -- demographic header, per-measure
+  table (predicted / measured / z / severity), interpretive pattern,
+  PRISm and BDR status, and the `pft_plot()` z-score figure. Useful
+  for cohort papers and clinical handoffs.
+
 ## New interpretation primitives
 
 * `pft_severity(zscore)` returns one of `"normal"`, `"mild"`,
