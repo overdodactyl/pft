@@ -1,5 +1,45 @@
 # pft (development version)
 
+## pft_diffusion_interpret() — clinical category from DLCO/VA/KCO z-scores
+
+`pft_diffusion_interpret(data)` consumes the diffusion z-score
+columns already produced by `pft_diffusion()` (either traditional
+units: `dlco_zscore` / `va_zscore` / `kco_tr_zscore`; or SI units:
+`tlco_zscore` / `va_zscore` / `kco_si_zscore`) and assigns a
+clinical interpretive category per the Hughes & Pride 2012
+framework adopted by the ERS/ATS Stanojevic 2017 task force.
+
+Categories:
+
+* `"Normal"` — all three z-scores above LLN.
+* `"Parenchymal"` — low DLCO + low KCO + normal VA (interstitial
+  lung disease, emphysema, anemia, COHb).
+* `"Volume loss"` — low DLCO + low VA + normal or elevated KCO
+  (extra-parenchymal restriction: chest wall, neuromuscular,
+  post-lobectomy, atelectasis).
+* `"Mixed"` — all three low (combined volume loss + exchange
+  impairment).
+* `"Vascular (suggested)"` — low DLCO + normal VA + low/elevated
+  KCO (pulmonary vascular disease pattern: PE, PAH).
+* `"Elevated KCO"` — normal DLCO + elevated KCO (hyperventilation,
+  polycythemia, anemia recovery).
+* `"Other"` — combinations not matching the above (e.g., low VA
+  in isolation).
+* `NA` — required z-score columns missing.
+
+`pft_interpret()` auto-runs the classifier when diffusion z-score
+columns are present in the data; the new `diffusion_category`
+column appears alongside the existing `ats_classification` and
+`volume_subpattern` columns. No new input data is required --
+the categorisation operates on z-scores `pft_diffusion()` already
+computes.
+
+Constants `DIFFUSION_LLN_Z` / `DIFFUSION_ULN_Z` in
+`R/constants.R` (aliased to the package's existing `LLN_Z` /
+`ULN_Z`) -- the boundary semantics match the rest of the package.
+
+Test count: 1195 -> 1211 (+16).
+
 ## New interpretation primitives (audit follow-up)
 
 The just-completed source-paper verification audit documented

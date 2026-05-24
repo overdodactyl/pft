@@ -15,6 +15,15 @@
 LLN_Z <- -1.645
 ULN_Z <-  1.645
 
+# Diffusion-pattern classifier (Hughes & Pride 2012 framework adopted
+# by ERS/ATS Stanojevic 2017) uses the same LLN/ULN thresholds as the
+# rest of the package. Aliased here for explicit traceability from
+# `classify_diffusion()` -- the classifier is purely qualitative
+# (low / normal / elevated per measure z-score) and inherits the LMS
+# 5th / 95th percentile convention.
+DIFFUSION_LLN_Z <- LLN_Z
+DIFFUSION_ULN_Z <- ULN_Z
+
 # Severity grade boundaries from Stanojevic et al. ERJ 2022, "Severity
 # of lung function impairment" section. Each entry is the *upper bound*
 # of the named grade (i.e. z < bound is the grade itself, and z >=

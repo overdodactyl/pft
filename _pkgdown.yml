@@ -38,6 +38,7 @@ reference:
       - pft_change
       - pft_fev1q
       - pft_dlco_hb_correct
+      - pft_diffusion_interpret
 
   - title: Predecessor 2005 standard
     desc: >
