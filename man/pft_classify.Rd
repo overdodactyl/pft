@@ -4,26 +4,45 @@
 \alias{pft_classify}
 \title{Classify ATS spirometry patterns from spirometry and lung-volume measurements}
 \usage{
-pft_classify(data)
+pft_classify(data, standard = c("2022", "2005"))
 }
 \arguments{
 \item{data}{A data frame containing columns for fev1, fvc, fev1fvc, and their associated LLNs.}
+
+\item{standard}{Which interpretive standard's classifier to apply.
+\code{"2022"} (default) follows Stanojevic et al. ERJ 2022 Figure 8 and
+recognises five labels: \code{Normal}, \code{Non-specific}, \code{Obstructed},
+\code{Restricted}, \code{Mixed}. \code{"2005"} follows Pellegrino et al. ERJ 2005
+Figure 2 and recognises four labels (\code{Normal}, \code{Obstructed},
+\code{Restricted}, \code{Mixed}). The 2005 algorithm only consults TLC when
+FVC is below LLN; when FVC is normal it routes directly to
+\code{Normal} or \code{Obstructed} regardless of TLC. This is the dominant
+source of 2005 -> 2022 reclassification: rows with low TLC but
+normal FVC (NNNA, ANNA) become \code{Restricted} under 2022 but stay
+\code{Normal} under 2005; rows with low FEV1/FVC and low TLC but normal
+FVC (NNAA, ANAA) become \code{Mixed} under 2022 but stay \code{Obstructed}
+under 2005; the isolated-low-FVC cells (NANN, AANN) become
+\code{Non-specific} under 2022 but \code{Normal} under 2005.}
 }
 \value{
 The original data frame with two appended columns:
 \itemize{
-\item \code{ats_classification}: pattern label (\code{"Normal"}, \code{"Non-specific"},
-\code{"Obstructed"}, \code{"Restricted"}, or \code{"Mixed"}).
+\item \code{ats_classification}: pattern label. Values depend on the
+selected \code{standard}; see above.
 \item \code{ats_pattern_combination}: a 4-character string in fixed column
 order \strong{FEV1, FVC, FEV1/FVC, TLC}, with \code{"A"} denoting the value
 is below its LLN and \code{"N"} denoting it is at or above. So
 \code{"NNAN"} means only FEV1/FVC is below its LLN (pure airway
 obstruction); \code{"AANA"} means FEV1, FVC, and TLC are all low while
-FEV1/FVC is preserved (restriction).
+FEV1/FVC is preserved (restriction). The pattern-combination
+string is independent of the \code{standard} selected.
 }
 }
 \description{
 \code{pft_classify()} assigns ATS patterns using spirometry and lung volume data.
+By default it applies the Stanojevic et al. ERS/ATS 2022 algorithm
+(Figure 8); pass \code{standard = "2005"} to apply the predecessor
+Pellegrino et al. ERJ 2005 algorithm.
 }
 \examples{
 data <- data.frame(fev1 = c(3.453, 2.385),
@@ -35,23 +54,25 @@ data <- data.frame(fev1 = c(3.453, 2.385),
                              tlc = c(1.5, 2.3),
                              tlc_lln = c(2, 2.5))
           pft_classify(data)
+          pft_classify(data, standard = "2005")
 
 }
 \references{
 Stanojevic S, Kaminsky DA, Miller MR, et al. ERS/ATS technical standard
 on interpretive strategies for routine lung function tests. Eur Respir J.
-2022;60(1):2101499. \doi{10.1183/13993003.01499-2021}. The classifier
-follows the spirometry interpretation flowchart in Figure 8 and the
-pattern definitions in Tables 5 and 8.
+2022;60(1):2101499. \doi{10.1183/13993003.01499-2021}. The 2022
+classifier follows the spirometry interpretation flowchart in Figure 8
+and the pattern definitions in Tables 5 and 8.
 
 Pellegrino R, Viegi G, Brusasco V, et al. Interpretative strategies for
 lung function tests. Eur Respir J. 2005;26(5):948-968.
-\doi{10.1183/09031936.05.00035205}. The predecessor interpretation
-standard that this function's 5-category labelling derives from.
+\doi{10.1183/09031936.05.00035205}. The 2005 classifier follows
+Figure 2.
 }
 \seealso{
 \code{\link[=pft_prism]{pft_prism()}} for the spirometry-only PRISm screen (no TLC
-required). \code{\link[=pft_severity]{pft_severity()}} grades the per-measure z-scores
-downstream. \code{\link[=pft_interpret]{pft_interpret()}} runs this classifier as part of the
-one-call workflow.
+required). \code{\link[=pft_severity]{pft_severity()}} / \code{\link[=pft_severity_2005]{pft_severity_2005()}} grade
+per-measure severity. \code{\link[=pft_interpret]{pft_interpret()}} runs the classifier as
+part of the one-call workflow and also accepts the \code{standard}
+argument for end-to-end reclassification.
 }

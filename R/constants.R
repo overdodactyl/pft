@@ -30,6 +30,31 @@ SEVERITY_BOUNDARIES <- c(
 # 12%-and-200-mL-from-baseline criterion.
 BDR_THRESHOLD_PCT_PRED <- 10
 
+# Predecessor 2005 BDR criterion: significant if BOTH
+#   - relative change from baseline > 12%
+#   - absolute change > 200 mL
+# From Pellegrino R et al. ERJ 2005;26(5):948-968, p. 958 ("Values
+# >12% and 200 mL compared with baseline ... suggest a 'significant'
+# bronchodilatation") and p. 959 ("(>12% of control and >200 mL)"
+# which clarifies both operators are strict). The "200 mL"
+# threshold on p. 958 lacks an operator; p. 959 disambiguates it as
+# strictly greater than 200 mL.
+BDR_2005_PCT_PRE    <- 12
+BDR_2005_ABS_LITRES <- 0.2
+
+# Predecessor 2005 severity grading (FEV1 percent predicted bands).
+# From Pellegrino R et al. ERJ 2005;26(5):948-968, Table 6 p. 957.
+# The paper's Table 6 wording ("Mild >70") creates a degenerate gap
+# at exactly 70%; clinical convention (and this implementation)
+# treats the lower bound of each band as inclusive. Each entry below
+# is the lower bound (inclusive) of the named grade.
+SEVERITY_2005_BOUNDARIES <- c(
+  mild              = 70,
+  moderate          = 60,
+  moderately_severe = 50,
+  severe            = 35
+)
+
 # GOLD COPD severity tier upper bounds (FEV1 % predicted). Each entry
 # is the *upper bound* of the named tier.
 GOLD_BOUNDARIES <- c(
@@ -46,12 +71,20 @@ GOLD_BOUNDARIES <- c(
 QUALITY_THRESHOLD_ADULT <- c(A = 0.150, C = 0.200, D = 0.250)
 QUALITY_THRESHOLD_CHILD <- c(A = 0.100, C = 0.150, D = 0.200)
 
-# Conditional change score significance threshold (Stanojevic 2022).
-# |CCS| > this value corresponds to one-sided p < 0.05 under normality.
-CCS_SIGNIFICANCE <- 1.645  # equal to ULN_Z
+# Conditional change score "normal limits" threshold from
+# Stanojevic et al. ERJ 2022 Box 2 p. 12: "Changes within +/- 1.96
+# change scores are considered within the normal limits." (Two-sided
+# 95% normal-limits cutoff, NOT the one-sided 1.645 cutoff used for
+# the LLN.)
+CCS_SIGNIFICANCE <- 1.96
 
-# Default within-subject z-score autocorrelation for the conditional
-# change score, used when the caller does not supply one. Mid-range
-# value from adult FEV1 longitudinal studies; the result is sensitive
-# to this choice -- see pft_change() docs.
-DEFAULT_AUTOCORRELATION <- 0.7
+# Coefficients of the Stanojevic 2022 conditional-change-score
+# autocorrelation formula (Box 2 p. 12):
+#   r = 0.642 - 0.04 * time(years) + 0.020 * age(years) at t1
+# Derived from a children/young-people cohort; the 2022 standard
+# notes this has "yet to be validated, extended to adults" but
+# permits its use as "a reasonable tool to facilitate
+# interpretation".
+CCS_R_INTERCEPT <-  0.642
+CCS_R_TIME_COEF <- -0.04
+CCS_R_AGE_COEF  <-  0.020

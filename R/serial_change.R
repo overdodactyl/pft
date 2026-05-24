@@ -1,59 +1,88 @@
 #' @title Conditional change score for serial PFT measurements
 #'
 #' @description
-#' `pft_change()` computes a z-score-style index of whether a
-#' change between two pulmonary function measurements is larger than
-#' would be expected by within-subject variability and regression to the
-#' mean. The conditional change score (CCS) is recommended by the
-#' Stanojevic et al. ERJ 2022 interpretation standard as the preferred
-#' way to interpret serial PFT measurements over time.
+#' `pft_change()` computes the conditional change score (CCS) defined
+#' in Box 2 of the Stanojevic et al. ERS/ATS 2022 interpretation
+#' standard. The CCS evaluates whether the change between two FEV1
+#' z-scores is larger than would be expected from within-subject
+#' variability and regression to the mean alone.
 #'
-#' The CCS is:
+#' Formula (paper Box 2 p. 12):
 #'   \deqn{CCS = (z_2 - r \cdot z_1) / \sqrt{1 - r^2}}
-#' where `z1` and `z2` are the z-scores of the first and second
-#' measurements (against a reference equation), and `r` is the
-#' within-subject autocorrelation of z-scores at the time interval of
-#' interest. A `|CCS| > 1.645` indicates a change exceeding the typical
-#' within-subject variability (one-sided p < 0.05 under normality).
 #'
-#' This implementation covers adults only. The Stanojevic 2022 standard
-#' notes that the autocorrelation `r` depends on the measure and the
-#' interval between measurements; we expose `r` as an argument so callers
-#' can plug in interval-specific values from the literature.
+#' Where the autocorrelation `r` is itself a function of the time
+#' interval between measurements and the patient's age at the first
+#' time point:
+#'   \deqn{r = 0.642 - 0.04 \cdot time(years) + 0.020 \cdot age(years)}
 #'
-#' @param z1,z2 Numeric vectors of z-scores at time points 1 and 2.
-#' @param r Within-subject z-score autocorrelation between the two
-#'   time points. Default `0.7` is a mid-range value drawn from
-#'   adult longitudinal studies of FEV1 over ~1-year intervals
-#'   (Vollmer WM et al. *Eur Respir J.* 1988;1(7):589-596; Wang ML
-#'   et al. *Chest.* 2014;145(2):353-359). Pass an interval- and
-#'   measure-specific value from your population literature when
-#'   available; the result is sensitive to this choice. The valid
-#'   range is `(-1, 1)`.
+#' Changes within `+/- 1.96` change scores are considered within the
+#' normal limits per the paper.
+#'
+#' This formula was derived from a children/young-people cohort
+#' (Stanojevic 2022 references the underlying study and notes the
+#' approach has *"yet to be validated, extended to adults"* but
+#' permits its use as *"a reasonable tool to facilitate
+#' interpretation"*). For adults the 2022 standard alternatively
+#' recommends FEV1Q (Box 3) -- not yet implemented in `pft`.
+#'
+#' @param z1,z2 Numeric vectors of FEV1 z-scores at time 1 and time 2.
+#' @param age_t1 Numeric. Patient age (in years) at the first
+#'   measurement.
+#' @param time_years Numeric. Elapsed time between measurements in
+#'   years (e.g. 0.25 for 3 months, 4 for 4 years).
+#' @param r Optional. Numeric in `(-1, 1)`. If supplied, used directly
+#'   in place of the paper's age/time formula -- useful for callers
+#'   who have a population-specific autocorrelation estimate. If
+#'   `NULL` (the default), `r` is computed from `age_t1` and
+#'   `time_years` via the Box 2 formula.
 #'
 #' @return A data frame with columns:
-#'   - `ccs`: conditional change score.
-#'   - `is_significant`: logical, `TRUE` when `|ccs| > 1.645`.
+#'   - `ccs`: the conditional change score.
+#'   - `r_used`: the autocorrelation actually used in the calculation
+#'     (returned so callers can audit the value chosen).
+#'   - `is_significant`: logical, `TRUE` when `|ccs| > 1.96`
+#'     (i.e. outside the paper's normal-limits range).
 #'
 #' @references
-#' Stanojevic S, Kaminsky DA, Miller MR, et al. ERS/ATS technical standard
-#' on interpretive strategies for routine lung function tests. Eur Respir J.
-#' 2022;60(1):2101499. \doi{10.1183/13993003.01499-2021}.
+#' Stanojevic S, Kaminsky DA, Miller MR, et al. ERS/ATS technical
+#' standard on interpretive strategies for routine lung function
+#' tests. Eur Respir J. 2022;60(1):2101499.
+#' \doi{10.1183/13993003.01499-2021}. Box 2 (p. 12).
 #'
-#' @seealso [pft_spirometry()], [pft_volumes()], and [pft_diffusion()]
-#'   to produce the z-scores at each time point that this function
-#'   compares.
+#' @seealso [pft_spirometry()] to produce the FEV1 z-scores at each
+#'   time point.
 #'
 #' @examples
-#' # Two measurements 1 year apart, FEV1 z dropped from -1 to -2
-#' pft_change(z1 = -1, z2 = -2)
+#' # Stanojevic 2022 Box 2 worked example: a 14-year-old male whose
+#' # FEV1 z-score dropped from -0.78 to -1.60 over 3 months.
+#' pft_change(z1 = -0.78, z2 = -1.60, age_t1 = 14, time_years = 0.25)
+#' # -> r_used = 0.912, ccs ~= -2.17, is_significant = TRUE
+#'
+#' # Same drop spread over 4 years
+#' pft_change(z1 = -0.78, z2 = -1.60, age_t1 = 14, time_years = 4)
+#' # -> r_used = 0.762, ccs ~= -1.55, is_significant = FALSE
 #'
 #' @export
-pft_change <- function(z1, z2, r = DEFAULT_AUTOCORRELATION) {
-  if (r <= -1 || r >= 1) stop("r must lie strictly between -1 and 1")
+pft_change <- function(z1, z2, age_t1 = NULL, time_years = NULL,
+                        r = NULL) {
+
+  if (is.null(r)) {
+    if (is.null(age_t1) || is.null(time_years)) {
+      stop("pft_change(): must supply either `r` directly or both `age_t1` and `time_years` so r can be computed from the Stanojevic 2022 formula.",
+           call. = FALSE)
+    }
+    r <- CCS_R_INTERCEPT + CCS_R_TIME_COEF * time_years +
+           CCS_R_AGE_COEF * age_t1
+  }
+  if (any(r <= -1 | r >= 1, na.rm = TRUE)) {
+    stop("pft_change(): r must lie strictly between -1 and 1 (got values outside this range -- check age_t1 / time_years inputs).",
+         call. = FALSE)
+  }
+
   ccs <- (z2 - r * z1) / sqrt(1 - r^2)
   tibble::tibble(
-    ccs = ccs,
+    ccs            = ccs,
+    r_used         = r,
     is_significant = abs(ccs) > CCS_SIGNIFICANCE
   )
 }

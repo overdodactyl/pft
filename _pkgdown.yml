@@ -36,6 +36,16 @@ reference:
       - pft_prism
       - pft_change
 
+  - title: Predecessor 2005 standard
+    desc: >
+      Pellegrino 2005 interpretive primitives, provided for
+      reclassification analyses comparing the current Stanojevic 2022
+      standard against its predecessor. `pft_classify(standard = "2005")`
+      and `pft_interpret(standard = "2005")` route through these.
+    contents:
+      - pft_severity_2005
+      - pft_bdr_2005
+
   - title: Clinical extensions
     desc: >
       Maneuver-level quality grading (ATS/ERS 2019), COPD-specific

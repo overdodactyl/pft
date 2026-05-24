@@ -39,6 +39,14 @@
 #' @param year GLI spirometry equation year. See [pft_spirometry()].
 #' @param SI.units Whether to report diffusion in SI units. See
 #'   [pft_diffusion()].
+#' @param standard Interpretive standard whose downstream rules to
+#'   apply: `"2022"` (default) uses Stanojevic et al. ERJ 2022 for
+#'   pattern classification, severity grading, and BDR; `"2005"` uses
+#'   the Pellegrino et al. ERJ 2005 predecessor. The selected standard
+#'   does *not* affect the GLI reference equations (those are
+#'   controlled by `year`) -- only the downstream interpretive logic.
+#'   Useful for reclassification analyses comparing the two standards
+#'   on the same cohort.
 #' @param sex,age,height,race Column references. By default
 #'   `pft_interpret()` reads from `sex`, `age`, `height`, and (for
 #'   `year = 2012`) `race`. Override via a bare name (`sex = Sex`), a
@@ -77,8 +85,11 @@
 #'
 #' @export
 pft_interpret <- function(data, year = 2012, SI.units = FALSE,
+                           standard = c("2022", "2005"),
                            sex = sex, age = age,
                            height = height, race = race) {
+
+  standard <- match.arg(standard)
 
   sex_q    <- rlang::enquo(sex)
   age_q    <- rlang::enquo(age)
@@ -107,11 +118,22 @@ pft_interpret <- function(data, year = 2012, SI.units = FALSE,
                            height = !!height_q)
   }
 
-  # 2. Severity grading for every z-score column emitted above.
-  zscore_cols <- grep("_zscore", colnames(data), value = TRUE)
-  for (col in zscore_cols) {
-    severity_col <- sub("_zscore", "_severity", col)
-    data[[severity_col]] <- pft_severity(data[[col]])
+  # 2. Severity grading for every z-score column (2022) or every
+  #    percent-predicted column (2005). The 2022 grader takes the
+  #    z-score directly; the 2005 grader takes percent predicted, so
+  #    the input columns differ.
+  if (standard == "2022") {
+    zscore_cols <- grep("_zscore", colnames(data), value = TRUE)
+    for (col in zscore_cols) {
+      severity_col <- sub("_zscore", "_severity", col)
+      data[[severity_col]] <- pft_severity(data[[col]])
+    }
+  } else {
+    pct_cols <- grep("_pctpred", colnames(data), value = TRUE)
+    for (col in pct_cols) {
+      severity_col <- sub("_pctpred", "_severity", col)
+      data[[severity_col]] <- pft_severity_2005(data[[col]])
+    }
   }
 
   # 3. ATS pattern classification, if measured + LLN columns are present
@@ -133,33 +155,45 @@ pft_interpret <- function(data, year = 2012, SI.units = FALSE,
     }
   }
   if (pat_ready) {
-    pat_out <- pft_classify(pat_data)
+    pat_out <- pft_classify(pat_data, standard = standard)
     data$ats_classification     <- pat_out$ats_classification
     data$ats_pattern_combination <- pat_out$ats_pattern_combination
   }
 
   # 4. PRISm screen, if the spirometry-only inputs are resolvable.
+  #    Per Stanojevic 2022 Table 5, PRISm requires low FEV1, low FVC,
+  #    AND normal FEV1/FVC -- so fvc / fvc_lln are needed too.
   if (all(c("fev1_measured", "fev1_lln",
+            "fvc_measured", "fvc_lln",
             "fev1fvc_measured", "fev1fvc_lln") %in% colnames(data))) {
     prism_data <- data.frame(
       fev1        = data$fev1_measured,
       fev1_lln    = data$fev1_lln,
+      fvc         = data$fvc_measured,
+      fvc_lln     = data$fvc_lln,
       fev1fvc     = data$fev1fvc_measured,
       fev1fvc_lln = data$fev1fvc_lln
     )
     data$prism <- pft_prism(prism_data)$prism
   }
 
-  # 5. Bronchodilator response, for any spirometry measure with pre/post.
+  # 5. Bronchodilator response, for any spirometry measure with
+  #    pre/post. 2022 requires the predicted value; 2005 doesn't.
   for (m in c("fev1", "fvc", "fev1fvc")) {
     pre  <- paste0(m, "_pre")
     post <- paste0(m, "_post")
-    pred_col <- paste0(m, "_pred", if (year == 2022) "_2022" else "")
-    if (pre %in% colnames(data) && post %in% colnames(data) &&
-        pred_col %in% colnames(data)) {
-      bdr <- pft_bdr(data[[pre]], data[[post]],
-                                     data[[pred_col]])
+    if (!(pre %in% colnames(data) && post %in% colnames(data))) next
+
+    if (standard == "2022") {
+      pred_col <- paste0(m, "_pred", if (year == 2022) "_2022" else "")
+      if (!(pred_col %in% colnames(data))) next
+      bdr <- pft_bdr(data[[pre]], data[[post]], data[[pred_col]])
       data[[paste0(m, "_bdr_pct")]]         <- bdr$pct_pred_change
+      data[[paste0(m, "_bdr_significant")]] <- bdr$is_significant
+    } else {
+      bdr <- pft_bdr_2005(data[[pre]], data[[post]])
+      data[[paste0(m, "_bdr_pct")]]         <- bdr$pct_change
+      data[[paste0(m, "_bdr_abs")]]         <- bdr$abs_change
       data[[paste0(m, "_bdr_significant")]] <- bdr$is_significant
     }
   }

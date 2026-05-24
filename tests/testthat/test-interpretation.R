@@ -63,8 +63,9 @@ test_that("BDR custom threshold respected", {
 
 ## --- pft_prism -------------------------------------------------------
 
-test_that("pft_prism flags low FEV1 with normal ratio", {
+test_that("pft_prism flags low FEV1 + low FVC + normal ratio", {
   d <- data.frame(fev1 = 2.0, fev1_lln = 2.5,
+                  fvc  = 2.5, fvc_lln = 3.0,
                   fev1fvc = 0.80, fev1fvc_lln = 0.70)
   out <- pft_prism(d)
   expect_true(out$prism)
@@ -72,6 +73,7 @@ test_that("pft_prism flags low FEV1 with normal ratio", {
 
 test_that("pft_prism does NOT flag low FEV1 with low ratio (obstructed)", {
   d <- data.frame(fev1 = 2.0, fev1_lln = 2.5,
+                  fvc  = 2.5, fvc_lln = 3.0,
                   fev1fvc = 0.60, fev1fvc_lln = 0.70)
   out <- pft_prism(d)
   expect_false(out$prism)
@@ -79,6 +81,18 @@ test_that("pft_prism does NOT flag low FEV1 with low ratio (obstructed)", {
 
 test_that("pft_prism does NOT flag normal FEV1", {
   d <- data.frame(fev1 = 3.0, fev1_lln = 2.5,
+                  fvc  = 3.5, fvc_lln = 3.0,
+                  fev1fvc = 0.80, fev1fvc_lln = 0.70)
+  out <- pft_prism(d)
+  expect_false(out$prism)
+})
+
+test_that("pft_prism requires FVC<LLN (per Stanojevic 2022 Table 5)", {
+  # Low FEV1, normal FEV1/FVC, but FVC normal -> NOT PRISm.
+  # Verifies the bug fix: previously the package flagged this case
+  # as PRISm because it didn't check FVC.
+  d <- data.frame(fev1 = 2.0, fev1_lln = 2.5,
+                  fvc  = 3.5, fvc_lln = 3.0,    # FVC normal
                   fev1fvc = 0.80, fev1fvc_lln = 0.70)
   out <- pft_prism(d)
   expect_false(out$prism)
@@ -86,6 +100,7 @@ test_that("pft_prism does NOT flag normal FEV1", {
 
 test_that("pft_prism propagates NA inputs", {
   d <- data.frame(fev1 = NA_real_, fev1_lln = 2.5,
+                  fvc  = 2.5, fvc_lln = 3.0,
                   fev1fvc = 0.80, fev1fvc_lln = 0.70)
   out <- pft_prism(d)
   expect_true(is.na(out$prism))
@@ -93,6 +108,7 @@ test_that("pft_prism propagates NA inputs", {
 
 test_that("pft_prism preserves input columns and row count", {
   d <- data.frame(fev1 = c(2.0, 3.0), fev1_lln = 2.5,
+                  fvc  = c(2.5, 3.5), fvc_lln = 3.0,
                   fev1fvc = c(0.80, 0.80), fev1fvc_lln = 0.70,
                   patient_id = c(1, 2))
   out <- pft_prism(d)

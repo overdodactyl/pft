@@ -7,39 +7,43 @@
 pft_prism(data)
 }
 \arguments{
-\item{data}{A data frame containing \code{fev1}, \code{fev1_lln}, \code{fev1fvc},
-and \code{fev1fvc_lln} columns.}
+\item{data}{A data frame containing \code{fev1}, \code{fev1_lln}, \code{fvc},
+\code{fvc_lln}, \code{fev1fvc}, and \code{fev1fvc_lln} columns.}
 }
 \value{
-The original data frame with a \code{prism} logical column appended.
-\code{NA} propagates from any of the four input columns.
+The original data frame with a \code{prism} logical column
+appended. \code{NA} propagates from any of the six input columns.
 }
 \description{
-PRISm is defined as a low FEV1 with a preserved FEV1/FVC ratio: that
-is, FEV1 below its LLN AND FEV1/FVC at or above its LLN. The pattern
-is associated with elevated all-cause mortality and progression to
-chronic respiratory disease, and is highlighted as a distinct entity
-in the Stanojevic et al. ERJ 2022 interpretation standard.
+PRISm is the spirometry-only manifestation of the "non-specific"
+pattern when TLC is not available: a low FEV1, a low FVC, and a
+preserved (normal) FEV1/FVC ratio. The 2022 ERS/ATS interpretation
+standard (Stanojevic et al.) classifies it in Table 5 with row
+"Non-specific pattern" (FEV1 reduced, FVC reduced, FEV1/FVC
+normal). The pattern is associated with elevated all-cause
+mortality and progression to chronic respiratory disease.
 
-This function adds a \code{prism} logical column to the data frame. PRISm
-is a spirometry-only screen and does not require a TLC measurement.
+This function adds a \code{prism} logical column to the data frame.
+PRISm is a spirometry-only screen and does not require a TLC
+measurement.
 }
 \examples{
-d <- data.frame(fev1 = 2.0, fev1_lln = 2.5,
+d <- data.frame(fev1    = 2.0, fev1_lln    = 2.5,
+                fvc     = 2.6, fvc_lln     = 3.0,
                 fev1fvc = 0.80, fev1fvc_lln = 0.70)
 pft_prism(d)
 
 }
 \references{
-Stanojevic S, Kaminsky DA, Miller MR, et al. ERS/ATS technical standard
-on interpretive strategies for routine lung function tests. Eur Respir J.
-2022;60(1):2101499. \doi{10.1183/13993003.01499-2021}. PRISm is listed
-under "Classification of impairments" (Table 1) and discussed alongside
-the "non-specific" pattern.
+Stanojevic S, Kaminsky DA, Miller MR, et al. ERS/ATS technical
+standard on interpretive strategies for routine lung function
+tests. Eur Respir J. 2022;60(1):2101499.
+\doi{10.1183/13993003.01499-2021}. PRISm appears in Table 5 as
+the spirometry-only form of the non-specific pattern.
 }
 \seealso{
 \code{\link[=pft_classify]{pft_classify()}} for the full ATS pattern classification
-when TLC is available; \code{\link[=pft_interpret]{pft_interpret()}} runs both PRISm and full
-classification automatically when the relevant columns are
+when TLC is available; \code{\link[=pft_interpret]{pft_interpret()}} runs both PRISm and
+full classification automatically when the relevant columns are
 present.
 }

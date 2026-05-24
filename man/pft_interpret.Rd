@@ -8,6 +8,7 @@ pft_interpret(
   data,
   year = 2012,
   SI.units = FALSE,
+  standard = c("2022", "2005"),
   sex = sex,
   age = age,
   height = height,
@@ -22,6 +23,15 @@ See Details for the column-name conventions.}
 
 \item{SI.units}{Whether to report diffusion in SI units. See
 \code{\link[=pft_diffusion]{pft_diffusion()}}.}
+
+\item{standard}{Interpretive standard whose downstream rules to
+apply: \code{"2022"} (default) uses Stanojevic et al. ERJ 2022 for
+pattern classification, severity grading, and BDR; \code{"2005"} uses
+the Pellegrino et al. ERJ 2005 predecessor. The selected standard
+does \emph{not} affect the GLI reference equations (those are
+controlled by \code{year}) -- only the downstream interpretive logic.
+Useful for reclassification analyses comparing the two standards
+on the same cohort.}
 
 \item{sex, age, height, race}{Column references. By default
 \code{pft_interpret()} reads from \code{sex}, \code{age}, \code{height}, and (for

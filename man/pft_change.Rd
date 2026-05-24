@@ -4,60 +4,76 @@
 \alias{pft_change}
 \title{Conditional change score for serial PFT measurements}
 \usage{
-pft_change(z1, z2, r = DEFAULT_AUTOCORRELATION)
+pft_change(z1, z2, age_t1 = NULL, time_years = NULL, r = NULL)
 }
 \arguments{
-\item{z1, z2}{Numeric vectors of z-scores at time points 1 and 2.}
+\item{z1, z2}{Numeric vectors of FEV1 z-scores at time 1 and time 2.}
 
-\item{r}{Within-subject z-score autocorrelation between the two
-time points. Default \code{0.7} is a mid-range value drawn from
-adult longitudinal studies of FEV1 over ~1-year intervals
-(Vollmer WM et al. \emph{Eur Respir J.} 1988;1(7):589-596; Wang ML
-et al. \emph{Chest.} 2014;145(2):353-359). Pass an interval- and
-measure-specific value from your population literature when
-available; the result is sensitive to this choice. The valid
-range is \verb{(-1, 1)}.}
+\item{age_t1}{Numeric. Patient age (in years) at the first
+measurement.}
+
+\item{time_years}{Numeric. Elapsed time between measurements in
+years (e.g. 0.25 for 3 months, 4 for 4 years).}
+
+\item{r}{Optional. Numeric in \verb{(-1, 1)}. If supplied, used directly
+in place of the paper's age/time formula -- useful for callers
+who have a population-specific autocorrelation estimate. If
+\code{NULL} (the default), \code{r} is computed from \code{age_t1} and
+\code{time_years} via the Box 2 formula.}
 }
 \value{
 A data frame with columns:
 \itemize{
-\item \code{ccs}: conditional change score.
-\item \code{is_significant}: logical, \code{TRUE} when \verb{|ccs| > 1.645}.
+\item \code{ccs}: the conditional change score.
+\item \code{r_used}: the autocorrelation actually used in the calculation
+(returned so callers can audit the value chosen).
+\item \code{is_significant}: logical, \code{TRUE} when \verb{|ccs| > 1.96}
+(i.e. outside the paper's normal-limits range).
 }
 }
 \description{
-\code{pft_change()} computes a z-score-style index of whether a
-change between two pulmonary function measurements is larger than
-would be expected by within-subject variability and regression to the
-mean. The conditional change score (CCS) is recommended by the
-Stanojevic et al. ERJ 2022 interpretation standard as the preferred
-way to interpret serial PFT measurements over time.
+\code{pft_change()} computes the conditional change score (CCS) defined
+in Box 2 of the Stanojevic et al. ERS/ATS 2022 interpretation
+standard. The CCS evaluates whether the change between two FEV1
+z-scores is larger than would be expected from within-subject
+variability and regression to the mean alone.
 
-The CCS is:
+Formula (paper Box 2 p. 12):
 \deqn{CCS = (z_2 - r \cdot z_1) / \sqrt{1 - r^2}}
-where \code{z1} and \code{z2} are the z-scores of the first and second
-measurements (against a reference equation), and \code{r} is the
-within-subject autocorrelation of z-scores at the time interval of
-interest. A \verb{|CCS| > 1.645} indicates a change exceeding the typical
-within-subject variability (one-sided p < 0.05 under normality).
 
-This implementation covers adults only. The Stanojevic 2022 standard
-notes that the autocorrelation \code{r} depends on the measure and the
-interval between measurements; we expose \code{r} as an argument so callers
-can plug in interval-specific values from the literature.
+Where the autocorrelation \code{r} is itself a function of the time
+interval between measurements and the patient's age at the first
+time point:
+\deqn{r = 0.642 - 0.04 \cdot time(years) + 0.020 \cdot age(years)}
+
+Changes within \verb{+/- 1.96} change scores are considered within the
+normal limits per the paper.
+
+This formula was derived from a children/young-people cohort
+(Stanojevic 2022 references the underlying study and notes the
+approach has \emph{"yet to be validated, extended to adults"} but
+permits its use as \emph{"a reasonable tool to facilitate
+interpretation"}). For adults the 2022 standard alternatively
+recommends FEV1Q (Box 3) -- not yet implemented in \code{pft}.
 }
 \examples{
-# Two measurements 1 year apart, FEV1 z dropped from -1 to -2
-pft_change(z1 = -1, z2 = -2)
+# Stanojevic 2022 Box 2 worked example: a 14-year-old male whose
+# FEV1 z-score dropped from -0.78 to -1.60 over 3 months.
+pft_change(z1 = -0.78, z2 = -1.60, age_t1 = 14, time_years = 0.25)
+# -> r_used = 0.912, ccs ~= -2.17, is_significant = TRUE
+
+# Same drop spread over 4 years
+pft_change(z1 = -0.78, z2 = -1.60, age_t1 = 14, time_years = 4)
+# -> r_used = 0.762, ccs ~= -1.55, is_significant = FALSE
 
 }
 \references{
-Stanojevic S, Kaminsky DA, Miller MR, et al. ERS/ATS technical standard
-on interpretive strategies for routine lung function tests. Eur Respir J.
-2022;60(1):2101499. \doi{10.1183/13993003.01499-2021}.
+Stanojevic S, Kaminsky DA, Miller MR, et al. ERS/ATS technical
+standard on interpretive strategies for routine lung function
+tests. Eur Respir J. 2022;60(1):2101499.
+\doi{10.1183/13993003.01499-2021}. Box 2 (p. 12).
 }
 \seealso{
-\code{\link[=pft_spirometry]{pft_spirometry()}}, \code{\link[=pft_volumes]{pft_volumes()}}, and \code{\link[=pft_diffusion]{pft_diffusion()}}
-to produce the z-scores at each time point that this function
-compares.
+\code{\link[=pft_spirometry]{pft_spirometry()}} to produce the FEV1 z-scores at each
+time point.
 }

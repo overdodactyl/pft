@@ -1,5 +1,35 @@
 # pft (development version)
 
+## Predecessor 2005 standard
+
+Pellegrino 2005 interpretive primitives are now available so the
+package can serve a cross-standard reclassification analysis
+(comparing Stanojevic 2022 against the predecessor algorithm on the
+same cohort). All constants and decision logic are verified line-by-
+line against the source PDF (`papers/pellegrino_2005/`); the
+extraction is documented in
+`papers/pellegrino_2005/verification.md`.
+
+* `pft_classify()` gains a `standard = c("2022", "2005")` argument.
+  The 2022 path is the default and is unchanged. The 2005 path
+  implements the Pellegrino et al. ERJ 2005 Figure 2 algorithm: it
+  has four labels (Normal, Obstructed, Restricted, Mixed) -- no
+  Non-specific category, which was introduced after 2005. Cells
+  that 2022 labels "Non-specific" are labeled "Restricted" under
+  2005.
+* `pft_severity_2005(pctpred)` grades severity from FEV1 percent
+  predicted into the five Pellegrino bands
+  (mild / moderate / moderately severe / severe / very severe).
+* `pft_bdr_2005(pre, post)` applies the dual >=12% AND >=200 mL
+  criterion from the 2005 standard, without needing the patient's
+  predicted value.
+* `pft_interpret()` gains a matching `standard = c("2022", "2005")`
+  argument that dispatches all three primitives to the 2005 forms in
+  one call. `year` (GLI equation year) and `standard` (interpretive
+  rules) are independent -- you can pair GLI 2022 race-neutral
+  equations with the 2005 interpretive logic, or any other
+  combination, for nuanced reclassification analyses.
+
 ## Input contract
 
 * `pft_spirometry()`, `pft_volumes()`, `pft_diffusion()`, and

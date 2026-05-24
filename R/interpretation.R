@@ -98,42 +98,47 @@ pft_bdr <- function(pre, post, predicted, threshold = BDR_THRESHOLD_PCT_PRED) {
 #' @title Screen for Preserved Ratio Impaired Spirometry (PRISm)
 #'
 #' @description
-#' PRISm is defined as a low FEV1 with a preserved FEV1/FVC ratio: that
-#' is, FEV1 below its LLN AND FEV1/FVC at or above its LLN. The pattern
-#' is associated with elevated all-cause mortality and progression to
-#' chronic respiratory disease, and is highlighted as a distinct entity
-#' in the Stanojevic et al. ERJ 2022 interpretation standard.
+#' PRISm is the spirometry-only manifestation of the "non-specific"
+#' pattern when TLC is not available: a low FEV1, a low FVC, and a
+#' preserved (normal) FEV1/FVC ratio. The 2022 ERS/ATS interpretation
+#' standard (Stanojevic et al.) classifies it in Table 5 with row
+#' "Non-specific pattern" (FEV1 reduced, FVC reduced, FEV1/FVC
+#' normal). The pattern is associated with elevated all-cause
+#' mortality and progression to chronic respiratory disease.
 #'
-#' This function adds a `prism` logical column to the data frame. PRISm
-#' is a spirometry-only screen and does not require a TLC measurement.
+#' This function adds a `prism` logical column to the data frame.
+#' PRISm is a spirometry-only screen and does not require a TLC
+#' measurement.
 #'
-#' @param data A data frame containing `fev1`, `fev1_lln`, `fev1fvc`,
-#'   and `fev1fvc_lln` columns.
+#' @param data A data frame containing `fev1`, `fev1_lln`, `fvc`,
+#'   `fvc_lln`, `fev1fvc`, and `fev1fvc_lln` columns.
 #'
-#' @return The original data frame with a `prism` logical column appended.
-#'   `NA` propagates from any of the four input columns.
+#' @return The original data frame with a `prism` logical column
+#'   appended. `NA` propagates from any of the six input columns.
 #'
 #' @references
-#' Stanojevic S, Kaminsky DA, Miller MR, et al. ERS/ATS technical standard
-#' on interpretive strategies for routine lung function tests. Eur Respir J.
-#' 2022;60(1):2101499. \doi{10.1183/13993003.01499-2021}. PRISm is listed
-#' under "Classification of impairments" (Table 1) and discussed alongside
-#' the "non-specific" pattern.
+#' Stanojevic S, Kaminsky DA, Miller MR, et al. ERS/ATS technical
+#' standard on interpretive strategies for routine lung function
+#' tests. Eur Respir J. 2022;60(1):2101499.
+#' \doi{10.1183/13993003.01499-2021}. PRISm appears in Table 5 as
+#' the spirometry-only form of the non-specific pattern.
 #'
 #' @seealso [pft_classify()] for the full ATS pattern classification
-#'   when TLC is available; [pft_interpret()] runs both PRISm and full
-#'   classification automatically when the relevant columns are
+#'   when TLC is available; [pft_interpret()] runs both PRISm and
+#'   full classification automatically when the relevant columns are
 #'   present.
 #'
 #' @examples
-#' d <- data.frame(fev1 = 2.0, fev1_lln = 2.5,
+#' d <- data.frame(fev1    = 2.0, fev1_lln    = 2.5,
+#'                 fvc     = 2.6, fvc_lln     = 3.0,
 #'                 fev1fvc = 0.80, fev1fvc_lln = 0.70)
 #' pft_prism(d)
 #'
 #' @export
 pft_prism <- function(data) {
-  fev1_low      <- data$fev1    <  data$fev1_lln
-  ratio_normal  <- data$fev1fvc >= data$fev1fvc_lln
-  data$prism <- fev1_low & ratio_normal
+  fev1_low     <- data$fev1    <  data$fev1_lln
+  fvc_low      <- data$fvc     <  data$fvc_lln
+  ratio_normal <- data$fev1fvc >= data$fev1fvc_lln
+  data$prism <- fev1_low & fvc_low & ratio_normal
   tibble::as_tibble(data)
 }
