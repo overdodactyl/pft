@@ -31,6 +31,10 @@
 #' European Respiratory Society Technical Statement. Am J Respir Crit
 #' Care Med. 2019;200(8):e70-e88. \doi{10.1164/rccm.201908-1590ST}.
 #'
+#' @seealso [pft_validate()] for input-level QC; [pft_interpret()] for
+#'   the downstream interpretation once acceptable maneuvers have been
+#'   selected.
+#'
 #' @examples
 #' pft_quality(c(3.20, 3.15, 3.10))              # Grade A (within 0.15 L)
 #' pft_quality(c(3.20, 3.00))                    # Grade C (within 0.20 L)
@@ -45,17 +49,13 @@ pft_quality <- function(values, age = NA_real_) {
   if (n == 1) return("E")
 
   child <- !is.na(age) && age < 6
-  best_two_diff <- diff(sort(values, decreasing = TRUE)[1:2])
-  best_two_diff <- abs(best_two_diff)
+  th <- if (child) QUALITY_THRESHOLD_CHILD else QUALITY_THRESHOLD_ADULT
+  best_two_diff <- abs(diff(sort(values, decreasing = TRUE)[1:2]))
 
-  th_a <- if (child) 0.100 else 0.150
-  th_c <- if (child) 0.150 else 0.200
-  th_d <- if (child) 0.200 else 0.250
-
-  if (n >= 3 && best_two_diff <= th_a) return("A")
-  if (n >= 2 && best_two_diff <= th_a) return("B")
-  if (n >= 2 && best_two_diff <= th_c) return("C")
-  if (n >= 2 && best_two_diff <= th_d) return("D")
+  if (n >= 3 && best_two_diff <= th[["A"]]) return("A")
+  if (n >= 2 && best_two_diff <= th[["A"]]) return("B")
+  if (n >= 2 && best_two_diff <= th[["C"]]) return("C")
+  if (n >= 2 && best_two_diff <= th[["D"]]) return("D")
   "F"
 }
 
@@ -73,11 +73,15 @@ pft_quality <- function(values, age = NA_real_) {
 #'   `"GOLD 4"`, or `NA`.
 #'
 #' @details
-#' GOLD severity grades for airflow obstruction (FEV1 % predicted):
-#' - **GOLD 1 (mild)**: >= 80%
-#' - **GOLD 2 (moderate)**: 50 - 79%
-#' - **GOLD 3 (severe)**: 30 - 49%
-#' - **GOLD 4 (very severe)**: < 30%
+#' GOLD severity grades for airflow obstruction (FEV1 % predicted),
+#' matching the function's implementation:
+#'
+#' | Grade   | FEV1 % predicted   |
+#' |---------|--------------------|
+#' | GOLD 1  | `>= 80`            |
+#' | GOLD 2  | `>= 50 and < 80`   |
+#' | GOLD 3  | `>= 30 and < 50`   |
+#' | GOLD 4  | `< 30`             |
 #'
 #' These criteria apply only to patients with confirmed airflow
 #' obstruction (FEV1/FVC < lower limit of normal, or the GOLD-defined
@@ -89,20 +93,24 @@ pft_quality <- function(values, age = NA_real_) {
 #' Strategy for Prevention, Diagnosis and Management of COPD. Annual
 #' reports available at \url{https://goldcopd.org}.
 #'
+#' @seealso [pft_classify()] to confirm airflow obstruction before
+#'   applying GOLD severity; [pft_severity()] for the Stanojevic 2022
+#'   z-score-based severity scheme (which differs from GOLD's
+#'   percent-predicted scheme).
+#'
 #' @examples
 #' pft_gold(c(85, 65, 40, 25))
 #' # -> "GOLD 1" "GOLD 2" "GOLD 3" "GOLD 4"
 #'
 #' @export
 pft_gold <- function(fev1_pctpred) {
+  ok  <- !is.na(fev1_pctpred)
   out <- character(length(fev1_pctpred))
-  out[is.na(fev1_pctpred)]                                <- NA_character_
-  out[!is.na(fev1_pctpred) & fev1_pctpred >= 80]          <- "GOLD 1"
-  out[!is.na(fev1_pctpred) & fev1_pctpred >= 50 &
-        fev1_pctpred < 80]                                <- "GOLD 2"
-  out[!is.na(fev1_pctpred) & fev1_pctpred >= 30 &
-        fev1_pctpred < 50]                                <- "GOLD 3"
-  out[!is.na(fev1_pctpred) & fev1_pctpred < 30]           <- "GOLD 4"
+  out[!ok] <- NA_character_
+  out[ok & fev1_pctpred >= GOLD_BOUNDARIES["GOLD 2"]]                                            <- "GOLD 1"
+  out[ok & fev1_pctpred <  GOLD_BOUNDARIES["GOLD 2"] & fev1_pctpred >= GOLD_BOUNDARIES["GOLD 3"]] <- "GOLD 2"
+  out[ok & fev1_pctpred <  GOLD_BOUNDARIES["GOLD 3"] & fev1_pctpred >= GOLD_BOUNDARIES["GOLD 4"]] <- "GOLD 3"
+  out[ok & fev1_pctpred <  GOLD_BOUNDARIES["GOLD 4"]]                                            <- "GOLD 4"
   out
 }
 
@@ -122,6 +130,9 @@ pft_gold <- function(fev1_pctpred) {
 #' - `zscores`: per-measure z-score quantiles and percent below LLN.
 #' - `patterns`: ATS pattern frequencies (counts and proportions).
 #' - `prism`: PRISm prevalence (count and proportion).
+#'
+#' @seealso [pft_interpret()] to produce the per-patient input data
+#'   frame summarised here.
 #'
 #' @examples
 #' cohort <- data.frame(

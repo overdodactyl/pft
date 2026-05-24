@@ -42,3 +42,7 @@ d <- data.frame(sex = c("M","X"), age = c(45, 250),
 pft_validate(d)
 
 }
+\seealso{
+\code{\link[=pft_quality]{pft_quality()}} for ATS/ERS 2019 maneuver-level quality
+grading; \code{\link[=pft_interpret]{pft_interpret()}} for the downstream interpretation.
+}

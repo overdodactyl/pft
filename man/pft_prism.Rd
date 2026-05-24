@@ -37,3 +37,9 @@ on interpretive strategies for routine lung function tests. Eur Respir J.
 under "Classification of impairments" (Table 1) and discussed alongside
 the "non-specific" pattern.
 }
+\seealso{
+\code{\link[=pft_classify]{pft_classify()}} for the full ATS pattern classification
+when TLC is available; \code{\link[=pft_interpret]{pft_interpret()}} runs both PRISm and full
+classification automatically when the relevant columns are
+present.
+}

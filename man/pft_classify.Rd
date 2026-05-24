@@ -10,8 +10,17 @@ pft_classify(data)
 \item{data}{A data frame containing columns for fev1, fvc, fev1fvc, and their associated LLNs.}
 }
 \value{
-The original data frame with an additional column for ATS spirometry pattern labels,
-and a string indicating the normal/abnormal test values that assigned the pattern.
+The original data frame with two appended columns:
+\itemize{
+\item \code{ats_classification}: pattern label (\code{"Normal"}, \code{"Non-specific"},
+\code{"Obstructed"}, \code{"Restricted"}, or \code{"Mixed"}).
+\item \code{ats_pattern_combination}: a 4-character string in fixed column
+order \strong{FEV1, FVC, FEV1/FVC, TLC}, with \code{"A"} denoting the value
+is below its LLN and \code{"N"} denoting it is at or above. So
+\code{"NNAN"} means only FEV1/FVC is below its LLN (pure airway
+obstruction); \code{"AANA"} means FEV1, FVC, and TLC are all low while
+FEV1/FVC is preserved (restriction).
+}
 }
 \description{
 \code{pft_classify()} assigns ATS patterns using spirometry and lung volume data.
@@ -39,4 +48,10 @@ Pellegrino R, Viegi G, Brusasco V, et al. Interpretative strategies for
 lung function tests. Eur Respir J. 2005;26(5):948-968.
 \doi{10.1183/09031936.05.00035205}. The predecessor interpretation
 standard that this function's 5-category labelling derives from.
+}
+\seealso{
+\code{\link[=pft_prism]{pft_prism()}} for the spirometry-only PRISm screen (no TLC
+required). \code{\link[=pft_severity]{pft_severity()}} grades the per-measure z-scores
+downstream. \code{\link[=pft_interpret]{pft_interpret()}} runs this classifier as part of the
+one-call workflow.
 }

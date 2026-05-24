@@ -44,3 +44,10 @@ Global Lung Function Initiative reference values for static lung volumes
 in individuals of European ancestry. Eur Respir J. 2021;57(3):2000289.
 \doi{10.1183/13993003.00289-2020}.
 }
+\seealso{
+\code{\link[=pft_spirometry]{pft_spirometry()}} and \code{\link[=pft_diffusion]{pft_diffusion()}} for the analogous
+reference-value functions. \code{\link[=pft_classify]{pft_classify()}} uses TLC and its LLN
+(produced by this function) to identify restrictive impairments.
+\code{\link[=pft_interpret]{pft_interpret()}} composes all three reference functions in one
+call.
+}

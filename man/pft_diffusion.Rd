@@ -49,3 +49,9 @@ transfer factor for Caucasians. Eur Respir J. 2017;50(3):1700010.
 \doi{10.1183/13993003.00010-2017}. (Author correction:
 \doi{10.1183/13993003.50010-2017}, applied here.)
 }
+\seealso{
+\code{\link[=pft_spirometry]{pft_spirometry()}} and \code{\link[=pft_volumes]{pft_volumes()}} for the analogous
+reference-value functions. \code{\link[=pft_severity]{pft_severity()}} grades DLCO impairment
+severity from the z-score column produced here. \code{\link[=pft_interpret]{pft_interpret()}}
+composes all three reference functions in one call.
+}

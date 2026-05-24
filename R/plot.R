@@ -15,6 +15,9 @@
 #'
 #' @return A `ggplot` object.
 #'
+#' @seealso [pft_interpret()] to produce the input data; [pft_report()]
+#'   to embed this figure into a clinical PDF/HTML report.
+#'
 #' @examples
 #' \dontrun{
 #' patient <- data.frame(

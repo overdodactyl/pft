@@ -28,6 +28,9 @@
 #' @return The original data frame with `qc_pass` and `qc_issues`
 #'   columns appended.
 #'
+#' @seealso [pft_quality()] for ATS/ERS 2019 maneuver-level quality
+#'   grading; [pft_interpret()] for the downstream interpretation.
+#'
 #' @examples
 #' d <- data.frame(sex = c("M","X"), age = c(45, 250),
 #'                 height = c(178, 30))

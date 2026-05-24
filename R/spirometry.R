@@ -41,6 +41,13 @@
 #' interpretation of lung function measurements. Am J Respir Crit Care Med.
 #' 2023;207(6):768-774. \doi{10.1164/rccm.202205-0963OC}.
 #'
+#' @seealso [pft_volumes()] and [pft_diffusion()] for the analogous
+#'   reference-value functions for lung volumes and diffusion capacity.
+#'   [pft_classify()] consumes the LLN columns produced here to assign
+#'   ATS interpretive patterns. [pft_interpret()] is the one-call
+#'   wrapper that combines spirometry, volumes, diffusion, and all
+#'   downstream interpretation primitives.
+#'
 #' @examples
 #' data <- data.frame(sex=c("M","F"),
 #'                    age=c(30.1,5.1),

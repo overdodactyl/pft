@@ -4,7 +4,7 @@
 \alias{pft_bdr}
 \title{Bronchodilator response per the ERS/ATS 2022 criterion}
 \usage{
-pft_bdr(pre, post, predicted, threshold = 10)
+pft_bdr(pre, post, predicted, threshold = BDR_THRESHOLD_PCT_PRED)
 }
 \arguments{
 \item{pre, post}{Numeric vectors of pre- and post-bronchodilator
@@ -43,4 +43,9 @@ Stanojevic S, Kaminsky DA, Miller MR, et al. ERS/ATS technical standard
 on interpretive strategies for routine lung function tests. Eur Respir J.
 2022;60(1):2101499. \doi{10.1183/13993003.01499-2021}. See the
 "Bronchodilator responsiveness testing" section.
+}
+\seealso{
+\code{\link[=pft_spirometry]{pft_spirometry()}} to obtain the predicted FEV1 / FVC values
+used as the denominator. \code{\link[=pft_interpret]{pft_interpret()}} runs BDR automatically
+when \verb{<measure>_pre} and \verb{<measure>_post} columns are present.
 }

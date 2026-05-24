@@ -5,8 +5,15 @@
 #'
 #' @param data A data frame containing columns for fev1, fvc, fev1fvc, and their associated LLNs.
 #'
-#' @return The original data frame with an additional column for ATS spirometry pattern labels,
-#'         and a string indicating the normal/abnormal test values that assigned the pattern.
+#' @return The original data frame with two appended columns:
+#'   * `ats_classification`: pattern label (`"Normal"`, `"Non-specific"`,
+#'     `"Obstructed"`, `"Restricted"`, or `"Mixed"`).
+#'   * `ats_pattern_combination`: a 4-character string in fixed column
+#'     order **FEV1, FVC, FEV1/FVC, TLC**, with `"A"` denoting the value
+#'     is below its LLN and `"N"` denoting it is at or above. So
+#'     `"NNAN"` means only FEV1/FVC is below its LLN (pure airway
+#'     obstruction); `"AANA"` means FEV1, FVC, and TLC are all low while
+#'     FEV1/FVC is preserved (restriction).
 #'
 #' @references
 #' Stanojevic S, Kaminsky DA, Miller MR, et al. ERS/ATS technical standard
@@ -19,6 +26,11 @@
 #' lung function tests. Eur Respir J. 2005;26(5):948-968.
 #' \doi{10.1183/09031936.05.00035205}. The predecessor interpretation
 #' standard that this function's 5-category labelling derives from.
+#'
+#' @seealso [pft_prism()] for the spirometry-only PRISm screen (no TLC
+#'   required). [pft_severity()] grades the per-measure z-scores
+#'   downstream. [pft_interpret()] runs this classifier as part of the
+#'   one-call workflow.
 #'
 #' @examples data <- data.frame(fev1 = c(3.453, 2.385),
 #'                              fev1_lln = c(3.303, 3.384),

@@ -20,13 +20,15 @@ Returns the GOLD spirometric severity grade (1-4) for one or more
 patients given their FEV1 expressed as a percent of predicted.
 }
 \details{
-GOLD severity grades for airflow obstruction (FEV1 \% predicted):
-\itemize{
-\item \strong{GOLD 1 (mild)}: >= 80\%
-\item \strong{GOLD 2 (moderate)}: 50 - 79\%
-\item \strong{GOLD 3 (severe)}: 30 - 49\%
-\item \strong{GOLD 4 (very severe)}: < 30\%
+GOLD severity grades for airflow obstruction (FEV1 \% predicted),
+matching the function's implementation:\tabular{ll}{
+   Grade \tab FEV1 \% predicted \cr
+   GOLD 1 \tab \verb{>= 80} \cr
+   GOLD 2 \tab \verb{>= 50 and < 80} \cr
+   GOLD 3 \tab \verb{>= 30 and < 50} \cr
+   GOLD 4 \tab \verb{< 30} \cr
 }
+
 
 These criteria apply only to patients with confirmed airflow
 obstruction (FEV1/FVC < lower limit of normal, or the GOLD-defined
@@ -42,4 +44,10 @@ pft_gold(c(85, 65, 40, 25))
 Global Initiative for Chronic Obstructive Lung Disease (GOLD). Global
 Strategy for Prevention, Diagnosis and Management of COPD. Annual
 reports available at \url{https://goldcopd.org}.
+}
+\seealso{
+\code{\link[=pft_classify]{pft_classify()}} to confirm airflow obstruction before
+applying GOLD severity; \code{\link[=pft_severity]{pft_severity()}} for the Stanojevic 2022
+z-score-based severity scheme (which differs from GOLD's
+percent-predicted scheme).
 }

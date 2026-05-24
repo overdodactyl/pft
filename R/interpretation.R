@@ -2,10 +2,18 @@
 #'
 #' @description
 #' Assigns one of four severity categories to a z-score per the
-#' Stanojevic et al. ERS/ATS 2022 interpretation standard: `"normal"`
-#' (z > -1.645), `"mild"`, `"moderate"`, or `"severe"`. The same three-
-#' level (mild/moderate/severe) grading applies uniformly to spirometry,
-#' lung-volume, and diffusion measures.
+#' Stanojevic et al. ERS/ATS 2022 interpretation standard. The same
+#' three-level (mild/moderate/severe) grading applies uniformly to
+#' spirometry, lung-volume, and diffusion measures.
+#'
+#' Boundary conventions (matching the function's implementation):
+#'
+#' | Grade     | z-score                |
+#' |-----------|------------------------|
+#' | normal    | `z >= -1.645`          |
+#' | mild      | `-2.5 <= z < -1.645`   |
+#' | moderate  | `-4 <= z < -2.5`       |
+#' | severe    | `z < -4`               |
 #'
 #' @param zscore Numeric vector of z-scores.
 #'
@@ -18,18 +26,24 @@
 #' 2022;60(1):2101499. \doi{10.1183/13993003.01499-2021}. The cut points
 #' are taken from the "Severity of lung function impairment" section.
 #'
+#' @seealso [pft_classify()] for the pattern label that severity sits
+#'   alongside; [pft_gold()] for COPD-specific severity from FEV1
+#'   percent predicted; [pft_interpret()] applies this grading to every
+#'   z-score column in one call.
+#'
 #' @examples
 #' pft_severity(c(0, -1.7, -3, -5))
 #' # -> "normal" "mild" "moderate" "severe"
 #'
 #' @export
 pft_severity <- function(zscore) {
-  out <- character(length(zscore))
-  out[is.na(zscore)]            <- NA_character_
-  out[!is.na(zscore) & zscore >= -1.645]                  <- "normal"
-  out[!is.na(zscore) & zscore <  -1.645 & zscore >= -2.5] <- "mild"
-  out[!is.na(zscore) & zscore <  -2.5   & zscore >= -4.0] <- "moderate"
-  out[!is.na(zscore) & zscore <  -4.0]                    <- "severe"
+  ok   <- !is.na(zscore)
+  out  <- character(length(zscore))
+  out[!ok] <- NA_character_
+  out[ok & zscore >= SEVERITY_BOUNDARIES["mild"]]                                                  <- "normal"
+  out[ok & zscore <  SEVERITY_BOUNDARIES["mild"]     & zscore >= SEVERITY_BOUNDARIES["moderate"]]  <- "mild"
+  out[ok & zscore <  SEVERITY_BOUNDARIES["moderate"] & zscore >= SEVERITY_BOUNDARIES["severe"]]    <- "moderate"
+  out[ok & zscore <  SEVERITY_BOUNDARIES["severe"]]                                                <- "severe"
   out
 }
 
@@ -63,12 +77,16 @@ pft_severity <- function(zscore) {
 #' 2022;60(1):2101499. \doi{10.1183/13993003.01499-2021}. See the
 #' "Bronchodilator responsiveness testing" section.
 #'
+#' @seealso [pft_spirometry()] to obtain the predicted FEV1 / FVC values
+#'   used as the denominator. [pft_interpret()] runs BDR automatically
+#'   when `<measure>_pre` and `<measure>_post` columns are present.
+#'
 #' @examples
 #' pft_bdr(pre = 2.5, post = 3.0, predicted = 4.0)
 #' # -> 12.5% of predicted change, is_significant = TRUE
 #'
 #' @export
-pft_bdr <- function(pre, post, predicted, threshold = 10) {
+pft_bdr <- function(pre, post, predicted, threshold = BDR_THRESHOLD_PCT_PRED) {
   pct <- (post - pre) / predicted * 100
   tibble::tibble(
     pct_pred_change = pct,
@@ -101,6 +119,11 @@ pft_bdr <- function(pre, post, predicted, threshold = 10) {
 #' 2022;60(1):2101499. \doi{10.1183/13993003.01499-2021}. PRISm is listed
 #' under "Classification of impairments" (Table 1) and discussed alongside
 #' the "non-specific" pattern.
+#'
+#' @seealso [pft_classify()] for the full ATS pattern classification
+#'   when TLC is available; [pft_interpret()] runs both PRISm and full
+#'   classification automatically when the relevant columns are
+#'   present.
 #'
 #' @examples
 #' d <- data.frame(fev1 = 2.0, fev1_lln = 2.5,

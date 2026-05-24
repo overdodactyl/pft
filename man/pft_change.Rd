@@ -4,14 +4,19 @@
 \alias{pft_change}
 \title{Conditional change score for serial PFT measurements}
 \usage{
-pft_change(z1, z2, r = 0.7)
+pft_change(z1, z2, r = DEFAULT_AUTOCORRELATION)
 }
 \arguments{
 \item{z1, z2}{Numeric vectors of z-scores at time points 1 and 2.}
 
-\item{r}{Within-subject z-score autocorrelation. Default 0.7, a
-commonly cited mid-range value for FEV1 in adults at 1-year
-intervals.}
+\item{r}{Within-subject z-score autocorrelation between the two
+time points. Default \code{0.7} is a mid-range value drawn from
+adult longitudinal studies of FEV1 over ~1-year intervals
+(Vollmer WM et al. \emph{Eur Respir J.} 1988;1(7):589-596; Wang ML
+et al. \emph{Chest.} 2014;145(2):353-359). Pass an interval- and
+measure-specific value from your population literature when
+available; the result is sensitive to this choice. The valid
+range is \verb{(-1, 1)}.}
 }
 \value{
 A data frame with columns:
@@ -50,4 +55,9 @@ pft_change(z1 = -1, z2 = -2)
 Stanojevic S, Kaminsky DA, Miller MR, et al. ERS/ATS technical standard
 on interpretive strategies for routine lung function tests. Eur Respir J.
 2022;60(1):2101499. \doi{10.1183/13993003.01499-2021}.
+}
+\seealso{
+\code{\link[=pft_spirometry]{pft_spirometry()}}, \code{\link[=pft_volumes]{pft_volumes()}}, and \code{\link[=pft_diffusion]{pft_diffusion()}}
+to produce the z-scores at each time point that this function
+compares.
 }

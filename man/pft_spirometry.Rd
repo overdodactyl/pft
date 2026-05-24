@@ -59,3 +59,11 @@ Bowerman C, Bhakta NR, Brazzale D, et al. A race-neutral approach to the
 interpretation of lung function measurements. Am J Respir Crit Care Med.
 2023;207(6):768-774. \doi{10.1164/rccm.202205-0963OC}.
 }
+\seealso{
+\code{\link[=pft_volumes]{pft_volumes()}} and \code{\link[=pft_diffusion]{pft_diffusion()}} for the analogous
+reference-value functions for lung volumes and diffusion capacity.
+\code{\link[=pft_classify]{pft_classify()}} consumes the LLN columns produced here to assign
+ATS interpretive patterns. \code{\link[=pft_interpret]{pft_interpret()}} is the one-call
+wrapper that combines spirometry, volumes, diffusion, and all
+downstream interpretation primitives.
+}

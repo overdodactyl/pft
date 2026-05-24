@@ -33,3 +33,7 @@ pft_plot(pft_interpret(patient))
 }
 
 }
+\seealso{
+\code{\link[=pft_interpret]{pft_interpret()}} to produce the input data; \code{\link[=pft_report]{pft_report()}}
+to embed this figure into a clinical PDF/HTML report.
+}

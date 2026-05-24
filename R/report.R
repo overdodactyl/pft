@@ -20,6 +20,9 @@
 #'
 #' @return The (invisible) path to the rendered report.
 #'
+#' @seealso [pft_interpret()] to produce the result object this
+#'   function renders; [pft_plot()] for the embedded z-score figure.
+#'
 #' @examples
 #' \dontrun{
 #' patient <- data.frame(

@@ -32,6 +32,11 @@
 #' \doi{10.1183/13993003.00010-2017}. (Author correction:
 #' \doi{10.1183/13993003.50010-2017}, applied here.)
 #'
+#' @seealso [pft_spirometry()] and [pft_volumes()] for the analogous
+#'   reference-value functions. [pft_severity()] grades DLCO impairment
+#'   severity from the z-score column produced here. [pft_interpret()]
+#'   composes all three reference functions in one call.
+#'
 #' @examples
 #' data <- data.frame(sex=c("M","F"),
 #'                    age=c(30,5.1),

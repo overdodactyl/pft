@@ -27,6 +27,12 @@
 #' in individuals of European ancestry. Eur Respir J. 2021;57(3):2000289.
 #' \doi{10.1183/13993003.00289-2020}.
 #'
+#' @seealso [pft_spirometry()] and [pft_diffusion()] for the analogous
+#'   reference-value functions. [pft_classify()] uses TLC and its LLN
+#'   (produced by this function) to identify restrictive impairments.
+#'   [pft_interpret()] composes all three reference functions in one
+#'   call.
+#'
 #' @examples
 #' data <- data.frame(sex=c("M","F"),
 #'                    age=c(30,5.1),

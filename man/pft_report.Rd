@@ -44,3 +44,7 @@ pft_report(result, output_file = "patient_report.html")
 }
 
 }
+\seealso{
+\code{\link[=pft_interpret]{pft_interpret()}} to produce the result object this
+function renders; \code{\link[=pft_plot]{pft_plot()}} for the embedded z-score figure.
+}

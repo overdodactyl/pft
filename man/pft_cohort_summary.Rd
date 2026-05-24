@@ -40,3 +40,7 @@ result <- pft_interpret(cohort)
 pft_cohort_summary(result)
 
 }
+\seealso{
+\code{\link[=pft_interpret]{pft_interpret()}} to produce the per-patient input data
+frame summarised here.
+}

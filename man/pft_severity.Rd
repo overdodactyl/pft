@@ -15,10 +15,17 @@ Character vector the same length as \code{zscore} with values
 }
 \description{
 Assigns one of four severity categories to a z-score per the
-Stanojevic et al. ERS/ATS 2022 interpretation standard: \code{"normal"}
-(z > -1.645), \code{"mild"}, \code{"moderate"}, or \code{"severe"}. The same three-
-level (mild/moderate/severe) grading applies uniformly to spirometry,
-lung-volume, and diffusion measures.
+Stanojevic et al. ERS/ATS 2022 interpretation standard. The same
+three-level (mild/moderate/severe) grading applies uniformly to
+spirometry, lung-volume, and diffusion measures.
+
+Boundary conventions (matching the function's implementation):\tabular{ll}{
+   Grade \tab z-score \cr
+   normal \tab \code{z >= -1.645} \cr
+   mild \tab \verb{-2.5 <= z < -1.645} \cr
+   moderate \tab \verb{-4 <= z < -2.5} \cr
+   severe \tab \code{z < -4} \cr
+}
 }
 \examples{
 pft_severity(c(0, -1.7, -3, -5))
@@ -30,4 +37,10 @@ Stanojevic S, Kaminsky DA, Miller MR, et al. ERS/ATS technical standard
 on interpretive strategies for routine lung function tests. Eur Respir J.
 2022;60(1):2101499. \doi{10.1183/13993003.01499-2021}. The cut points
 are taken from the "Severity of lung function impairment" section.
+}
+\seealso{
+\code{\link[=pft_classify]{pft_classify()}} for the pattern label that severity sits
+alongside; \code{\link[=pft_gold]{pft_gold()}} for COPD-specific severity from FEV1
+percent predicted; \code{\link[=pft_interpret]{pft_interpret()}} applies this grading to every
+z-score column in one call.
 }
