@@ -1,5 +1,37 @@
 # pft (development version)
 
+## New interpretation primitives (audit follow-up)
+
+The just-completed source-paper verification audit documented
+several paper features that pft did not yet implement. The first
+three of those are now landing as direct follow-ups, each on its
+own feature branch with the same constants-sentinel + paper-anchored
+worked-example test pattern the audit established.
+
+### pft_fev1q()
+
+Computes FEV1Q per Stanojevic 2022 Box 3 (p. 13). FEV1Q expresses
+FEV1 in relation to a sex-specific 1st-percentile "bottom line"
+(0.5 L for males, 0.4 L for females) required for survival in adult
+lung-disease populations; values closer to 1 indicate greater risk
+of death. The 2022 standard suggests FEV1Q as the adult alternative
+to the conditional change score ([pft_change()]), which is derived
+from a children / young-people cohort.
+
+* `pft_fev1q(fev1, sex, age = NA_real_)` returns the FEV1Q ratio.
+* `age` is optional; when supplied, applies the paper's adult-only
+  caveat (`age < 18` -> `NA_real_`).
+* Reuses `normalize_sex_vec()` so "Male" / "female" / etc. work.
+* Constants `FEV1Q_DENOM_MALE` / `FEV1Q_DENOM_FEMALE` /
+  `FEV1Q_MIN_AGE` in `R/constants.R`, all pinned by sentinel tests.
+* Anchor test reproduces the Box 3 verbatim worked example:
+  `pft_fev1q(0.9, "F", age = 70) == 2.25`.
+* `papers/ats_2022_interpretation/verification.md` updated --
+  FEV1Q section flipped from "NOT IMPLEMENTED" to documented
+  implementation.
+
+Test count: 1123 -> 1146 (+23).
+
 ## Source-paper verification audit
 
 A line-by-line re-audit of every constant and algorithm in the
