@@ -211,6 +211,34 @@ test_that("NA measured value propagates to NA z-score and pctpred", {
   expect_true(is.na(out$fev1_pctpred))
 })
 
+## --- Quanjer 2012 Table 4 worked examples (paper p. 1335) ---------------
+## Paper Table 4 lists predicted spirometry values from the GLI 2012
+## equations for Caucasian males at six (age, height) combinations. The
+## paper reports values to 2 dp; tolerance reflects half-up rounding.
+## Anchors the package output against the published reference values
+## independently of the GLI web-calculator oracle.
+
+test_that("Quanjer 2012 Table 4: Caucasian male predicted values", {
+  cases <- data.frame(
+    sex    = "M",
+    age    = c(17.9, 18.0, 17.9, 18.0, 25.0, 55.0),
+    height = c(160,  160,  180,  180,  175,  175),
+    race   = "Caucasian"
+  )
+  expected <- data.frame(
+    fev1    = c(3.61, 3.61, 4.68, 4.69, 4.46, 3.65),
+    fvc     = c(4.12, 4.13, 5.47, 5.49, 5.32, 4.66),
+    fev1fvc = c(0.88, 0.88, 0.86, 0.86, 0.84, 0.79)
+  )
+  out <- pft_spirometry(cases, year = 2012)
+  expect_equal(out$fev1_pred,    expected$fev1,    tolerance = 0.02,
+               label = "FEV1 vs Quanjer 2012 Table 4")
+  expect_equal(out$fvc_pred,     expected$fvc,     tolerance = 0.02,
+               label = "FVC vs Quanjer 2012 Table 4")
+  expect_equal(out$fev1fvc_pred, expected$fev1fvc, tolerance = 0.01,
+               label = "FEV1/FVC vs Quanjer 2012 Table 4")
+})
+
 ## --- GLI 2022 oracle ----------------------------------------------------
 ## The fixture tests/testthat/gli_2022_oracle.csv is the canonical
 ## reference; regenerate via data-raw/build_gli_2022_oracle.R if it ever
