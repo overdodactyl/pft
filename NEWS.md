@@ -104,6 +104,66 @@ official GLI Global lookup-tables workbook.
 assertions and 104 structural / sentinel-cell assertions guarding
 the sysdata layer against silent regressions.
 
+### Hall 2021 (GLI 2021 static lung volumes)
+
+Documented in `papers/gli_2021_volumes/verification.md`. Audited the
+data-extraction layer (`data-raw/build_gli_2021_volumes.R`) and the
+runtime equation (`R/lung_volumes.R::pft_volumes()`) against Hall
+et al. ERJ 2021, the supplement workbook (14 spline lookup tables),
+and the supplement PDF (worked example p. 9, Table S4 VC
+predictions p. 8).
+
+* Conditional log-vs-linear covariate logic in `pft_volumes()` —
+  verified verbatim against Table 3 (paper p. 5). FRC and TLC use
+  `log(age)` and `log(height)`; **RV and RV/TLC use linear age AND
+  linear height**; ERV, IC, VC use linear age and `log(height)`.
+  FRC alone uses `log(age)` in the S equation; all others use
+  linear age. ERV / IC / VC have **no Sspline term**. The runtime
+  conditionals in `lung_volumes.R:122-129` match Table 3 row-for-row
+  across all 7 measures. This was flagged as the fragile part of
+  the volumes pipeline; it is correct.
+* Hand-keyed coefficient extraction — `build_gli_2021_volumes.R`
+  hand-keys 84 coefficient values (14 measure-sex rows × 6
+  columns) from Table 3, since the supplement workbook only
+  contains the spline lookup tables. All 84 values match the paper
+  verbatim at zero delta.
+* Spline tables — 14 random (sheet × age × column) cells
+  spot-checked from the xlsx against parsed `volume_splines`.
+  All match at machine precision. The workbook column order is
+  `age, Mspline, Sspline, Lspline` — a third distinct layout among
+  the three GLI workbooks audited (different from GLI 2012's
+  `age, L, M, S` and GLI 2022's `age, M, S, L`); the build script
+  handles it correctly. The ERV/IC/VC Sspline columns are NA in
+  the workbook (per Table 3's S-equation form); the build script
+  substitutes 0 so the runtime can unconditionally add the spline.
+* Worked example (supplement p. 9): Male 30y 178cm with FRC=3.7L.
+  Paper reports `frc_pred = 3.307587, frc_pctpred = 111.864,
+  frc_lln = 2.251922, frc_zscore = 0.5211515`. Package reproduces
+  `frc_pred` and `frc_pctpred` within ~10⁻⁵ (essentially exact).
+  `frc_lln` and `frc_zscore` differ from the paper-reported values
+  by ~5×10⁻⁴ — the paper's worked example contains a small internal
+  inconsistency (applying the LLN formula to the paper's own
+  reported intermediate S = 0.2190672 yields 2.25148, not the
+  paper's stated 2.251922). The package consistently applies
+  Table 3 coefficients end-to-end; the discrepancy is publication
+  rounding noise, not a code bug.
+* Table S4 VC predictions (supplement p. 8) — 8 cross-sex
+  cross-age predictions reproduce within ±5 mL, inside the paper's
+  2-dp printing precision.
+* Table S3 obesity-sensitivity table (supplement p. 7) does **not**
+  reproduce from the published Table 3 equations (ULN values are
+  3-6% lower in the package than in Table S3; RV pred is +20 mL
+  off). The canonical Table 3 equations, the FRC worked example,
+  and Table S4 all agree with each other; Table S3 alone disagrees.
+  Most likely a sensitivity-analysis draft figure that didn't track
+  the final coefficient values. Documented in
+  `verification.md`; not used as anchor tests.
+
+**No corrections required.** The audit added 13 anchor-test
+assertions (FRC worked example + Table S4 VC) and 187 structural /
+sentinel-cell assertions guarding the sysdata layer against silent
+regressions.
+
 ## Predecessor 2005 standard
 
 Pellegrino 2005 interpretive primitives are now available so the
