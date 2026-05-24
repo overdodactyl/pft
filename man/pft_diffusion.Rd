@@ -4,7 +4,7 @@
 \alias{pft_diffusion}
 \title{Compute carbon monoxide diffusion capacity or transfer factor reference values for given demographics}
 \usage{
-pft_diffusion(data, SI.units = FALSE)
+pft_diffusion(data, SI.units = FALSE, sex = sex, age = age, height = height)
 }
 \arguments{
 \item{data}{A data frame containing columns for sex ("M","F"),
@@ -16,6 +16,13 @@ used to compute z-score and percent-predicted (see Value).}
 
 \item{SI.units}{A boolean. Returns the reference values in SI units if TRUE
 .  and Traditional units if FALSE.}
+
+\item{sex, age, height}{Column references. By default \code{pft_diffusion()}
+reads from \code{sex}, \code{age}, and \code{height}. Override via a bare name
+(\code{sex = Sex}), a string (\code{sex = "Sex"}), or an rlang injection
+(\code{sex = !!my_var}). The user's original column names are preserved
+in the output. See \code{\link[=pft_required_columns]{pft_required_columns()}} for the full input
+contract.}
 }
 \value{
 The original data frame with extra columns appended for each

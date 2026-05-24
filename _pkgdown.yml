@@ -23,6 +23,7 @@ reference:
       - pft_spirometry
       - pft_volumes
       - pft_diffusion
+      - pft_required_columns
 
   - title: Interpretation primitives
     desc: >
@@ -54,6 +55,10 @@ reference:
       - pft_plot
       - pft_report
 
+  - title: Example data
+    contents:
+      - pft_example
+
   - title: Re-exports
     contents:
       - as_tibble
@@ -63,6 +68,7 @@ articles:
     navbar: ~
     contents:
       - pft
+      - input-format
       - glossary
 
 navbar:

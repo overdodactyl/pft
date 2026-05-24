@@ -4,7 +4,7 @@
 \alias{pft_volumes}
 \title{Compute lung volume reference values for given demographics}
 \usage{
-pft_volumes(data)
+pft_volumes(data, sex = sex, age = age, height = height)
 }
 \arguments{
 \item{data}{A data frame containing columns for sex ("M","F"),
@@ -13,6 +13,13 @@ also contains any of \code{frc_measured}, \code{tlc_measured}, \code{rv_measured
 \code{rv_tlc_measured}, \code{erv_measured}, \code{ic_measured}, \code{vc_measured},
 the corresponding measured value is used to compute a z-score and
 percent-predicted (see Value).}
+
+\item{sex, age, height}{Column references. By default \code{pft_volumes()}
+reads from \code{sex}, \code{age}, and \code{height}. Override via a bare name
+(\code{sex = Sex}), a string (\code{sex = "Sex"}), or an rlang injection
+(\code{sex = !!my_var}). The user's original column names are preserved
+in the output. See \code{\link[=pft_required_columns]{pft_required_columns()}} for the full input
+contract.}
 }
 \value{
 The original data frame with extra columns appended for each

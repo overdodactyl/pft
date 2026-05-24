@@ -1,5 +1,42 @@
 # pft (development version)
 
+## Input contract
+
+* `pft_spirometry()`, `pft_volumes()`, `pft_diffusion()`, and
+  `pft_interpret()` now accept tidyverse-style column references for
+  the demographics inputs. Bare names (`sex = Sex`), strings
+  (`sex = "Sex"`), and rlang injection (`sex = !!my_var`) are all
+  supported. Defaults match the canonical column names, so existing
+  code keeps working unchanged. The user's original column names are
+  preserved in the output.
+* New `pft_required_columns()` function programmatically returns the
+  required + optional columns each reference function consumes,
+  including which `<measure>_measured`, `<measure>_pre`, and
+  `<measure>_post` columns unlock z-scores, percent predicted, and
+  bronchodilator response.
+* New "Input data format" vignette walks through the data-frame
+  contract, units and types per column, the override syntax, and
+  common errors.
+
+## Input normalization
+
+* **Bug fix (silent-wrong-sex):** any `sex` value other than `"M"`
+  was previously treated as `"F"` without warning, so a cohort
+  with `"Male"` / `"Female"` / `"male"` etc. silently produced female
+  predictions. `pft_spirometry()`, `pft_volumes()`, and
+  `pft_diffusion()` now soft-correct common variants
+  (`"male"` -> `"M"`, `"Female"` -> `"F"`, etc.) with a warning;
+  truly unrecognised values (e.g. `"X"`, `"Unknown"`) are set to NA
+  rather than mis-coded.
+* `race` values are similarly soft-corrected case-insensitively with
+  whitespace and synonym tolerance (`"caucasian"` -> `"Caucasian"`,
+  `"white"` -> `"Caucasian"`, `"black"` -> `"AfrAm"`, etc.). All
+  normalisation findings roll up into a single consolidated warning
+  per call.
+* Missing `sex`, `age`, `height` columns (or `race` for GLI 2012) now
+  error with a clear message listing the expected names, rather than
+  silently producing all-NA output.
+
 ## Reference equations
 
 * All internal reference data is now built reproducibly from the

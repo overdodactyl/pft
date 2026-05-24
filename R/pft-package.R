@@ -12,6 +12,29 @@
 #' cohort-level summaries; input QC; clinical-style visualisation; and
 #' rmarkdown-based clinical reports.
 #'
+#' @section Input data format:
+#' Every reference function (`pft_spirometry()`, `pft_volumes()`,
+#' `pft_diffusion()`, `pft_interpret()`) reads from canonical column
+#' names (`sex`, `age`, `height`, and -- for GLI 2012 -- `race`) by
+#' default. If your data frame names them differently, point at them
+#' explicitly via tidyverse-style column references:
+#'
+#' ```r
+#' pft_spirometry(d, sex = Sex, age = Age_y,
+#'                   height = Ht_cm, race = Ancestry)
+#' ```
+#'
+#' Bare names, strings (`sex = "Sex"`), and rlang injection
+#' (`sex = !!my_var`) are all accepted. The user's original column
+#' names are preserved in the output.
+#'
+#' Optional `<measure>_measured`, `<measure>_pre`, and
+#' `<measure>_post` columns unlock z-score, percent-predicted, and
+#' bronchodilator-response outputs respectively; these are looked up
+#' by literal name (not overridable). See [pft_required_columns()]
+#' for the authoritative input contract per function, or
+#' `vignette("input-format")` for a walkthrough.
+#'
 #' @section Conventions used throughout:
 #' To support unambiguous clinical and research use, the following
 #' conventions hold across every exported function:

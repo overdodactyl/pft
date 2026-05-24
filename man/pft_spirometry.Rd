@@ -4,7 +4,14 @@
 \alias{pft_spirometry}
 \title{Compute spirometry reference values for given demographics}
 \usage{
-pft_spirometry(data, year = 2012)
+pft_spirometry(
+  data,
+  year = 2012,
+  sex = sex,
+  age = age,
+  height = height,
+  race = race
+)
 }
 \arguments{
 \item{data}{A data frame containing columns for sex ("M","F"),
@@ -22,6 +29,14 @@ percent-predicted for that measure (see Value).}
 \item{year}{The year of GLI published equations. Valid options are
 2012 (multi-ethnic, requires a \code{race} column) and 2022 (race-neutral
 "GLI Global"; the \code{race} column, if present, is ignored).}
+
+\item{sex, age, height, race}{Column references. By default
+\code{pft_spirometry()} reads from \code{sex}, \code{age}, \code{height}, and (for GLI
+2012) \code{race}. If your data frame names them differently, override
+via a bare name (\code{sex = Sex}), a string (\code{sex = "Sex"}), or an
+rlang injection (\code{sex = !!my_var}). The user's original column
+names are preserved in the output. See \code{\link[=pft_required_columns]{pft_required_columns()}}
+for the full input contract.}
 }
 \value{
 The original data frame with extra columns appended for each

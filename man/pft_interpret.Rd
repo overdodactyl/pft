@@ -4,7 +4,15 @@
 \alias{pft_interpret}
 \title{Comprehensive ERS/ATS 2022 PFT interpretation in one call}
 \usage{
-pft_interpret(data, year = 2012, SI.units = FALSE)
+pft_interpret(
+  data,
+  year = 2012,
+  SI.units = FALSE,
+  sex = sex,
+  age = age,
+  height = height,
+  race = race
+)
 }
 \arguments{
 \item{data}{A data frame containing whatever inputs are available.
@@ -14,6 +22,14 @@ See Details for the column-name conventions.}
 
 \item{SI.units}{Whether to report diffusion in SI units. See
 \code{\link[=pft_diffusion]{pft_diffusion()}}.}
+
+\item{sex, age, height, race}{Column references. By default
+\code{pft_interpret()} reads from \code{sex}, \code{age}, \code{height}, and (for
+\code{year = 2012}) \code{race}. Override via a bare name (\code{sex = Sex}), a
+string (\code{sex = "Sex"}), or an rlang injection (\code{sex = !!my_var}).
+See \code{\link[=pft_required_columns]{pft_required_columns()}} for the full input contract. The
+\verb{_measured}, \verb{_pre}, and \verb{_post} columns are still auto-detected
+by name and not overridable.}
 }
 \value{
 The original data frame with every applicable reference value,

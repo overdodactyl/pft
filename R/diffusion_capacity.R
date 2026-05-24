@@ -15,6 +15,13 @@
 #' @param SI.units A boolean. Returns the reference values in SI units if TRUE
 #'.  and Traditional units if FALSE.
 #'
+#' @param sex,age,height Column references. By default `pft_diffusion()`
+#'   reads from `sex`, `age`, and `height`. Override via a bare name
+#'   (`sex = Sex`), a string (`sex = "Sex"`), or an rlang injection
+#'   (`sex = !!my_var`). The user's original column names are preserved
+#'   in the output. See [pft_required_columns()] for the full input
+#'   contract.
+#'
 #' @return The original data frame with extra columns appended for each
 #'   measure:
 #'   - `<measure>_pred`: predicted (median) value.
@@ -44,10 +51,23 @@
 #' pft_diffusion(data)
 #'
 #' @export
-pft_diffusion <- function(data, SI.units = FALSE) {
+pft_diffusion <- function(data, SI.units = FALSE,
+                           sex = sex, age = age, height = height) {
 
-  data <- pft_normalize_inputs(data, requires_race = FALSE)
-  n <- nrow(data)
+  prep <- pft_normalize_inputs(
+    data, requires_race = FALSE,
+    sex    = rlang::enquo(sex),
+    age    = rlang::enquo(age),
+    height = rlang::enquo(height),
+    race   = rlang::quo(NULL)
+  )
+  data <- prep$data
+  cols <- prep$cols
+
+  sex_vec    <- data[[cols$sex]]
+  age_vec    <- data[[cols$age]]
+  height_vec <- data[[cols$height]]
+  n <- length(sex_vec)
 
   index.spline <- matrix(NA,nrow=n,ncol=5)
   Mspline <- matrix(NA,nrow=n,ncol=5)
@@ -65,26 +85,24 @@ pft_diffusion <- function(data, SI.units = FALSE) {
 
     # Skip rows with missing demographics; outputs stay NA via the
     # pre-allocated NA matrices above.
-    if (is.na(data$sex[i]) || is.na(data$age[i]) || is.na(data$height[i])) {
+    if (is.na(sex_vec[i]) || is.na(age_vec[i]) || is.na(height_vec[i])) {
       next
     }
 
-    if (data$sex[i] == "M") {
-      g.index <- c(1,3,5,7,9)
-    } else {
-      g.index <- c(2,4,6,8,10)
-    }
+    g.index <- if (sex_vec[i] == "M") c(1,3,5,7,9) else c(2,4,6,8,10)
+    age_i    <- age_vec[i]
+    height_i <- height_vec[i]
 
     for (j in 1:5) {
 
       # Select index spline
-      if (data[i,]$age == 5) {
+      if (age_i == 5) {
 
         index.spline[i,j] <- 1
 
       } else {
 
-        index.spline[i,j] <- which.min(!(data[i,]$age <= transfer_splines[[g.index[j]]]$age)) - 1
+        index.spline[i,j] <- which.min(!(age_i <= transfer_splines[[g.index[j]]]$age)) - 1
 
       }
 
@@ -94,7 +112,9 @@ pft_diffusion <- function(data, SI.units = FALSE) {
       }
 
       interp.factor <-
-        (data[i,]$age-transfer_splines[[g.index[j]]]$age[index.spline[i,j]])/(transfer_splines[[g.index[j]]]$age[index.spline[i,j]+1]-transfer_splines[[g.index[j]]]$age[index.spline[i,j]])
+        (age_i - transfer_splines[[g.index[j]]]$age[index.spline[i,j]]) /
+        (transfer_splines[[g.index[j]]]$age[index.spline[i,j]+1] -
+           transfer_splines[[g.index[j]]]$age[index.spline[i,j]])
 
       Mspline[i,j] <- transfer_splines[[g.index[j]]]$Mspline[index.spline[i,j]]+interp.factor*(transfer_splines[[g.index[j]]]$Mspline[index.spline[i,j]+1]-transfer_splines[[g.index[j]]]$Mspline[index.spline[i,j]])
 
@@ -103,11 +123,11 @@ pft_diffusion <- function(data, SI.units = FALSE) {
       Lspline[i,j] <- transfer_splines[[g.index[j]]]$Lspline[index.spline[i,j]]+interp.factor*(transfer_splines[[g.index[j]]]$Lspline[index.spline[i,j]+1]-transfer_splines[[g.index[j]]]$Lspline[index.spline[i,j]])
 
       M.vector[i,j] <- exp(transfer_coeff$Median1[g.index[j]]+
-                             transfer_coeff$Median2[g.index[j]]*log(data$height[i])+
-                             transfer_coeff$Median3[g.index[j]]*log(data$age[i])+Mspline[i,j])
+                             transfer_coeff$Median2[g.index[j]]*log(height_i)+
+                             transfer_coeff$Median3[g.index[j]]*log(age_i)+Mspline[i,j])
 
       S.vector[i,j] <- exp(transfer_coeff$S1[g.index[j]]+
-                             transfer_coeff$S2[g.index[j]]*log(data$age[i])+
+                             transfer_coeff$S2[g.index[j]]*log(age_i)+
                              Sspline[i,j])
 
       L.vector[i,j] <- transfer_coeff$L[g.index[j]]

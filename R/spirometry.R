@@ -20,6 +20,14 @@
 #'    2012 (multi-ethnic, requires a `race` column) and 2022 (race-neutral
 #'    "GLI Global"; the `race` column, if present, is ignored).
 #'
+#' @param sex,age,height,race Column references. By default
+#'    `pft_spirometry()` reads from `sex`, `age`, `height`, and (for GLI
+#'    2012) `race`. If your data frame names them differently, override
+#'    via a bare name (`sex = Sex`), a string (`sex = "Sex"`), or an
+#'    rlang injection (`sex = !!my_var`). The user's original column
+#'    names are preserved in the output. See [pft_required_columns()]
+#'    for the full input contract.
+#'
 #' @return The original data frame with extra columns appended for each
 #'    measure:
 #'    - `<measure>_pred`: predicted (median) value.
@@ -56,13 +64,26 @@
 #' pft_spirometry(data)
 #'
 #' @export
-pft_spirometry <- function(data, year = 2012) {
+pft_spirometry <- function(data, year = 2012,
+                            sex = sex, age = age,
+                            height = height, race = race) {
 
-  data <- pft_normalize_inputs(data, requires_race = (year == 2012))
+  prep <- pft_normalize_inputs(
+    data, requires_race = (year == 2012),
+    sex    = rlang::enquo(sex),
+    age    = rlang::enquo(age),
+    height = rlang::enquo(height),
+    race   = rlang::enquo(race)
+  )
+  data <- prep$data
+  cols <- prep$cols
 
   if (year == 2012) {
     fits <- spirometry_lms_fit(
-      data,
+      sex_vec    = data[[cols$sex]],
+      age_vec    = data[[cols$age]],
+      height_vec = data[[cols$height]],
+      race_vec   = data[[cols$race]],
       splines = spirometry_splines,
       coeff_m = spirometry_coeff_m,
       coeff_s = spirometry_coeff_s,
@@ -80,7 +101,10 @@ pft_spirometry <- function(data, year = 2012) {
     )
   } else if (year == 2022) {
     fits <- spirometry_lms_fit(
-      data,
+      sex_vec    = data[[cols$sex]],
+      age_vec    = data[[cols$age]],
+      height_vec = data[[cols$height]],
+      race_vec   = NULL,
       splines = spirometry_2022_splines,
       coeff_m = spirometry_2022_coeff_m,
       coeff_s = spirometry_2022_coeff_s,
@@ -111,26 +135,26 @@ pft_spirometry <- function(data, year = 2012) {
 # (race-adjusted) and GLI 2022 (race-neutral) codepaths.
 #
 # Inputs:
-#   data            -- the original demographics data frame.
+#   sex_vec, age_vec, height_vec, race_vec
+#                   -- numeric/character vectors of length n carrying the
+#                      already-normalised demographics. race_vec may be
+#                      NULL to skip race adjustment (GLI 2022).
 #   splines         -- list of per-(measure,sex) lookup tables, each a
 #                      data.frame with columns age, Mspline, Sspline, Lspline.
 #   coeff_m, coeff_s, coeff_l -- coefficient frames; one column per
 #                      (measure,sex) keyed by the indices in male_indices /
-#                      female_indices. coeff_m has rows: intercept,
-#                      log(height) coef, log(age) coef, then (optionally)
-#                      race dummies. coeff_s mirrors but without log(height).
-#                      coeff_l has rows: intercept, log(age) coef.
+#                      female_indices.
 #   male_indices    -- indices into `splines` / coefficient columns for males.
 #   female_indices  -- same, for females.
-#   race_levels     -- character vector of recognized race labels, in the
-#                      order matching the trailing rows of coeff_m / coeff_s.
+#   race_levels     -- character vector of recognized race labels.
 #                      Pass NULL to skip race adjustment (GLI 2022).
 #
 # Returns a list with 5 numeric matrices (M, S, L, lower, upper), each with
-# nrow(data) rows and length(male_indices) columns.
-spirometry_lms_fit <- function(data, splines, coeff_m, coeff_s, coeff_l,
+# n rows and length(male_indices) columns.
+spirometry_lms_fit <- function(sex_vec, age_vec, height_vec, race_vec = NULL,
+                                splines, coeff_m, coeff_s, coeff_l,
                                 male_indices, female_indices, race_levels) {
-  n <- nrow(data)
+  n <- length(sex_vec)
   n_measures <- length(male_indices)
   use_race <- !is.null(race_levels)
 
@@ -143,21 +167,21 @@ spirometry_lms_fit <- function(data, splines, coeff_m, coeff_s, coeff_l,
 
   for (i in seq_len(n)) {
 
-    if (is.na(data$sex[i]) || is.na(data$age[i]) || is.na(data$height[i])) {
+    if (is.na(sex_vec[i]) || is.na(age_vec[i]) || is.na(height_vec[i])) {
       next
     }
 
-    g_index <- if (data$sex[i] == "M") male_indices else female_indices
+    g_index <- if (sex_vec[i] == "M") male_indices else female_indices
 
     if (use_race) {
-      race_dummies <- as.numeric(data$race[i] == race_levels)
+      race_dummies <- as.numeric(race_vec[i] == race_levels)
       if (sum(race_dummies) == 0 || is.na(sum(race_dummies))) next
       n_race <- length(race_levels)
     }
 
-    age_i    <- data$age[i]
+    age_i    <- age_vec[i]
     log_age  <- log(age_i)
-    log_height <- log(data$height[i])
+    log_height <- log(height_vec[i])
 
     for (j in seq_len(n_measures)) {
       sp <- splines[[g_index[j]]]
@@ -205,4 +229,3 @@ spirometry_lms_fit <- function(data, splines, coeff_m, coeff_s, coeff_l,
 
   list(M = M, S = S, L = L, lower = lower, upper = upper)
 }
-

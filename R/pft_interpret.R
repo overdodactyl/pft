@@ -39,6 +39,13 @@
 #' @param year GLI spirometry equation year. See [pft_spirometry()].
 #' @param SI.units Whether to report diffusion in SI units. See
 #'   [pft_diffusion()].
+#' @param sex,age,height,race Column references. By default
+#'   `pft_interpret()` reads from `sex`, `age`, `height`, and (for
+#'   `year = 2012`) `race`. Override via a bare name (`sex = Sex`), a
+#'   string (`sex = "Sex"`), or an rlang injection (`sex = !!my_var`).
+#'   See [pft_required_columns()] for the full input contract. The
+#'   `_measured`, `_pre`, and `_post` columns are still auto-detected
+#'   by name and not overridable.
 #'
 #' @return The original data frame with every applicable reference value,
 #'   z-score, percent predicted, severity grade, pattern label, PRISm
@@ -69,16 +76,35 @@
 #' pft_interpret(patient)
 #'
 #' @export
-pft_interpret <- function(data, year = 2012, SI.units = FALSE) {
+pft_interpret <- function(data, year = 2012, SI.units = FALSE,
+                           sex = sex, age = age,
+                           height = height, race = race) {
 
-  has_demographics <- all(c("sex", "age", "height") %in% colnames(data))
+  sex_q    <- rlang::enquo(sex)
+  age_q    <- rlang::enquo(age)
+  height_q <- rlang::enquo(height)
+  race_q   <- rlang::enquo(race)
+
+  # Demographics check uses the (possibly overridden) column names.
+  sex_name    <- resolve_column_name(sex_q,    "sex")
+  age_name    <- resolve_column_name(age_q,    "age")
+  height_name <- resolve_column_name(height_q, "height")
+  has_demographics <- all(c(sex_name, age_name, height_name) %in% colnames(data))
 
   # 1. Reference values + z-scores + percent predicted for the three
   #    primary measure groups, conditional on demographics being present.
+  #    User's original column names are preserved through; subsequent
+  #    calls re-resolve via the same quosures.
   if (has_demographics) {
-    data <- pft_spirometry(data, year = year)
-    data <- pft_volumes(data)
-    data <- pft_diffusion(data, SI.units = SI.units)
+    data <- pft_spirometry(data, year = year,
+                            sex = !!sex_q, age = !!age_q,
+                            height = !!height_q, race = !!race_q)
+    data <- pft_volumes(data,
+                         sex = !!sex_q, age = !!age_q,
+                         height = !!height_q)
+    data <- pft_diffusion(data, SI.units = SI.units,
+                           sex = !!sex_q, age = !!age_q,
+                           height = !!height_q)
   }
 
   # 2. Severity grading for every z-score column emitted above.

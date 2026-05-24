@@ -18,6 +18,30 @@ grading; per-maneuver spirometry quality grades (Graham 2019);
 cohort-level summaries; input QC; clinical-style visualisation; and
 rmarkdown-based clinical reports.
 }
+\section{Input data format}{
+
+Every reference function (\code{pft_spirometry()}, \code{pft_volumes()},
+\code{pft_diffusion()}, \code{pft_interpret()}) reads from canonical column
+names (\code{sex}, \code{age}, \code{height}, and -- for GLI 2012 -- \code{race}) by
+default. If your data frame names them differently, point at them
+explicitly via tidyverse-style column references:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{pft_spirometry(d, sex = Sex, age = Age_y,
+                  height = Ht_cm, race = Ancestry)
+}\if{html}{\out{</div>}}
+
+Bare names, strings (\code{sex = "Sex"}), and rlang injection
+(\code{sex = !!my_var}) are all accepted. The user's original column
+names are preserved in the output.
+
+Optional \verb{<measure>_measured}, \verb{<measure>_pre}, and
+\verb{<measure>_post} columns unlock z-score, percent-predicted, and
+bronchodilator-response outputs respectively; these are looked up
+by literal name (not overridable). See \code{\link[=pft_required_columns]{pft_required_columns()}}
+for the authoritative input contract per function, or
+\code{vignette("input-format")} for a walkthrough.
+}
+
 \section{Conventions used throughout}{
 
 To support unambiguous clinical and research use, the following

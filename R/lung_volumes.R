@@ -11,6 +11,13 @@
 #'   the corresponding measured value is used to compute a z-score and
 #'   percent-predicted (see Value).
 #'
+#' @param sex,age,height Column references. By default `pft_volumes()`
+#'   reads from `sex`, `age`, and `height`. Override via a bare name
+#'   (`sex = Sex`), a string (`sex = "Sex"`), or an rlang injection
+#'   (`sex = !!my_var`). The user's original column names are preserved
+#'   in the output. See [pft_required_columns()] for the full input
+#'   contract.
+#'
 #' @return The original data frame with extra columns appended for each
 #'   measure:
 #'   - `<measure>_pred`: predicted (median) value.
@@ -40,10 +47,23 @@
 #' pft_volumes(data)
 #'
 #' @export
-pft_volumes <- function(data) {
+pft_volumes <- function(data,
+                         sex = sex, age = age, height = height) {
 
-  data <- pft_normalize_inputs(data, requires_race = FALSE)
-  n <- nrow(data)
+  prep <- pft_normalize_inputs(
+    data, requires_race = FALSE,
+    sex    = rlang::enquo(sex),
+    age    = rlang::enquo(age),
+    height = rlang::enquo(height),
+    race   = rlang::quo(NULL)
+  )
+  data <- prep$data
+  cols <- prep$cols
+
+  sex_vec    <- data[[cols$sex]]
+  age_vec    <- data[[cols$age]]
+  height_vec <- data[[cols$height]]
+  n <- length(sex_vec)
 
   index.spline <- matrix(NA, nrow = n, ncol = 7)
   Mspline <- matrix(NA, nrow = n, ncol = 7)
@@ -61,40 +81,37 @@ pft_volumes <- function(data) {
 
     # Skip rows with missing demographics; outputs stay NA via the
     # pre-allocated NA matrices above.
-    if (is.na(data$sex[i]) || is.na(data$age[i]) || is.na(data$height[i])) {
+    if (is.na(sex_vec[i]) || is.na(age_vec[i]) || is.na(height_vec[i])) {
       next
     }
 
-    if (data$sex[i] == "M") {
+    g.index <- if (sex_vec[i] == "M") c(1,3,5,7,9,11,13) else c(2,4,6,8,10,12,14)
 
-      g.index <- c(1,3,5,7,9,11,13)
-
-    } else {
-
-      g.index <- c(2,4,6,8,10,12,14)
-
-    }
+    age_i    <- age_vec[i]
+    height_i <- height_vec[i]
 
     for (j in 1:7) {
 
       # Handle spline indexing for end cases
-      if (data[i,]$age == 5) {
+      if (age_i == 5) {
 
         index.spline[i,j] <- 1
 
       } else {
 
-        index.spline[i,j] <- which.min( !( data[i,]$age <= volume_splines[[g.index[j]]]$age ) ) - 1
+        index.spline[i,j] <- which.min(!(age_i <= volume_splines[[g.index[j]]]$age)) - 1
 
       }
 
-      # Skip computation of age is outside acceptable range
+      # Skip computation if age is outside acceptable range
       if (index.spline[i,j] == 0) {
         next
       }
 
       interp.factor <-
-        (data[i,]$age - volume_splines[[g.index[j]]]$age[index.spline[i,j]]) / (volume_splines[[g.index[j]]]$age[index.spline[i,j] + 1] - volume_splines[[g.index[j]]]$age[index.spline[i,j]])
+        (age_i - volume_splines[[g.index[j]]]$age[index.spline[i,j]]) /
+        (volume_splines[[g.index[j]]]$age[index.spline[i,j] + 1] -
+           volume_splines[[g.index[j]]]$age[index.spline[i,j]])
 
       Mspline[i,j] <- volume_splines[[g.index[j]]]$Mspline[index.spline[i,j]] + interp.factor * (volume_splines[[g.index[j]]]$Mspline[index.spline[i,j] + 1] - volume_splines[[g.index[j]]]$Mspline[index.spline[i,j]])
 
@@ -102,27 +119,14 @@ pft_volumes <- function(data) {
 
       Lspline[i,j] <- volume_splines[[g.index[j]]]$Lspline[index.spline[i,j]] + interp.factor * (volume_splines[[g.index[j]]]$Lspline[index.spline[i,j] + 1] - volume_splines[[g.index[j]]]$Lspline[index.spline[i,j]])
 
-      if (j %in% c(1,2)) {
-        age.covarM <- log(data$age[i])
-      } else {
-        age.covarM <- data$age[i]
-      }
-
-      if (j %in% c(3,4)) {
-        height.covarM <- data$height[i]
-      } else {
-        height.covarM <- log(data$height[i])
-      }
+      age.covarM    <- if (j %in% c(1,2)) log(age_i)    else age_i
+      height.covarM <- if (j %in% c(3,4)) height_i      else log(height_i)
 
       M.vector[i,j] <- exp(volume_coeff$Median1[g.index[j]] +
                              volume_coeff$Median2[g.index[j]] * age.covarM +
                              volume_coeff$Median3[g.index[j]] * height.covarM + Mspline[i,j])
 
-      if (j == 1) {
-        age.covarS <- log(data$age[i])
-      } else {
-        age.covarS <- data$age[i]
-      }
+      age.covarS <- if (j == 1) log(age_i) else age_i
 
       S.vector[i,j] <- exp(volume_coeff$S1[g.index[j]]+
                              volume_coeff$S2[g.index[j]]*age.covarS+
@@ -143,5 +147,3 @@ pft_volumes <- function(data) {
     measures = c("frc", "tlc", "rv", "rv_tlc", "erv", "ic", "vc")
   )
 }
-
-

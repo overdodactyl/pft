@@ -150,30 +150,88 @@ emit_normalization_warning <- function(sex_issues, race_issues = NULL) {
   invisible(NULL)
 }
 
+# Resolve a column reference quosure to the corresponding column name
+# (a single string) in `data`.
+#
+# Accepted shapes for the quosure expression:
+#   - bare symbol (e.g. captured from `sex = Sex` or the default
+#     `sex = sex`): the symbol is interpreted as a column name.
+#   - string literal (e.g. captured from `sex = "Sex"`): used directly.
+#   - any expression that evaluates to a length-1 character or symbol
+#     (e.g. `!!my_var` where `my_var <- "Sex"`): evaluated and the
+#     result is used as a column name.
+#
+# `default` is the canonical column name used purely for error messages.
+resolve_column_name <- function(quosure, default) {
+  expr <- rlang::quo_get_expr(quosure)
+
+  if (rlang::is_symbol(expr)) return(rlang::as_name(expr))
+  if (rlang::is_string(expr)) return(expr)
+
+  resolved <- tryCatch(
+    rlang::eval_tidy(quosure),
+    error = function(e) NULL
+  )
+  if (rlang::is_string(resolved))  return(resolved)
+  if (rlang::is_symbol(resolved))  return(rlang::as_name(resolved))
+
+  stop(sprintf(
+    "pft: could not resolve a column reference for '%s'. Pass a bare column name (e.g. %s = Sex), a string (e.g. %s = \"Sex\"), or inject from a variable (e.g. %s = !!my_var).",
+    default, default, default, default
+  ), call. = FALSE)
+}
+
 # Top-level normalization called by pft_spirometry, pft_volumes,
-# pft_diffusion. Returns a data frame with `sex` (and `race` for GLI
-# 2012) replaced by their canonical forms, with one consolidated
-# warning emitted as a side-effect.
-pft_normalize_inputs <- function(data, requires_race = FALSE) {
-  # Required-column check (errors -- not recoverable)
-  required <- c("sex", "age", "height")
-  if (requires_race) required <- c(required, "race")
+# pft_diffusion. Resolves the four input column references (each a
+# quosure captured via rlang::enquo() at the caller's boundary),
+# normalises sex and race in-place in the user's data frame, and
+# returns a list:
+#   $data : the data frame with user-supplied column names preserved;
+#           sex and race columns now contain canonical values.
+#   $cols : a named list mapping canonical names ("sex", "age",
+#           "height", "race") to the corresponding user-supplied
+#           column names. Inner LMS-fit functions read via
+#           data[[cols$sex]] etc.
+#
+# Defaults: each quosure defaults to the canonical bare name (e.g.
+# the function signature uses `sex = sex`), so callers who already
+# have canonically-named data pass no extra arguments.
+pft_normalize_inputs <- function(data,
+                                  sex    = rlang::quo(sex),
+                                  age    = rlang::quo(age),
+                                  height = rlang::quo(height),
+                                  race   = rlang::quo(race),
+                                  requires_race = FALSE) {
+  sex_name    <- resolve_column_name(sex,    "sex")
+  age_name    <- resolve_column_name(age,    "age")
+  height_name <- resolve_column_name(height, "height")
+  race_name   <- if (requires_race) resolve_column_name(race, "race") else NULL
+
+  required <- c(sex_name, age_name, height_name)
+  if (requires_race) required <- c(required, race_name)
   missing_cols <- setdiff(required, colnames(data))
   if (length(missing_cols) > 0) {
-    stop(sprintf("pft: required column(s) missing from input: %s",
-                 paste(sprintf("'%s'", missing_cols), collapse = ", ")),
-         call. = FALSE)
+    stop(sprintf(
+      "pft: required column(s) missing from input: %s.\n  Expected: %s\n  See ?pft_required_columns.",
+      paste(sprintf("'%s'", missing_cols), collapse = ", "),
+      paste(sprintf("'%s'", required), collapse = ", ")
+    ), call. = FALSE)
   }
 
-  sex_issues  <- normalize_sex_vec(data$sex)
-  data$sex    <- sex_issues$values
+  sex_issues <- normalize_sex_vec(data[[sex_name]])
+  data[[sex_name]] <- sex_issues$values
 
   race_issues <- NULL
   if (requires_race) {
-    race_issues <- normalize_race_vec(data$race)
-    data$race   <- race_issues$values
+    race_issues <- normalize_race_vec(data[[race_name]])
+    data[[race_name]] <- race_issues$values
   }
 
   emit_normalization_warning(sex_issues, race_issues)
-  data
+
+  list(
+    data = data,
+    cols = list(sex = sex_name, age = age_name,
+                height = height_name, race = race_name)
+  )
 }
