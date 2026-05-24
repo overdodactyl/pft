@@ -104,6 +104,60 @@ official GLI Global lookup-tables workbook.
 assertions and 104 structural / sentinel-cell assertions guarding
 the sysdata layer against silent regressions.
 
+### Graham 2019 (ATS/ERS 2019 spirometry quality grading)
+
+Documented in `papers/graham_2019/verification.md`. Audited
+`R/clinical.R::pft_quality()` and the threshold constants in
+`R/constants.R` against Table 10 of the source standard.
+
+**This audit found 3 real bugs in the decision logic and 1 API
+limitation** — the first paper in this verification sweep to surface
+package-code corrections. Each is documented with its clinical
+impact and the verbatim Table 10 row that anchors the correct
+behavior.
+
+* **Bug fix (child age cutoff)**: pre-fix used `age < 6`, which
+  treated a 6-year-old as adult. Table 10 column header reads
+  "Age <= 6 yr"; a 6-year-old is a child. Edge-of-pediatric impact:
+  a 6.0-year-old previously received a 50% looser repeatability
+  threshold (0.150 L) than the standard specifies (0.100 L).
+* **Bug fix (child 10% rule)**: pre-fix ignored the Table 10
+  footnote: "Or 10% of the highest value, whichever is greater;
+  applies for age 6 years or younger only." For children of normal
+  developmental size, the effective threshold is now
+  `max(absolute, 0.10 * max(values))`, which relaxes the absolute
+  thresholds for children whose lung function approaches adult
+  scale. Pre-fix behaviour was overly strict for older / taller
+  children.
+* **Bug fix (Grade E vs F fall-through)**: pre-fix fell through to
+  `"F"` when `n >= 2` but the best-two repeatability exceeded all
+  of A/C/D thresholds. Table 10 grades these sessions as **E**
+  ("usable but with poor repeatability"). `"F"` is reserved for
+  "0 acceptable AND 0 usable" maneuvers. Test sessions with 2-3
+  acceptable maneuvers and diff > 0.250 L are now correctly graded
+  E, not F.
+* **API limitation (Grade U not implemented)**: Table 10
+  distinguishes **U** ("0 acceptable AND >= 1 usable") from **F**
+  ("0 acceptable AND 0 usable"). `pft_quality(values)` takes only
+  acceptable maneuvers and cannot distinguish U from F; the
+  function unconditionally returns F when no values are passed.
+  Documented in the function's docstring. Implementing U would
+  require an API extension (e.g., a separate `usable` argument);
+  marked as future work, not in scope for this audit.
+
+The threshold constants `QUALITY_THRESHOLD_ADULT` (0.150 / 0.200 /
+0.250 L) and `QUALITY_THRESHOLD_CHILD` (0.100 / 0.150 / 0.200 L) in
+`R/constants.R` were already correct against Table 10 verbatim and
+required no changes; the bugs were entirely in the decision logic
+that consumed them.
+
+Test additions: 4 regression tests (age=6 boundary, child 10% rule,
+n>=2 diff > 0.250 L returns E, full Table 10 truth table) plus an
+fp-boundary documentation test, totaling +19 assertions. The
+pre-existing child-threshold test was updated to use pediatric-scale
+values where the 10% rule does not override the absolute threshold,
+preserving the test's original "tighter for children" intent.
+
 ### Stanojevic 2017 + 2020 correction (GLI 2017 carbon-monoxide transfer factor)
 
 Documented in `papers/gli_2017_diffusion/verification.md`. Audited
