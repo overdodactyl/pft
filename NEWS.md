@@ -32,6 +32,37 @@ from a children / young-people cohort.
 
 Test count: 1123 -> 1146 (+23).
 
+### pft_dlco_hb_correct()
+
+Adjusts a measured DLCO or TLCO for the patient's hemoglobin per
+the Cotes 1972 correction documented in Stanojevic 2017 (p. 9,
+p. 11). The GLI 2017 reference equations are deliberately
+uncorrected for Hb (Table 4: "TLCO values should be uncorrected for
+Hb; Hb levels should be considered in the interpretation"); this
+helper provides the interpretive step, leaving `pft_diffusion()`
+untouched.
+
+* `pft_dlco_hb_correct(dlco, hemoglobin, sex, age = NA_real_)`.
+* Formula: `TLCO_corrected = TLCO_measured * (1.7 * Hb_ref) /
+  (Hb + 0.7 * Hb_ref)`. When `hemoglobin == Hb_ref` the correction
+  factor is exactly 1.
+* Reference Hb: 146 g/L (adult males >= 15), 134 g/L (females of
+  any age, males < 15) per Stanojevic 2017 p. 11.
+* Hb input in g/L by default. Values < 30 are auto-converted (with
+  a warning) on the assumption they were supplied in g/dL.
+* Sex soft-corrected via `normalize_sex_vec()`.
+* Constants `HB_REF_MALE_ADULT`, `HB_REF_FEMALE_CHILD`,
+  `HB_REF_MALE_ADULT_AGE`, `COTES_HB_K_NUM`, `COTES_HB_K_DENOM`
+  in `R/constants.R`, all pinned by sentinel tests.
+* Anchor test: anaemic adult male, Hb = 100 g/L, measured DLCO = 20
+  -> corrected DLCO = 20 x (1.7 x 146) / (100 + 0.7 x 146) =
+  24.55.
+* `papers/gli_2017_diffusion/verification.md` updated --
+  Hemoglobin correction moved out of the "not relevant" section
+  into a dedicated implementation section with paper-page anchors.
+
+Test count: 1146 -> 1170 (+24).
+
 ## Source-paper verification audit
 
 A line-by-line re-audit of every constant and algorithm in the
