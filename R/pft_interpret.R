@@ -220,6 +220,15 @@ pft_interpret <- function(data, year = 2012, SI.units = FALSE,
     data$prism <- pft_prism(prism_data)$prism
   }
 
+  # 4.5. Combined pattern-severity label (Stanojevic 2022 practical
+  # reporting convention), when both the pattern and the relevant
+  # per-measure severities are available.
+  if ("ats_classification" %in% colnames(data) &&
+      (any(c("fev1_severity", "fev1_severity_2022") %in% colnames(data)) ||
+       any(c("fvc_severity",  "fvc_severity_2022")  %in% colnames(data)))) {
+    data <- pft_pattern_severity(data)
+  }
+
   # 5. Bronchodilator response, for any spirometry measure with
   #    pre/post. 2022 requires the predicted value; 2005 doesn't.
   for (m in c("fev1", "fvc", "fev1fvc")) {

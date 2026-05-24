@@ -33,6 +33,7 @@ reference:
       - pft_classify
       - pft_volume_subpattern
       - pft_severity
+      - pft_pattern_severity
       - pft_bdr
       - pft_prism
       - pft_change
