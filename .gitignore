@@ -17,3 +17,8 @@ papers/**/*.xls
 papers/**/*.xlsx
 papers/**/*.xlsm
 papers/**/*.csv
+
+# Scratch outputs from verification scripts under notes/. The .R
+# scripts are version-controlled (reproducible); their .out dumps are
+# regeneratable and bulky.
+notes/*.out
