@@ -55,14 +55,24 @@ SEVERITY_2005_BOUNDARIES <- c(
   severe            = 35
 )
 
-# GOLD COPD severity tier upper bounds (FEV1 % predicted). Each entry
-# is the *upper bound* of the named tier.
+# GOLD COPD severity tier upper bounds (FEV1 % predicted), from
+# Figure 2.10 of the GOLD 2026 report ("GOLD Grades and Severity of
+# Airflow Obstruction in COPD (based on post-bronchodilator FEV1)").
+# Each entry is the *upper bound* of the named tier.
+#
+# GOLD 4: FEV1       < 30   (very severe)
+# GOLD 3: 30 <= FEV1 < 50   (severe)
+# GOLD 2: 50 <= FEV1 < 80   (moderate)
+# GOLD 1: 80 <= FEV1        (mild)
+#
+# Figure 2.10 specifies the prerequisite "In patients with COPD
+# (FEV1/FVC < 0.7)"; the package's pft_gold() applies this as an
+# optional `fev1fvc` parameter (see R/clinical.R).
 GOLD_BOUNDARIES <- c(
   "GOLD 4" = 30,
   "GOLD 3" = 50,
   "GOLD 2" = 80
 )
-# (GOLD 1 is "no upper bound" -- everything >= 80% predicted.)
 
 # ATS/ERS 2019 spirometry quality grade thresholds (best-two
 # repeatability difference, litres). From Graham BL et al. AJRCCM
