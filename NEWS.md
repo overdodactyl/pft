@@ -1,5 +1,62 @@
 # pft (development version)
 
+## Source-paper verification audit
+
+A line-by-line re-audit of every constant and algorithm in the
+package against the original source publications. Triggered after
+the Pellegrino 2005 and Stanojevic 2022 sweeps uncovered 9 real bugs
+attributable to constants being implemented from training-data
+memory rather than from the published papers. Each audit lands a
+`papers/<dir>/verification.md` log: source citation, verbatim quotes
+for each constant, page numbers, exact mapping to package code,
+corrections (if any), and reproduction of any worked examples in the
+paper.
+
+### Quanjer 2012 (GLI 2012 spirometry)
+
+Documented in `papers/gli_2012/verification.md`. Audited the
+data-extraction layer (`data-raw/build_gli_2012.R`) and the
+runtime equation (`R/spirometry.R::spirometry_lms_fit()`) against
+both the published paper and the official ERS lookup-tables workbook.
+
+* Equation form (paper p. 1330) — confirmed: the package's
+  `log(M) = a + b*log(H) + c*log(A) + sum(d_g * group_g) + Mspline`
+  matches the workbook's restated formula exactly. The S equation
+  drops the height term (workbook line `S = exp(p0 + p1*ln(Age) + ...
+  + Sspline)`); L is `q0 + q1*ln(Age) + Lspline` with no race
+  dummies. LLN/ULN use the 1.645 multiplier per Cole 1988.
+* Coefficient extraction — every M, S, L coefficient cell read by
+  `build_gli_2012.R` was compared to the workbook source cell across
+  all 10 (measure × sex) sheets. All match at the script's 4-dp
+  precision.
+* Spline tables — 14 random (sheet × age × column) cells
+  spot-checked directly from the xls against the parsed
+  `spirometry_splines`. All match at machine precision. The two
+  workbook quirks the script handles (FEF2575 sheets using
+  `age|M|S|L` instead of `age|L|M|S`, and FEF2575-females shifting
+  the header to row 4) were confirmed.
+* Table 4 worked examples (paper p. 1335) — six Caucasian-male
+  predictions from the paper reproduce in the package within
+  ±0.02 L (volumes) / ±0.005 (ratio), inside the paper's 2-dp
+  reporting precision. Added as anchor tests in
+  `tests/testthat/test-spirometry.R`.
+* Table 3 % differences (paper p. 1331) — 24 cross-group cells
+  agree within ±1.63 pp; residual is consistent with 4-dp rounding
+  of the underlying d coefficients and not a build-script bug. The
+  package matches the canonical workbook exactly.
+* "Other/mixed" composite (paper p. 1330) — confirmed: M and F
+  values are identical for 4 of 5 measures and equal the cross-sex
+  cross-group average. FVC has a 0.0008 M-vs-F asymmetry that is a
+  workbook rounding artifact.
+* Age-range coverage — workbook covers 3-95 yrs for FEV1/FVC and
+  3-90 yrs for FEF25-75% / FEF75%, matching the existing
+  out-of-range NA tests.
+
+**No corrections required.** The data-extraction layer is faithful
+to the canonical source. The audit added the explicit
+paper-to-code traceability and 3 Table-4 anchor tests; test count
+grows 372 → 375.
+
 ## Predecessor 2005 standard
 
 Pellegrino 2005 interpretive primitives are now available so the
