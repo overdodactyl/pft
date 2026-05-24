@@ -12,8 +12,10 @@ acceptable maneuver for ONE patient and ONE measure. Length 0 is
 allowed and yields grade \code{"F"}.}
 
 \item{age}{Patient age, in years. The repeatability thresholds tighten
-for children below age 6 (0.100 L instead of 0.150 L). Defaults to
-\code{NA_real_}, which uses the adult thresholds.}
+for children aged 6 or younger; the threshold is the \emph{greater} of
+the absolute child value (0.100 / 0.150 / 0.200 L for A / C / D)
+and 10\% of the highest measured value, per Table 10's footnote.
+Defaults to \code{NA_real_}, which uses the adult thresholds.}
 }
 \value{
 A length-1 character with value \code{"A"}, \code{"B"}, \code{"C"}, \code{"D"},
@@ -22,24 +24,38 @@ A length-1 character with value \code{"A"}, \code{"B"}, \code{"C"}, \code{"D"},
 \description{
 Assigns one of grades A-F to a set of acceptable spirometry maneuvers
 for a single measure (FEV1 or FVC) per the Graham et al. ATS/ERS 2019
-technical standard. Grades depend on the number of usable maneuvers and
-the difference between the best two values.
+technical standard, Table 10. Grades depend on the number of
+acceptable maneuvers and the difference between the best two values.
 }
 \details{
-Grade definitions:
+Grade definitions (Table 10, paper p. e83). Adult thresholds in
+parentheses; child (age <= 6) thresholds are \verb{max(absolute, 0.10 · max(values))}:
 \itemize{
-\item \strong{A}: >= 3 acceptable maneuvers; best two within 0.150 L (0.100 L if
-age < 6).
-\item \strong{B}: 2 acceptable maneuvers; best two within 0.150 L (0.100 L).
-\item \strong{C}: 2 acceptable maneuvers; best two within 0.200 L (0.150 L).
-\item \strong{D}: 2 acceptable maneuvers; best two within 0.250 L (0.200 L).
-\item \strong{E}: 1 acceptable maneuver.
+\item \strong{A}: >= 3 acceptable maneuvers; best two within 0.150 L
+(0.100 L for child).
+\item \strong{B}:    2 acceptable maneuvers; best two within 0.150 L
+(0.100 L for child).
+\item \strong{C}: >= 2 acceptable maneuvers; best two within 0.200 L
+(0.150 L for child).
+\item \strong{D}: >= 2 acceptable maneuvers; best two within 0.250 L
+(0.200 L for child).
+\item \strong{E}: >= 2 acceptable maneuvers with best-two diff exceeding the
+D threshold, OR exactly 1 acceptable maneuver.
 \item \strong{F}: 0 acceptable maneuvers.
 }
+
+Grade \strong{U} ("0 acceptable AND >= 1 usable") from Table 10 is NOT
+currently distinguished from F. Implementing U would require
+extending the API to take a separate vector of usable-but-not-
+acceptable maneuvers; with zero acceptable values, the function
+returns F unconditionally.
 }
 \examples{
-pft_quality(c(3.20, 3.15, 3.10))              # Grade A (within 0.15 L)
-pft_quality(c(3.20, 3.00))                    # Grade C (within 0.20 L)
+pft_quality(c(3.20, 3.12, 3.10))              # Grade A (n>=3 within 0.150)
+pft_quality(c(3.20, 3.12))                    # Grade B (n=2 within 0.150)
+pft_quality(c(3.20, 3.02))                    # Grade C (n>=2 within 0.200)
+pft_quality(c(3.20, 2.97))                    # Grade D (n>=2 within 0.250)
+pft_quality(c(3.20, 2.80))                    # Grade E (n>=2 diff > 0.250)
 pft_quality(c(3.20))                          # Grade E (only 1)
 pft_quality(numeric(0))                       # Grade F (none)
 
