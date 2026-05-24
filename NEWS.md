@@ -1,5 +1,36 @@
 # pft (development version)
 
+## pft_pattern_severity() — composite "Moderate Obstructed" labels
+
+`pft_pattern_severity(data)` composes the existing
+`ats_classification` (Normal / Non-specific / Obstructed /
+Restricted / Mixed / PRISm) and per-measure severity (normal /
+mild / moderate / severe) columns into a single label like
+`"Moderate Obstructed"` or `"Severe Mixed"` for cohort reporting
+and clinic notes.
+
+Composition rule (Stanojevic 2022 practical reporting):
+
+* Obstructed -> FEV1 severity drives the qualifier.
+* Restricted -> FVC severity drives the qualifier.
+* Mixed -> worse of FEV1 and FVC severity.
+* Non-specific / PRISm -> FEV1 severity.
+* Normal -> `"Normal"` (no severity qualifier).
+* Obstructed / Restricted / Mixed with normal severity also drop
+  the qualifier (e.g., low FEV1/FVC with a normal FEV1 z-score
+  reports as `"Obstructed"`, not `"Normal Obstructed"`).
+
+`pft_interpret()` auto-runs the composer when both
+`ats_classification` and at least one severity column are present;
+the new `pattern_severity` column appears alongside the existing
+interpretation columns. Falls back to `_2022`-suffixed severity
+columns when the unsuffixed columns are absent.
+
+Operates on the package's existing wide-form output -- no new
+input data is required.
+
+Test count: 1211 -> 1223 (+12).
+
 ## pft_diffusion_interpret() — clinical category from DLCO/VA/KCO z-scores
 
 `pft_diffusion_interpret(data)` consumes the diffusion z-score
