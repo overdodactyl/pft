@@ -98,3 +98,15 @@ CCS_SIGNIFICANCE <- 1.96
 CCS_R_INTERCEPT <-  0.642
 CCS_R_TIME_COEF <- -0.04
 CCS_R_AGE_COEF  <-  0.020
+
+# FEV1Q denominators from Stanojevic et al. ERJ 2022 Box 3 p. 13:
+# "FEV1Q is the observed forced expiratory volume in 1 s (FEV1) in
+# litres divided by the sex-specific 1st percentile of the FEV1
+# distribution found in adult subjects with lung disease; these
+# percentiles are 0.5 L for males and 0.4 L for females."
+FEV1Q_DENOM_MALE   <- 0.5
+FEV1Q_DENOM_FEMALE <- 0.4
+# Box 3 p. 13 (closing sentence): "FEV1Q is not appropriate for
+# children and adolescents." Adult-only cutoff applied when an age
+# vector is supplied to pft_fev1q().
+FEV1Q_MIN_AGE      <- 18
