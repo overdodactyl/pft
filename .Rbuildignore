@@ -6,3 +6,7 @@
 ^LICENSE\.md$
 ^papers$
 ^docs$
+^notes$
+^_pkgdown\.yml$
+^\.github$
+^pkgdown$

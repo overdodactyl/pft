@@ -6,3 +6,4 @@ dockerimage
 *.tar.gz
 papers/
 *.Rcheck/
+docs/

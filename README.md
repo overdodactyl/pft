@@ -14,7 +14,7 @@ and interpretive pattern classifications for pulmonary function tests in R.
 
 ```r
 # install.packages("remotes")
-remotes::install_github("<your-org>/pft")
+remotes::install_github("YOUR-ORG/pft")
 ```
 
 ## What it does

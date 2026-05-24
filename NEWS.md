@@ -86,7 +86,7 @@
   Previously these two were swapped. The change re-labels patients
   whose spirometry profile is "isolated low FEV1 + everything else
   normal" (previously "Non-specific", now "Normal") and vice versa for
-  isolated low FVC. See `docs/ats_classification_label_fix.md` for the
+  isolated low FVC. See `notes/ats_classification_label_fix.md` for the
   clinical-review memo.
 * **Bug fix:** the "all normal" branch was comparing FVC against
   `fev1_lln` instead of `fvc_lln`. Combined with the label-swap above,
@@ -121,7 +121,7 @@
   underlying reference papers as `bibentry` objects.
 * The MIT license file is now correctly declared in `DESCRIPTION` and
   shipped via `LICENSE` / `LICENSE.md`.
-* `docs/ats_classification_label_fix.md` records the rationale and
+* `notes/ats_classification_label_fix.md` records the rationale and
   clinical-review questions for the ATS pattern-label changes above.
 
 ## Internal
@@ -130,4 +130,6 @@
 * Reference paper PDFs and supplement workbooks live under `papers/`
   but are excluded from git and from the `R CMD build` tarball (they
   are copyrighted publisher content).
-* `docs/` (clinical-review memos and similar) is also `Rbuildignore`d.
+* `notes/` (clinical-review memos and similar) is also `Rbuildignore`d.
+  `docs/` is reserved for the pkgdown-built site (gitignored; built and
+  deployed to the `gh-pages` branch by `.github/workflows/pkgdown.yaml`).

@@ -1,0 +1,65 @@
+url: https://YOUR-ORG.github.io/pft/
+
+template:
+  bootstrap: 5
+  bootswatch: cosmo
+
+home:
+  title: pft — ATS/ERS 2022-compliant pulmonary function test interpretation
+  description: >
+    A comprehensive R toolkit implementing the full Stanojevic 2022
+    interpretive strategy: reference values, z-scores, ATS pattern
+    classification, severity grading, bronchodilator response, PRISm
+    screening, conditional change scores, and clinical visualisation.
+
+reference:
+  - title: Reference values
+    desc: >
+      GLI-derived predicted values, lower and upper limits of normal,
+      and (when measured values are supplied) z-scores and percent
+      predicted. Each function takes a data frame in and returns a
+      tibble out.
+    contents:
+      - pft_spirometry
+      - pft_volumes
+      - pft_diffusion
+
+  - title: Interpretation primitives
+    desc: >
+      Per-measure clinical interpretation primitives implementing the
+      Stanojevic 2022 ERS/ATS standard.
+    contents:
+      - pft_classify
+      - pft_severity
+      - pft_bdr
+      - pft_prism
+      - pft_change
+
+  - title: Workflow and utilities
+    desc: >
+      End-to-end interpretation in a single call, input QC, and
+      clinical-style visualisation.
+    contents:
+      - pft_interpret
+      - pft_validate
+      - pft_plot
+
+  - title: Re-exports
+    contents:
+      - as_tibble
+
+articles:
+  - title: Getting started
+    navbar: ~
+    contents:
+      - pft
+
+navbar:
+  structure:
+    left:  [intro, reference, articles, news]
+    right: [search, github]
+
+news:
+  releases:
+  - text: "Development version"
+    href: news/index.html
