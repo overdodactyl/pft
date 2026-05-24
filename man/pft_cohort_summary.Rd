@@ -4,12 +4,18 @@
 \alias{pft_cohort_summary}
 \title{Cohort-level summary of PFT results}
 \usage{
-pft_cohort_summary(data)
+pft_cohort_summary(data, by = NULL)
 }
 \arguments{
 \item{data}{A data frame produced by \code{\link[=pft_interpret]{pft_interpret()}} or the
 individual reference / interpretation functions. The summary is
 robust to which columns are present and skips anything absent.}
+
+\item{by}{Optional character vector of column names to stratify
+the summary by. Each output component (\code{zscores}, \code{patterns},
+\code{prism}) is then faceted: an extra column per \code{by} group is
+prepended. \code{by = NULL} (default) gives the cohort-wide summary.
+Pass \code{by = "sex"} for per-sex summaries, \code{by = c("sex", "age_band")} for two-way stratification, etc.}
 }
 \value{
 A list with three components, each a tibble:
@@ -25,6 +31,16 @@ z-scores, severity grades, ATS pattern labels, and / or PRISm flags
 (typically the output of \code{\link[=pft_interpret]{pft_interpret()}} applied to many patients).
 Useful for cohort papers, screening reports, and quick QA looks.
 }
+\section{Reclassification audit}{
+
+When both \code{ats_classification} and \code{ats_classification_2022}
+columns are present in \code{data} (e.g., a \code{\link[=pft_compare]{pft_compare()}} output),
+the returned list gains a fourth \code{reclassification} component: a
+confusion-matrix tibble counting the 2012 -> 2022 transitions,
+a \code{n_reclassified} / \code{rate} summary row, and a \code{severity} tibble
+counting per-measure severity reclassification.
+}
+
 \examples{
 cohort <- data.frame(
   sex    = c("M","F","M","F","M"),

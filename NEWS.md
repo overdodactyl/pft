@@ -1,5 +1,38 @@
 # pft (development version)
 
+## pft_cohort_summary() — `by =` stratification + reclassification audit
+
+Two enhancements to the existing cohort-summary helper:
+
+### Stratified summaries
+
+`pft_cohort_summary(result, by = c("sex", "age_band"))` faces each
+output component (`zscores`, `patterns`, `prism`) by the cross of
+the supplied columns. The cohort-wide default (`by = NULL`)
+preserves the existing return shape byte-for-byte; existing
+callers need no changes.
+
+### Reclassification audit
+
+When both `ats_classification` and `ats_classification_2022`
+columns are present in the input (the output shape of
+`pft_compare()` -- the GLI 2012 vs GLI Global 2022 side-by-side
+comparison), the returned list gains a new `reclassification`
+component containing:
+
+* `overall`: n, n_reclassified, rate (cohort-wide pattern change
+  rate).
+* `confusion`: the 2012 -> 2022 transition tibble, suitable for
+  `ggplot2::geom_tile()`.
+* `severity`: per-measure (fev1 / fvc / fev1fvc) severity
+  reclassification counts when the corresponding
+  `_severity_2022` columns are also present.
+
+Pure post-processing over existing outputs; no new input data is
+required.
+
+Test count: 1195 -> 1210 (+15).
+
 ## New interpretation primitives (audit follow-up)
 
 The just-completed source-paper verification audit documented
