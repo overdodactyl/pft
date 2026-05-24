@@ -24,6 +24,17 @@ test_that("pft_severity is vectorised", {
 
 ## --- pft_bdr --------------------------------------------
 
+test_that("Stanojevic 2022 Box 1 BDR worked example reproduces", {
+  # Box 1 (paper p. 11) provides a verbatim worked example: a 50-year-
+  # old male, height 170 cm, with pre = 2.0 L, post = 2.4 L, and
+  # predicted = 3.32 L gives (2.4 - 2.0) / 3.32 * 100 = 12.05 % of
+  # predicted change, which exceeds the 10% cutoff and is therefore
+  # significant. Paper-anchored regression test for the BDR formula.
+  r <- pft_bdr(pre = 2.0, post = 2.4, predicted = 3.32)
+  expect_equal(r$pct_pred_change, 12.05, tolerance = 1e-2)
+  expect_true(r$is_significant)
+})
+
 test_that("BDR detects >10% of predicted change as significant", {
   r <- pft_bdr(pre = 2.5, post = 3.0, predicted = 4.0)
   expect_equal(r$pct_pred_change, 12.5)
