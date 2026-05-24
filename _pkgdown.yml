@@ -36,6 +36,7 @@ reference:
       - pft_bdr
       - pft_prism
       - pft_change
+      - pft_decline
       - pft_fev1q
       - pft_dlco_hb_correct
 
