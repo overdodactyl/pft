@@ -10,3 +10,9 @@
 ^_pkgdown\.yml$
 ^\.github$
 ^pkgdown$
+^paper$
+^CITATION\.cff$
+^CODE_OF_CONDUCT\.md$
+^CONTRIBUTING\.md$
+^\.lintr$
+^codecov\.yml$

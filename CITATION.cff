@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+title: "pft: Pulmonary Function Test Interpretation per ERS/ATS 2022"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - given-names: Pat
+    family-names: Johnson
+    email: johnson.pat@mayo.edu
+    role: [aut, cre]
+  - given-names: Zach
+    family-names: Quicksall
+    role: [aut]
+  - given-names: Jairo
+    family-names: Pena
+    role: [aut]
+repository-code: "https://github.com/YOUR-ORG/pft"
+url: "https://YOUR-ORG.github.io/pft/"
+license: MIT
+keywords:
+  - pulmonary-function-test
+  - spirometry
+  - lung-volumes
+  - diffusion-capacity
+  - GLI
+  - ATS-ERS
+  - clinical-interpretation
+preferred-citation:
+  type: software
+  title: "pft: Pulmonary Function Test Interpretation per ERS/ATS 2022"
+  authors:
+    - given-names: Pat
+      family-names: Johnson
+    - given-names: Zach
+      family-names: Quicksall
+    - given-names: Jairo
+      family-names: Pena
+  url: "https://github.com/YOUR-ORG/pft"
+  notes: "R package version 0.1.0"

@@ -1,5 +1,12 @@
 # pft
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/YOUR-ORG/pft/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/YOUR-ORG/pft/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/YOUR-ORG/pft/graph/badge.svg)](https://app.codecov.io/gh/YOUR-ORG/pft)
+[![pkgdown](https://github.com/YOUR-ORG/pft/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/YOUR-ORG/pft/actions/workflows/pkgdown.yaml)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+<!-- badges: end -->
+
 Compute ATS / ERS-compliant reference values, lower/upper limits of normal,
 and interpretive pattern classifications for pulmonary function tests in R.
 
