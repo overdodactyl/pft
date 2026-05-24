@@ -1,5 +1,39 @@
 # pft (development version)
 
+## Tidiers — broom integration and long-form pivot
+
+`pft_long()` reshapes a `pft_result` (or any compatible wide data frame
+with `<measure>_pred[_<year>]` columns) into long form: one row per
+`(patient, measure, year)` with columns `pred`, `lln`, `uln`,
+`measured`, `zscore`, `pctpred`, `severity`. This is the natural shape
+for downstream `dplyr` / `ggplot2` faceting and cohort modelling, and
+it unblocks `tidymodels` `recipes::step_*` wrappers planned for a
+later release.
+
+`pft_glance()` returns a per-patient summary: top-level
+`ats_classification`, `ats_pattern_combination`, `prism`, and
+`volume_subpattern` when present, plus three derived statistics
+(`worst_zscore`, `n_below_lln`, `n_above_uln`) computed across all
+z-score columns in the input.
+
+S3 methods `tidy.pft_result()` and `glance.pft_result()` are
+registered with `broom::tidy()` and `broom::glance()` via roxygen2's
+`@exportS3Method` directive. They dispatch to `pft_long()` and
+`pft_glance()` respectively. Neither method requires `broom` to be
+installed unless the user actually calls `broom::tidy()` /
+`broom::glance()` on a `pft_result`.
+
+* `broom` added to `Suggests`.
+* `pft_long()` is year-suffix aware: a `pft_interpret(..., year = 2022)`
+  result produces long-form rows with `year = "2022"` populated.
+* `pft_glance()` is robust to missing high-level interpretation
+  columns (returns a `.patient`-only tibble when none of the
+  interpretation primitives ran).
+* New tests in `tests/testthat/test-pft_result_tidiers.R` (40 new
+  expectations).
+
+Test count: 1195 -> 1235 (+40).
+
 ## New interpretation primitives (audit follow-up)
 
 The just-completed source-paper verification audit documented

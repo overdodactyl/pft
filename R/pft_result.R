@@ -143,3 +143,187 @@ summary.pft_result <- function(object, ...) print(object, ...)
 
 #' @export
 plot.pft_result <- function(x, ...) pft_plot(x, ...)
+
+
+# Tidiers -------------------------------------------------------------------
+# Long-form pivot of a pft_result (or any compatible data frame) and a
+# per-row summary suitable for `broom::tidy()` / `broom::glance()`
+# dispatch. Both functions also work standalone (they do not require the
+# `broom` package).
+
+#' Pivot a `pft_result` to long form
+#'
+#' Reshapes a wide [pft_interpret()] / [pft_spirometry()] / [pft_volumes()] /
+#' [pft_diffusion()] output (one row per patient, one column per measure ×
+#' statistic) into long form (one row per `(patient, measure, year)` with
+#' columns for each statistic). This is the natural shape for `dplyr` /
+#' `ggplot2` faceting, cohort modelling, and `broom`-style downstream
+#' workflows.
+#'
+#' Discovery is keyed off `<measure>_pred` columns; if your data frame
+#' has predicted columns from a non-default GLI year, they are picked up
+#' automatically and the four-digit year ends up in the `year` column.
+#' Columns whose suffix does not match a recognised statistic are
+#' ignored, so id / demographic columns are dropped (use the `.patient`
+#' integer to join back).
+#'
+#' @param x A data frame; typically a `pft_result` but any data frame
+#'   with `<measure>_pred[_<year>]` columns works.
+#' @param ... Currently unused; reserved for forward compatibility.
+#'
+#' @return A tibble with columns `.patient` (integer row position),
+#'   `measure`, `year` (character; `NA` for non-suffixed outputs),
+#'   `pred`, `lln`, `uln`, `measured`, `zscore`, `pctpred`, and
+#'   `severity`. Missing statistics fill with `NA` of the appropriate
+#'   type.
+#'
+#' @seealso [pft_glance()] for per-patient summaries; [pft_interpret()]
+#'   to produce the wide-form input.
+#'
+#' @examples
+#' patient <- data.frame(
+#'   sex = c("M","F"), age = c(45, 60), height = c(178, 165),
+#'   race = "Caucasian",
+#'   fev1_measured = c(2.5, 1.8), fvc_measured = c(3.8, 2.4)
+#' )
+#' result <- pft_interpret(patient)
+#' pft_long(result)
+#'
+#' @export
+pft_long <- function(x, ...) {
+  if (!is.data.frame(x)) {
+    stop("`x` must be a data frame.", call. = FALSE)
+  }
+
+  empty <- tibble::tibble(
+    .patient = integer(),
+    measure  = character(),
+    year     = character(),
+    pred     = double(),
+    lln      = double(),
+    uln      = double(),
+    measured = double(),
+    zscore   = double(),
+    pctpred  = double(),
+    severity = character()
+  )
+  if (nrow(x) == 0) return(empty)
+
+  cols <- colnames(x)
+  pred_cols <- grep("_pred(?:_[0-9]+)?$", cols, value = TRUE, perl = TRUE)
+  if (length(pred_cols) == 0) return(empty)
+
+  parts <- lapply(pred_cols, function(pcol) {
+    m <- regmatches(pcol, regexec("^(.+)_pred(?:_([0-9]+))?$", pcol))[[1]]
+    meas     <- m[2]
+    year_str <- if (length(m) >= 3) m[3] else ""
+    yr       <- if (nzchar(year_str)) year_str else NA_character_
+    suf      <- if (!is.na(yr)) paste0("_", yr) else ""
+
+    # Precompute column names and values OUTSIDE the tibble() call so the
+    # tibble data mask cannot shadow `meas` / `yr` with the column being
+    # built (which would recycle them to length nrow(x) and break the
+    # %in% lookup).
+    col_or_na <- function(name, type = "numeric") {
+      if (name %in% cols) return(x[[name]])
+      if (type == "character") rep(NA_character_, nrow(x)) else rep(NA_real_, nrow(x))
+    }
+    pred_vals     <- as.numeric(col_or_na(paste0(meas, "_pred",     suf)))
+    lln_vals      <- as.numeric(col_or_na(paste0(meas, "_lln",      suf)))
+    uln_vals      <- as.numeric(col_or_na(paste0(meas, "_uln",      suf)))
+    measured_vals <- as.numeric(col_or_na(paste0(meas, "_measured")))
+    zscore_vals   <- as.numeric(col_or_na(paste0(meas, "_zscore",   suf)))
+    pctpred_vals  <- as.numeric(col_or_na(paste0(meas, "_pctpred",  suf)))
+    severity_vals <- as.character(col_or_na(paste0(meas, "_severity", suf), "character"))
+
+    tibble::tibble(
+      .patient = seq_len(nrow(x)),
+      measure  = meas,
+      year     = yr,
+      pred     = pred_vals,
+      lln      = lln_vals,
+      uln      = uln_vals,
+      measured = measured_vals,
+      zscore   = zscore_vals,
+      pctpred  = pctpred_vals,
+      severity = severity_vals
+    )
+  })
+
+  do.call(rbind, parts)
+}
+
+
+#' Per-patient summary of a `pft_result`
+#'
+#' Returns one row per patient with the highest-level interpretation
+#' columns (`ats_classification`, `ats_pattern_combination`, `prism`,
+#' `volume_subpattern`) when present, plus three derived per-patient
+#' summary statistics computed across all z-score columns in `x`:
+#' `worst_zscore` (the z-score with greatest absolute value),
+#' `n_below_lln` (count of z-scores below -1.645), and `n_above_uln`
+#' (count above +1.645). This is the natural shape for `broom`-style
+#' "one row of metadata per fit" workflows and for cohort-level joins.
+#'
+#' @param x A data frame; typically a `pft_result` from [pft_interpret()].
+#' @param ... Currently unused; reserved for forward compatibility.
+#'
+#' @return A tibble with one row per row of `x`. Always contains
+#'   `.patient` (row position); other columns are added only when
+#'   present in `x`.
+#'
+#' @seealso [pft_long()] for the per-measure long-form pivot;
+#'   [pft_cohort_summary()] for cohort-level (not per-patient) summaries.
+#'
+#' @examples
+#' cohort <- data.frame(
+#'   sex = c("M","F","M"), age = c(45,60,30), height = c(178,165,175),
+#'   race = "Caucasian",
+#'   fev1_measured = c(2.5, 1.8, 4.0),
+#'   fvc_measured  = c(3.8, 2.4, 5.2),
+#'   fev1fvc_measured = c(0.66, 0.75, 0.77),
+#'   tlc_measured  = c(6.0, 4.5, 6.8)
+#' )
+#' pft_glance(pft_interpret(cohort))
+#'
+#' @export
+pft_glance <- function(x, ...) {
+  if (!is.data.frame(x)) {
+    stop("`x` must be a data frame.", call. = FALSE)
+  }
+
+  out <- tibble::tibble(.patient = seq_len(nrow(x)))
+  if (nrow(x) == 0) return(out)
+
+  cols <- colnames(x)
+  for (top in c("ats_classification", "ats_pattern_combination",
+                "prism", "volume_subpattern")) {
+    if (top %in% cols) out[[top]] <- x[[top]]
+  }
+
+  zcols <- grep("_zscore(?:_[0-9]+)?$", cols, value = TRUE, perl = TRUE)
+  if (length(zcols) > 0) {
+    zmat <- as.matrix(x[, zcols, drop = FALSE])
+    storage.mode(zmat) <- "double"
+    out$worst_zscore <- vapply(seq_len(nrow(zmat)), function(i) {
+      r <- zmat[i, ]
+      r <- r[!is.na(r)]
+      if (length(r) == 0) NA_real_ else r[which.max(abs(r))]
+    }, numeric(1))
+    out$n_below_lln <- rowSums(zmat < -1.645, na.rm = TRUE)
+    out$n_above_uln <- rowSums(zmat >  1.645, na.rm = TRUE)
+  }
+  out
+}
+
+
+# broom S3 methods. These dispatch only when broom is installed; the
+# underlying pft_long() / pft_glance() are always available regardless.
+# Roxygen emits S3method(broom::tidy, pft_result) and
+# S3method(broom::glance, pft_result) into NAMESPACE.
+
+#' @exportS3Method broom::tidy pft_result
+tidy.pft_result <- function(x, ...) pft_long(x, ...)
+
+#' @exportS3Method broom::glance pft_result
+glance.pft_result <- function(x, ...) pft_glance(x, ...)
