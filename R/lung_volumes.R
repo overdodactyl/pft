@@ -42,6 +42,7 @@
 #' @export
 pft_volumes <- function(data) {
 
+  data <- pft_normalize_inputs(data, requires_race = FALSE)
   n <- nrow(data)
 
   index.spline <- matrix(NA, nrow = n, ncol = 7)

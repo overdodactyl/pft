@@ -48,7 +48,10 @@ pft_validate <- function(data) {
 
   if ("sex" %in% colnames(data)) {
     bad <- !is.na(data$sex) & !data$sex %in% c("M", "F")
-    add(bad, "sex not in {M, F}")
+    add(bad, "sex not in {M, F} (case-sensitive; \"male\"/\"Male\" not accepted)")
+  } else {
+    # Whole-cohort issue: flag on row 1 if data is non-empty.
+    if (n > 0) add(c(TRUE, rep(FALSE, n - 1)), "sex column missing")
   }
   if ("age" %in% colnames(data)) {
     bad <- !is.na(data$age) & (data$age < 0 | data$age > 120)
@@ -61,7 +64,7 @@ pft_validate <- function(data) {
   if ("race" %in% colnames(data)) {
     bad <- !is.na(data$race) &
       !data$race %in% c("AfrAm","NEAsia","SEAsia","Other/mixed","Caucasian")
-    add(bad, "race not a recognised GLI 2012 category")
+    add(bad, "race not a recognised GLI 2012 category (case-sensitive; see ?pft_spirometry)")
   }
 
   # FEV1 should not exceed FVC. Allow 1% tolerance for measurement noise.

@@ -203,3 +203,32 @@ GLI 2012 distinguishes five ancestral groups for spirometry:
 
 GLI Global 2022 is race-neutral; the `race` column is ignored when
 calling `pft_spirometry(year = 2022)`.
+
+# Common validation errors
+
+If your cohort is unexpectedly all-NA or you see a warning about
+unrecognised inputs, check the following before anything else:
+
+**Sex must be canonical `"M"` / `"F"`.** Common dataset values like
+`"male"`, `"Male"`, `"MALE"`, `"m"`, `"f"`, `"Female"`, `"woman"`,
+`"boy"`, `"girl"` are auto-normalised with a warning. Anything else
+(e.g. `"Unknown"`, `"X"`, `"NB"`) is set to `NA`. Prior to this
+behaviour any value other than `"M"` was silently treated as female;
+make sure your data isn't relying on that.
+
+**Race must be one of the five GLI 2012 categories.** Common
+variants like `"caucasian"` (lowercase), `" Caucasian"` (whitespace),
+`"white"`, `"black"`, `"African American"`, `"european"` are
+auto-normalised with a warning. Anything else (`"Asian"` ambiguous
+between NEAsia/SEAsia is mapped to `NEAsia`; other strings like
+`"Hispanic"`, `"Latino"`, `"Native American"` are not in the GLI 2012
+framework) is set to `NA`.
+
+**`year = 2012` without a `race` column errors** rather than
+silently producing all-NA output. Either supply a `race` column or
+call `pft_spirometry(data, year = 2022)` for the race-neutral
+equations.
+
+**Pre-flight QC**: call `pft_validate()` on a fresh data frame to
+get a row-level breakdown of input issues *before* running the
+reference functions.

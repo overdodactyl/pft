@@ -23,8 +23,10 @@ rmarkdown-based clinical reports.
 To support unambiguous clinical and research use, the following
 conventions hold across every exported function:
 \itemize{
-\item \strong{Sex} is coded as the character string \code{"M"} or \code{"F"}
-(case-sensitive). Anything else is treated as missing.
+\item \strong{Sex} is canonically coded as the character string \code{"M"} or
+\code{"F"}. Common variants (\code{"male"}, \code{"Female"}, \code{"m"}, \code{"woman"},
+etc.) are auto-normalised with a warning. Truly unrecognised
+values (\code{"X"}, \code{"Unknown"}, etc.) are treated as missing.
 \item \strong{Age} is in years (decimal allowed).
 \item \strong{Height} is in centimetres.
 \item \strong{Volumes} (FEV1, FVC, FRC, TLC, RV, ERV, IC, VC) are in litres.

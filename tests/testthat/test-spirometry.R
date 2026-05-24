@@ -133,9 +133,9 @@ test_that("ages above GLI 2012 upper bound produce NA", {
   expect_true(is.na(out$fef75_pred[2])) # age 91 is above FEF75's 90 ceiling
 })
 
-test_that("unrecognized race string produces NA", {
+test_that("unrecognized race string produces NA (with warning)", {
   d <- data.frame(sex = "M", age = 30, height = 170, race = "Martian")
-  out <- pft_spirometry(d, year = 2012)
+  expect_warning(out <- pft_spirometry(d, year = 2012), "Martian|unrecognised")
   expect_true(is.na(out$fev1_pred))
 })
 

@@ -58,6 +58,8 @@
 #' @export
 pft_spirometry <- function(data, year = 2012) {
 
+  data <- pft_normalize_inputs(data, requires_race = (year == 2012))
+
   if (year == 2012) {
     fits <- spirometry_lms_fit(
       data,

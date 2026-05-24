@@ -16,8 +16,10 @@
 #' To support unambiguous clinical and research use, the following
 #' conventions hold across every exported function:
 #'
-#' * **Sex** is coded as the character string `"M"` or `"F"`
-#'   (case-sensitive). Anything else is treated as missing.
+#' * **Sex** is canonically coded as the character string `"M"` or
+#'   `"F"`. Common variants (`"male"`, `"Female"`, `"m"`, `"woman"`,
+#'   etc.) are auto-normalised with a warning. Truly unrecognised
+#'   values (`"X"`, `"Unknown"`, etc.) are treated as missing.
 #' * **Age** is in years (decimal allowed).
 #' * **Height** is in centimetres.
 #' * **Volumes** (FEV1, FVC, FRC, TLC, RV, ERV, IC, VC) are in litres.
