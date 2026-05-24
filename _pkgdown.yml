@@ -31,10 +31,13 @@ reference:
       Stanojevic 2022 ERS/ATS standard.
     contents:
       - pft_classify
+      - pft_volume_subpattern
       - pft_severity
       - pft_bdr
       - pft_prism
       - pft_change
+      - pft_fev1q
+      - pft_dlco_hb_correct
 
   - title: Predecessor 2005 standard
     desc: >
