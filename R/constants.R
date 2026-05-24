@@ -110,3 +110,18 @@ FEV1Q_DENOM_FEMALE <- 0.4
 # children and adolescents." Adult-only cutoff applied when an age
 # vector is supplied to pft_fev1q().
 FEV1Q_MIN_AGE      <- 18
+
+# Hemoglobin correction of DLCO/TLCO per Stanojevic 2017 (p. 9, p. 11)
+# and the underlying Cotes 1972 formula. Used by pft_dlco_hb_correct().
+# Reference Hb values are sex- and age-specific (Stanojevic 2017 p. 11:
+# "146 g/L for males aged >=15 years and 134 g/L for females and
+# children"). The constants 1.7 and 0.7 are the Cotes formula
+# parameters, dependent on the assumption that the ratio of membrane
+# diffusing capacity to pulmonary capillary blood volume is
+# 0.7 mL/min/mmHg/mL-blood and that alveolar oxygen partial pressure
+# is 14.63 kPa (110 mmHg).
+HB_REF_MALE_ADULT      <- 146   # g/L
+HB_REF_FEMALE_CHILD    <- 134   # g/L
+HB_REF_MALE_ADULT_AGE  <- 15    # cutoff: males <15 use female/child ref
+COTES_HB_K_NUM         <- 1.7
+COTES_HB_K_DENOM       <- 0.7
