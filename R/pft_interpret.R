@@ -9,24 +9,24 @@
 #'
 #' \itemize{
 #'   \item If sex / age / height (and race, for `year = 2012`) are present,
-#'     it computes spirometry reference values via [spirometry_normals()].
+#'     it computes spirometry reference values via [pft_spirometry()].
 #'   \item If sex / age / height are present, it computes lung-volume
-#'     reference values via [volume_normals()].
+#'     reference values via [pft_volumes()].
 #'   \item If sex / age / height are present, it computes diffusion
-#'     reference values via [diffusion_normals()].
+#'     reference values via [pft_diffusion()].
 #'   \item For each measure whose `_measured` column is present, z-score
 #'     and percent-predicted are appended (see the individual reference
 #'     functions for details).
 #'   \item For each measure with a z-score, a `<measure>_severity`
-#'     column is appended via [severity_grade()].
+#'     column is appended via [pft_severity()].
 #'   \item If `fev1_measured`, `fvc_measured`, `fev1fvc_measured`, and
 #'     `tlc_measured` columns are present, the ATS pattern classifier
-#'     ([ats_classification()]) labels each row.
+#'     ([pft_classify()]) labels each row.
 #'   \item If `fev1_measured`, `fev1fvc_measured`, and their LLNs are
-#'     resolvable, [prism_screen()] adds a `prism` flag (independent of
+#'     resolvable, [pft_prism()] adds a `prism` flag (independent of
 #'     TLC).
 #'   \item If `<measure>_pre` and `<measure>_post` columns are present
-#'     for any spirometry measure, [bronchodilator_response()] adds
+#'     for any spirometry measure, [pft_bdr()] adds
 #'     `<measure>_bdr_pct` and `<measure>_bdr_significant` columns.
 #' }
 #'
@@ -36,9 +36,9 @@
 #'
 #' @param data A data frame containing whatever inputs are available.
 #'   See Details for the column-name conventions.
-#' @param year GLI spirometry equation year. See [spirometry_normals()].
+#' @param year GLI spirometry equation year. See [pft_spirometry()].
 #' @param SI.units Whether to report diffusion in SI units. See
-#'   [diffusion_normals()].
+#'   [pft_diffusion()].
 #'
 #' @return The original data frame with every applicable reference value,
 #'   z-score, percent predicted, severity grade, pattern label, PRISm
@@ -76,16 +76,16 @@ pft_interpret <- function(data, year = 2012, SI.units = FALSE) {
   # 1. Reference values + z-scores + percent predicted for the three
   #    primary measure groups, conditional on demographics being present.
   if (has_demographics) {
-    data <- spirometry_normals(data, year = year)
-    data <- volume_normals(data)
-    data <- diffusion_normals(data, SI.units = SI.units)
+    data <- pft_spirometry(data, year = year)
+    data <- pft_volumes(data)
+    data <- pft_diffusion(data, SI.units = SI.units)
   }
 
   # 2. Severity grading for every z-score column emitted above.
   zscore_cols <- grep("_zscore", colnames(data), value = TRUE)
   for (col in zscore_cols) {
     severity_col <- sub("_zscore", "_severity", col)
-    data[[severity_col]] <- severity_grade(data[[col]])
+    data[[severity_col]] <- pft_severity(data[[col]])
   }
 
   # 3. ATS pattern classification, if measured + LLN columns are present
@@ -107,7 +107,7 @@ pft_interpret <- function(data, year = 2012, SI.units = FALSE) {
     }
   }
   if (pat_ready) {
-    pat_out <- ats_classification(pat_data)
+    pat_out <- pft_classify(pat_data)
     data$ats_classification     <- pat_out$ats_classification
     data$ats_pattern_combination <- pat_out$ats_pattern_combination
   }
@@ -121,7 +121,7 @@ pft_interpret <- function(data, year = 2012, SI.units = FALSE) {
       fev1fvc     = data$fev1fvc_measured,
       fev1fvc_lln = data$fev1fvc_lln
     )
-    data$prism <- prism_screen(prism_data)$prism
+    data$prism <- pft_prism(prism_data)$prism
   }
 
   # 5. Bronchodilator response, for any spirometry measure with pre/post.
@@ -131,7 +131,7 @@ pft_interpret <- function(data, year = 2012, SI.units = FALSE) {
     pred_col <- paste0(m, "_pred", if (year == 2022) "_2022" else "")
     if (pre %in% colnames(data) && post %in% colnames(data) &&
         pred_col %in% colnames(data)) {
-      bdr <- bronchodilator_response(data[[pre]], data[[post]],
+      bdr <- pft_bdr(data[[pre]], data[[post]],
                                      data[[pred_col]])
       data[[paste0(m, "_bdr_pct")]]         <- bdr$pct_pred_change
       data[[paste0(m, "_bdr_significant")]] <- bdr$is_significant

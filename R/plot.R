@@ -21,18 +21,18 @@
 #'   sex = "M", age = 45, height = 178, race = "Caucasian",
 #'   fev1_measured = 2.5, fvc_measured = 3.8
 #' )
-#' plot_pft(pft_interpret(patient))
+#' pft_plot(pft_interpret(patient))
 #' }
 #'
 #' @export
-plot_pft <- function(data) {
+pft_plot <- function(data) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    stop("plot_pft() requires the ggplot2 package. Install with ",
+    stop("pft_plot() requires the ggplot2 package. Install with ",
          "install.packages(\"ggplot2\").")
   }
   if (nrow(data) != 1) {
-    stop("plot_pft() expects a single-patient data frame (nrow == 1). ",
-         "For multi-patient summaries, call plot_pft() per row.")
+    stop("pft_plot() expects a single-patient data frame (nrow == 1). ",
+         "For multi-patient summaries, call pft_plot() per row.")
   }
 
   zcols <- grep("_zscore", colnames(data), value = TRUE)

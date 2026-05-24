@@ -10,10 +10,10 @@ pft_interpret(data, year = 2012, SI.units = FALSE)
 \item{data}{A data frame containing whatever inputs are available.
 See Details for the column-name conventions.}
 
-\item{year}{GLI spirometry equation year. See [spirometry_normals()].}
+\item{year}{GLI spirometry equation year. See [pft_spirometry()].}
 
 \item{SI.units}{Whether to report diffusion in SI units. See
-[diffusion_normals()].}
+[pft_diffusion()].}
 }
 \value{
 The original data frame with every applicable reference value,
@@ -29,24 +29,24 @@ anything it cannot do:
 
 \itemize{
   \item If sex / age / height (and race, for `year = 2012`) are present,
-    it computes spirometry reference values via [spirometry_normals()].
+    it computes spirometry reference values via [pft_spirometry()].
   \item If sex / age / height are present, it computes lung-volume
-    reference values via [volume_normals()].
+    reference values via [pft_volumes()].
   \item If sex / age / height are present, it computes diffusion
-    reference values via [diffusion_normals()].
+    reference values via [pft_diffusion()].
   \item For each measure whose `_measured` column is present, z-score
     and percent-predicted are appended (see the individual reference
     functions for details).
   \item For each measure with a z-score, a `<measure>_severity`
-    column is appended via [severity_grade()].
+    column is appended via [pft_severity()].
   \item If `fev1_measured`, `fvc_measured`, `fev1fvc_measured`, and
     `tlc_measured` columns are present, the ATS pattern classifier
-    ([ats_classification()]) labels each row.
+    ([pft_classify()]) labels each row.
   \item If `fev1_measured`, `fev1fvc_measured`, and their LLNs are
-    resolvable, [prism_screen()] adds a `prism` flag (independent of
+    resolvable, [pft_prism()] adds a `prism` flag (independent of
     TLC).
   \item If `<measure>_pre` and `<measure>_post` columns are present
-    for any spirometry measure, [bronchodilator_response()] adds
+    for any spirometry measure, [pft_bdr()] adds
     `<measure>_bdr_pct` and `<measure>_bdr_significant` columns.
 }
 

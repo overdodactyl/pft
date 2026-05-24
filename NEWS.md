@@ -18,16 +18,16 @@
 
 ## New interpretation primitives
 
-* `severity_grade(zscore)` returns one of `"normal"`, `"mild"`,
+* `pft_severity(zscore)` returns one of `"normal"`, `"mild"`,
   `"moderate"`, `"severe"` per the Stanojevic et al. ERJ 2022 z-score
   cut points (>= -1.645, > -2.5, > -4, <= -4).
-* `bronchodilator_response(pre, post, predicted)` classifies BDR per
+* `pft_bdr(pre, post, predicted)` classifies BDR per
   the 2022 criterion (>10% change relative to predicted, replacing the
   earlier 12%/200 mL rule).
-* `prism_screen(data)` adds a `prism` logical column flagging
+* `pft_prism(data)` adds a `prism` logical column flagging
   Preserved Ratio Impaired Spirometry (FEV1 below LLN, FEV1/FVC at or
   above LLN). Requires only spirometry; does not need TLC.
-* `serial_change_score(z1, z2, r)` computes the conditional change
+* `pft_change(z1, z2, r)` computes the conditional change
   z-score recommended by Stanojevic 2022 for interpreting serial PFT
   measurements over time. Configurable autocorrelation `r`.
 
@@ -39,16 +39,16 @@
   predicted, severity grading, ATS pattern, PRISm flag, and
   bronchodilator response. This is the recommended entry point for
   clinical-style reporting.
-* `validate_pft(data)` flags biologically implausible inputs (FEV1 >
+* `pft_validate(data)` flags biologically implausible inputs (FEV1 >
   FVC, out-of-range demographics, swapped pre/post columns, unknown
   sex/race) without erroring. Returns the original data frame with
   `qc_pass` and `qc_issues` columns appended.
-* `plot_pft(result)` generates a clinical-style z-score lollipop plot
+* `pft_plot(result)` generates a clinical-style z-score lollipop plot
   with severity-band shading. Requires `ggplot2` (Suggests).
 
 ## New outputs: z-score and percent predicted
 
-* `spirometry_normals()`, `volume_normals()`, and `diffusion_normals()`
+* `pft_spirometry()`, `pft_volumes()`, and `pft_diffusion()`
   now optionally compute z-scores and percent predicted. Supply a
   `<measure>_measured` column in the input data frame (e.g.
   `fev1_measured`, `frc_measured`, `dlco_measured`) and the function
@@ -67,12 +67,12 @@
 
 ## Reference-function robustness
 
-* **Bug fix:** `spirometry_normals()`, `volume_normals()`, and
-  `diffusion_normals()` previously crashed with a "missing value where
+* **Bug fix:** `pft_spirometry()`, `pft_volumes()`, and
+  `pft_diffusion()` previously crashed with a "missing value where
   TRUE/FALSE needed" error when any row had a missing value (`NA`) in
   `sex`, `age`, or `height`. They now skip such rows and emit `NA` for
   the reference values on that row, matching the behaviour already
-  provided for missing `race` (spirometry) and for `ats_classification()`.
+  provided for missing `race` (spirometry) and for `pft_classify()`.
   Real clinical PFT data routinely contains missing demographics; the
   prior behaviour required callers to filter `NA`s themselves.
 

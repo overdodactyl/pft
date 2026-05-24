@@ -15,7 +15,7 @@ gli_test_grid <- gli_test_grid %>%
 ## Generate predictions via the package
 ## Round outputs to three decimal places to
 ## match the output from the GLI web tool
-preds <- spirometry_normals(gli_test_grid, year = 2012) %>%
+preds <- pft_spirometry(gli_test_grid, year = 2012) %>%
   mutate(across(.cols = c(-sex, -race, -age, -height),
                 ~ round(.x, digits = 3)))
 
@@ -95,7 +95,7 @@ test_that("NA in sex / age / height / race produces NA outputs (spirometry 2012)
     height = c(170,       170,         170,      NA_real_),
     race   = c(NA,        "Caucasian", "Caucasian", "Caucasian")
   )
-  out <- spirometry_normals(d, year = 2012)
+  out <- pft_spirometry(d, year = 2012)
   expect_true(all(is.na(out$fev1_pred)))
   expect_true(all(is.na(out$fev1_lln)))
   expect_true(all(is.na(out$fev1_uln)))
@@ -108,7 +108,7 @@ test_that("mixed valid and NA rows: valid rows still get predictions", {
     height = c(170,       170, 165),
     race   = c("Caucasian","Caucasian","Caucasian")
   )
-  out <- spirometry_normals(d, year = 2012)
+  out <- pft_spirometry(d, year = 2012)
   expect_false(is.na(out$fev1_pred[1]))   # valid row
   expect_true(is.na(out$fev1_pred[2]))    # NA sex
   expect_false(is.na(out$fev1_pred[3]))   # valid row
@@ -120,7 +120,7 @@ test_that("mixed valid and NA rows: valid rows still get predictions", {
 
 test_that("ages below GLI 2012 lower bound produce NA", {
   d <- data.frame(sex = "M", age = 2, height = 170, race = "Caucasian")
-  out <- spirometry_normals(d, year = 2012)
+  out <- pft_spirometry(d, year = 2012)
   expect_true(is.na(out$fev1_pred))
   expect_true(is.na(out$fvc_pred))
 })
@@ -128,14 +128,14 @@ test_that("ages below GLI 2012 lower bound produce NA", {
 test_that("ages above GLI 2012 upper bound produce NA", {
   d <- data.frame(sex = c("M","M"), age = c(96, 91), height = 170,
                   race = "Caucasian")
-  out <- spirometry_normals(d, year = 2012)
+  out <- pft_spirometry(d, year = 2012)
   expect_true(is.na(out$fev1_pred[1])) # age 96 is above FEV1's 95 ceiling
   expect_true(is.na(out$fef75_pred[2])) # age 91 is above FEF75's 90 ceiling
 })
 
 test_that("unrecognized race string produces NA", {
   d <- data.frame(sex = "M", age = 30, height = 170, race = "Martian")
-  out <- spirometry_normals(d, year = 2012)
+  out <- pft_spirometry(d, year = 2012)
   expect_true(is.na(out$fev1_pred))
 })
 
@@ -144,14 +144,14 @@ test_that("unrecognized race string produces NA", {
 test_that("output preserves input columns and row count", {
   d <- data.frame(sex = c("M","F"), age = c(30, 40), height = c(170, 165),
                   race = c("Caucasian","Caucasian"), patient_id = c(1, 2))
-  out <- spirometry_normals(d, year = 2012)
+  out <- pft_spirometry(d, year = 2012)
   expect_equal(nrow(out), nrow(d))
   expect_true(all(c("sex","age","height","race","patient_id") %in% colnames(out)))
 })
 
 test_that("year = 2012 emits all expected reference columns", {
   d <- data.frame(sex = "M", age = 30, height = 170, race = "Caucasian")
-  out <- spirometry_normals(d, year = 2012)
+  out <- pft_spirometry(d, year = 2012)
   expected <- c("fev1_pred","fev1_lln","fev1_uln",
                 "fvc_pred","fvc_lln","fvc_uln",
                 "fev1fvc_pred","fev1fvc_lln","fev1fvc_uln",
@@ -162,7 +162,7 @@ test_that("year = 2012 emits all expected reference columns", {
 
 test_that("year = 2022 emits the 2022 reference columns", {
   d <- data.frame(sex = "M", age = 30, height = 170)
-  out <- spirometry_normals(d, year = 2022)
+  out <- pft_spirometry(d, year = 2022)
   expected <- c("fev1_pred_2022","fev1_lln_2022","fev1_uln_2022",
                 "fvc_pred_2022","fvc_lln_2022","fvc_uln_2022",
                 "fev1fvc_pred_2022","fev1fvc_lln_2022","fev1fvc_uln_2022")
@@ -176,29 +176,29 @@ test_that("year = 2022 emits the 2022 reference columns", {
 
 test_that("year=2012: z-score is 0 at predicted and ~+/-1.645 at LLN/ULN", {
   d <- data.frame(sex="M", age=45, height=178, race="Caucasian")
-  ref <- spirometry_normals(d, year = 2012)
+  ref <- pft_spirometry(d, year = 2012)
   for (m in c("fev1","fvc","fev1fvc","fef2575","fef75")) {
     d_at_pred <- d; d_at_pred[[paste0(m, "_measured")]] <- ref[[paste0(m, "_pred")]]
     d_at_lln  <- d; d_at_lln [[paste0(m, "_measured")]] <- ref[[paste0(m, "_lln")]]
     d_at_uln  <- d; d_at_uln [[paste0(m, "_measured")]] <- ref[[paste0(m, "_uln")]]
-    expect_equal(spirometry_normals(d_at_pred, 2012)[[paste0(m, "_zscore")]],   0,      tolerance = 1e-8, label = m)
-    expect_equal(spirometry_normals(d_at_lln,  2012)[[paste0(m, "_zscore")]], -1.645, tolerance = 1e-4, label = m)
-    expect_equal(spirometry_normals(d_at_uln,  2012)[[paste0(m, "_zscore")]],  1.645, tolerance = 1e-4, label = m)
+    expect_equal(pft_spirometry(d_at_pred, 2012)[[paste0(m, "_zscore")]],   0,      tolerance = 1e-8, label = m)
+    expect_equal(pft_spirometry(d_at_lln,  2012)[[paste0(m, "_zscore")]], -1.645, tolerance = 1e-4, label = m)
+    expect_equal(pft_spirometry(d_at_uln,  2012)[[paste0(m, "_zscore")]],  1.645, tolerance = 1e-4, label = m)
   }
 })
 
 test_that("year=2012: pctpred is 100 at predicted, 80 at 0.8*predicted", {
   d <- data.frame(sex="M", age=45, height=178, race="Caucasian")
-  ref <- spirometry_normals(d, year = 2012)
+  ref <- pft_spirometry(d, year = 2012)
   d_at_pred <- d; d_at_pred$fev1_measured <- ref$fev1_pred
   d_at_80   <- d; d_at_80$fev1_measured   <- ref$fev1_pred * 0.8
-  expect_equal(spirometry_normals(d_at_pred, 2012)$fev1_pctpred, 100, tolerance = 1e-8)
-  expect_equal(spirometry_normals(d_at_80,   2012)$fev1_pctpred,  80, tolerance = 1e-8)
+  expect_equal(pft_spirometry(d_at_pred, 2012)$fev1_pctpred, 100, tolerance = 1e-8)
+  expect_equal(pft_spirometry(d_at_80,   2012)$fev1_pctpred,  80, tolerance = 1e-8)
 })
 
 test_that("z-score / pctpred columns absent when no measured cols supplied", {
   d <- data.frame(sex="M", age=45, height=178, race="Caucasian")
-  out <- spirometry_normals(d, year = 2012)
+  out <- pft_spirometry(d, year = 2012)
   expect_false("fev1_zscore" %in% colnames(out))
   expect_false("fev1_pctpred" %in% colnames(out))
 })
@@ -206,7 +206,7 @@ test_that("z-score / pctpred columns absent when no measured cols supplied", {
 test_that("NA measured value propagates to NA z-score and pctpred", {
   d <- data.frame(sex="M", age=45, height=178, race="Caucasian",
                   fev1_measured = NA_real_)
-  out <- spirometry_normals(d, year = 2012)
+  out <- pft_spirometry(d, year = 2012)
   expect_true(is.na(out$fev1_zscore))
   expect_true(is.na(out$fev1_pctpred))
 })
@@ -218,11 +218,11 @@ test_that("NA measured value propagates to NA z-score and pctpred", {
 
 test_that("year=2022 matches the GLI Global oracle", {
   oracle <- read.csv(test_path("gli_2022_oracle.csv"), stringsAsFactors = FALSE)
-  # Pass demographics AND measured values so spirometry_normals also emits
+  # Pass demographics AND measured values so pft_spirometry also emits
   # zscore + pctpred columns.
   input_cols <- c("sex","age","height",
                   "fev1_measured","fvc_measured","fev1fvc_measured")
-  out <- spirometry_normals(oracle[, input_cols], year = 2022)
+  out <- pft_spirometry(oracle[, input_cols], year = 2022)
   check_cols <- c("fev1_pred_2022","fev1_lln_2022",
                   "fev1_zscore_2022","fev1_pctpred_2022",
                   "fvc_pred_2022","fvc_lln_2022",

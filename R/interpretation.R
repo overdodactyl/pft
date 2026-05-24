@@ -19,11 +19,11 @@
 #' are taken from the "Severity of lung function impairment" section.
 #'
 #' @examples
-#' severity_grade(c(0, -1.7, -3, -5))
+#' pft_severity(c(0, -1.7, -3, -5))
 #' # -> "normal" "mild" "moderate" "severe"
 #'
 #' @export
-severity_grade <- function(zscore) {
+pft_severity <- function(zscore) {
   out <- character(length(zscore))
   out[is.na(zscore)]            <- NA_character_
   out[!is.na(zscore) & zscore >= -1.645]                  <- "normal"
@@ -48,7 +48,7 @@ severity_grade <- function(zscore) {
 #'   measurements (same units, same length).
 #' @param predicted Numeric vector of predicted (median) values for the
 #'   same measure, typically the `<measure>_pred` column from a previous
-#'   call to `spirometry_normals()`.
+#'   call to `pft_spirometry()`.
 #' @param threshold Percent-of-predicted change considered significant.
 #'   Defaults to 10 (the Stanojevic 2022 criterion).
 #'
@@ -64,11 +64,11 @@ severity_grade <- function(zscore) {
 #' "Bronchodilator responsiveness testing" section.
 #'
 #' @examples
-#' bronchodilator_response(pre = 2.5, post = 3.0, predicted = 4.0)
+#' pft_bdr(pre = 2.5, post = 3.0, predicted = 4.0)
 #' # -> 12.5% of predicted change, is_significant = TRUE
 #'
 #' @export
-bronchodilator_response <- function(pre, post, predicted, threshold = 10) {
+pft_bdr <- function(pre, post, predicted, threshold = 10) {
   pct <- (post - pre) / predicted * 100
   tibble::tibble(
     pct_pred_change = pct,
@@ -105,10 +105,10 @@ bronchodilator_response <- function(pre, post, predicted, threshold = 10) {
 #' @examples
 #' d <- data.frame(fev1 = 2.0, fev1_lln = 2.5,
 #'                 fev1fvc = 0.80, fev1fvc_lln = 0.70)
-#' prism_screen(d)
+#' pft_prism(d)
 #'
 #' @export
-prism_screen <- function(data) {
+pft_prism <- function(data) {
   fev1_low      <- data$fev1    <  data$fev1_lln
   ratio_normal  <- data$fev1fvc >= data$fev1fvc_lln
   data$prism <- fev1_low & ratio_normal

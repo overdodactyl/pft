@@ -41,7 +41,7 @@ patient <- data.frame(
   sex = "M", age = 45, height = 178, race = "Caucasian"
 )
 
-ref <- spirometry_normals(patient, year = 2012)
+ref <- pft_spirometry(patient, year = 2012)
 ref[, c("fev1_pred", "fev1_lln", "fev1_uln",
         "fvc_pred",  "fvc_lln",  "fvc_uln")]
 ```
@@ -49,8 +49,8 @@ ref[, c("fev1_pred", "fev1_lln", "fev1_uln",
 The same pattern works for lung volumes and diffusion:
 
 ```{r}
-volume_normals(patient)[, c("frc_pred", "tlc_pred", "rv_pred", "vc_pred")]
-diffusion_normals(patient)[, c("dlco_pred", "kco_tr_pred", "va_pred")]
+pft_volumes(patient)[, c("frc_pred", "tlc_pred", "rv_pred", "vc_pred")]
+pft_diffusion(patient)[, c("dlco_pred", "kco_tr_pred", "va_pred")]
 ```
 
 # 2. Z-scores and percent predicted from measured values
@@ -65,7 +65,7 @@ patient_with_measurements <- data.frame(
   fvc_measured  = 3.8
 )
 
-out <- spirometry_normals(patient_with_measurements)
+out <- pft_spirometry(patient_with_measurements)
 out[, c("fev1_pred", "fev1_zscore", "fev1_pctpred",
         "fvc_pred",  "fvc_zscore",  "fvc_pctpred")]
 ```
@@ -76,24 +76,24 @@ The z-score uses the standard LMS formula
 
 # 3. Severity grading
 
-`severity_grade()` maps a z-score to one of four categories per the
+`pft_severity()` maps a z-score to one of four categories per the
 Stanojevic 2022 cut points:
 
 ```{r}
-severity_grade(c(0, -1.7, -3, -5))
+pft_severity(c(0, -1.7, -3, -5))
 ```
 
 You can grade any z-score column directly:
 
 ```{r}
-out$fev1_severity <- severity_grade(out$fev1_zscore)
-out$fvc_severity  <- severity_grade(out$fvc_zscore)
+out$fev1_severity <- pft_severity(out$fev1_zscore)
+out$fvc_severity  <- pft_severity(out$fvc_zscore)
 out[, c("fev1_zscore", "fev1_severity", "fvc_zscore", "fvc_severity")]
 ```
 
 # 4. ATS pattern classification
 
-Given measured spirometry plus TLC and their LLNs, `ats_classification()`
+Given measured spirometry plus TLC and their LLNs, `pft_classify()`
 labels the pattern per Stanojevic 2022 Figure 8:
 
 ```{r}
@@ -103,7 +103,7 @@ classification_input <- data.frame(
   fev1fvc = 0.66, fev1fvc_lln = 0.70,
   tlc  = 6.0,  tlc_lln = 5.0
 )
-ats_classification(classification_input)[
+pft_classify(classification_input)[
   , c("ats_classification", "ats_pattern_combination")
 ]
 ```
@@ -119,7 +119,7 @@ The Stanojevic 2022 BDR criterion is a >10% change relative to predicted
 in FEV1 or FVC (replacing the 2005 12% / 200 mL rule):
 
 ```{r}
-bronchodilator_response(pre = 2.5, post = 3.0, predicted = 4.0)
+pft_bdr(pre = 2.5, post = 3.0, predicted = 4.0)
 ```
 
 # 6. PRISm screening
@@ -128,7 +128,7 @@ Preserved Ratio Impaired Spirometry: low FEV1 with normal FEV1/FVC.
 Spirometry-only; no TLC needed.
 
 ```{r}
-prism_screen(data.frame(
+pft_prism(data.frame(
   fev1 = 2.0,    fev1_lln = 2.5,
   fev1fvc = 0.80, fev1fvc_lln = 0.70
 ))
@@ -142,12 +142,12 @@ autocorrelation `r`. `|CCS| > 1.645` indicates an unusual change.
 
 ```{r}
 # z dropped from -0.5 to -2.5 over 1 year; r ≈ 0.7 for adult FEV1
-serial_change_score(z1 = -0.5, z2 = -2.5, r = 0.7)
+pft_change(z1 = -0.5, z2 = -2.5, r = 0.7)
 ```
 
 # 8. Input QC
 
-`validate_pft()` flags biologically implausible inputs without
+`pft_validate()` flags biologically implausible inputs without
 erroring -- handy for screening a real-world cohort before
 interpretation.
 
@@ -159,7 +159,7 @@ cohort <- data.frame(
   fev1_measured = c(2.5, 4.0, 2.0),
   fvc_measured  = c(3.8, 3.5, 2.5)
 )
-validate_pft(cohort)[, c("qc_pass", "qc_issues")]
+pft_validate(cohort)[, c("qc_pass", "qc_issues")]
 ```
 
 # 9. The one-call workflow
@@ -188,11 +188,11 @@ result[, c("fev1_pred", "fev1_zscore", "fev1_severity",
 
 # 10. Visualisation
 
-`plot_pft()` produces a clinical-style z-score lollipop figure with
+`pft_plot()` produces a clinical-style z-score lollipop figure with
 severity bands. Requires `ggplot2` (Suggests).
 
 ```{r, eval = requireNamespace("ggplot2", quietly = TRUE)}
-plot_pft(result)
+pft_plot(result)
 ```
 
 # 11. Cohort analyses

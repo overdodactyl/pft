@@ -57,11 +57,11 @@ test_that("pft_interpret produces the same numeric outputs as the components", {
   d <- data.frame(sex = "M", age = 45, height = 178, race = "Caucasian",
                   fev1_measured = 2.5)
   out <- pft_interpret(d)
-  direct <- spirometry_normals(d, year = 2012)
+  direct <- pft_spirometry(d, year = 2012)
   expect_equal(out$fev1_pred,   direct$fev1_pred)
   expect_equal(out$fev1_lln,    direct$fev1_lln)
   expect_equal(out$fev1_zscore, direct$fev1_zscore)
-  expect_equal(out$fev1_severity, severity_grade(direct$fev1_zscore))
+  expect_equal(out$fev1_severity, pft_severity(direct$fev1_zscore))
 })
 
 test_that("pft_interpret year=2022 emits 2022 columns and uses them for BDR", {

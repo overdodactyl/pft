@@ -3,7 +3,7 @@ library(dplyr)
 ## Generate predictions via the package
 ## Round outputs to three decimal places to
 ## match the output from the GLI web tool
-preds <- volume_normals(gli_test_grid) %>%
+preds <- pft_volumes(gli_test_grid) %>%
   mutate(across(.cols = c(-sex, -ethnic, -age, -height),
                 ~ round(.x, digits = 3)))
 
@@ -78,29 +78,29 @@ test_that("vc_pred",     { expect_equal(preds$vc_pred,     gli_test_groundtruth$
 
 test_that("volumes z-score is 0 at predicted and ~+/-1.645 at LLN/ULN", {
   d <- data.frame(sex="M", age=45, height=178)
-  ref <- volume_normals(d)
+  ref <- pft_volumes(d)
   for (m in c("frc","tlc","rv","rv_tlc","erv","ic","vc")) {
     d_at_pred <- d; d_at_pred[[paste0(m, "_measured")]] <- ref[[paste0(m, "_pred")]]
     d_at_lln  <- d; d_at_lln [[paste0(m, "_measured")]] <- ref[[paste0(m, "_lln")]]
     d_at_uln  <- d; d_at_uln [[paste0(m, "_measured")]] <- ref[[paste0(m, "_uln")]]
-    expect_equal(volume_normals(d_at_pred)[[paste0(m, "_zscore")]],   0,     tolerance = 1e-8, label = m)
-    expect_equal(volume_normals(d_at_lln )[[paste0(m, "_zscore")]], -1.645, tolerance = 1e-4, label = m)
-    expect_equal(volume_normals(d_at_uln )[[paste0(m, "_zscore")]],  1.645, tolerance = 1e-4, label = m)
+    expect_equal(pft_volumes(d_at_pred)[[paste0(m, "_zscore")]],   0,     tolerance = 1e-8, label = m)
+    expect_equal(pft_volumes(d_at_lln )[[paste0(m, "_zscore")]], -1.645, tolerance = 1e-4, label = m)
+    expect_equal(pft_volumes(d_at_uln )[[paste0(m, "_zscore")]],  1.645, tolerance = 1e-4, label = m)
   }
 })
 
 test_that("volumes pctpred is 100 at predicted", {
   d <- data.frame(sex="M", age=45, height=178)
-  ref <- volume_normals(d)
+  ref <- pft_volumes(d)
   for (m in c("frc","tlc")) {
     d_at_pred <- d; d_at_pred[[paste0(m, "_measured")]] <- ref[[paste0(m, "_pred")]]
-    expect_equal(volume_normals(d_at_pred)[[paste0(m, "_pctpred")]], 100, tolerance = 1e-8, label = m)
+    expect_equal(pft_volumes(d_at_pred)[[paste0(m, "_pctpred")]], 100, tolerance = 1e-8, label = m)
   }
 })
 
 test_that("volumes: zscore/pctpred columns absent without measured cols", {
   d <- data.frame(sex="M", age=45, height=178)
-  out <- volume_normals(d)
+  out <- pft_volumes(d)
   expect_false("frc_zscore" %in% colnames(out))
   expect_false("frc_pctpred" %in% colnames(out))
 })
@@ -114,7 +114,7 @@ test_that("NA in sex / age / height produces NA outputs (volumes)", {
     age    = c(30, NA_real_, 30),
     height = c(170, 170, NA_real_)
   )
-  out <- volume_normals(d)
+  out <- pft_volumes(d)
   expect_true(all(is.na(out$frc_pred)))
   expect_true(all(is.na(out$tlc_pred)))
 })
@@ -124,13 +124,13 @@ test_that("NA in sex / age / height produces NA outputs (volumes)", {
 
 test_that("ages below GLI 2021 lower bound produce NA", {
   d <- data.frame(sex = "M", age = 4, height = 100)
-  out <- volume_normals(d)
+  out <- pft_volumes(d)
   expect_true(is.na(out$frc_pred))
 })
 
 test_that("ages above GLI 2021 upper bound produce NA", {
   d <- data.frame(sex = "M", age = 81, height = 170)
-  out <- volume_normals(d)
+  out <- pft_volumes(d)
   expect_true(is.na(out$frc_pred))
 })
 
@@ -139,14 +139,14 @@ test_that("ages above GLI 2021 upper bound produce NA", {
 test_that("volumes output preserves input columns and row count", {
   d <- data.frame(sex = c("M","F"), age = c(30, 40), height = c(170, 165),
                   patient_id = c(1, 2))
-  out <- volume_normals(d)
+  out <- pft_volumes(d)
   expect_equal(nrow(out), nrow(d))
   expect_true(all(c("sex","age","height","patient_id") %in% colnames(out)))
 })
 
-test_that("volume_normals emits all 7 measure-x-3 reference columns", {
+test_that("pft_volumes emits all 7 measure-x-3 reference columns", {
   d <- data.frame(sex = "M", age = 30, height = 170)
-  out <- volume_normals(d)
+  out <- pft_volumes(d)
   expected <- c("frc_pred","frc_lln","frc_uln",
                 "tlc_pred","tlc_lln","tlc_uln",
                 "rv_pred","rv_lln","rv_uln",

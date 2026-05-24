@@ -1,7 +1,7 @@
 #' @title Compute carbon monoxide diffusion capacity or transfer factor reference values for given demographics
 #'
 #' @description
-#' `diffusion_normals()` computes ATS-compliant upper and lower normal limits
+#' `pft_diffusion()` computes ATS-compliant upper and lower normal limits
 #' for carbon monoxide measured diffusion capacity and European equivalents
 #' including DLCO (or TLCO), KCO, and VA.
 #'
@@ -36,10 +36,10 @@
 #' data <- data.frame(sex=c("M","F"),
 #'                    age=c(30,5.1),
 #'                    height=c(178,50))
-#' diffusion_normals(data)
+#' pft_diffusion(data)
 #'
 #' @export
-diffusion_normals <- function(data, SI.units = FALSE) {
+pft_diffusion <- function(data, SI.units = FALSE) {
 
   n <- nrow(data)
 

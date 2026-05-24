@@ -1,7 +1,7 @@
 #' @title Compute lung volume reference values for given demographics
 #'
 #' @description
-#' `volume_normals()` computes ATS-compliant upper and lower normal limits
+#' `pft_volumes()` computes ATS-compliant upper and lower normal limits
 #' for lung volume measures including FRC, TLC, RV, ERV, IC, and VC.
 #'
 #' @param data A data frame containing columns for sex ("M","F"),
@@ -31,10 +31,10 @@
 #' data <- data.frame(sex=c("M","F"),
 #'                    age=c(30,5.1),
 #'                    height=c(178,50))
-#' volume_normals(data)
+#' pft_volumes(data)
 #'
 #' @export
-volume_normals <- function(data) {
+pft_volumes <- function(data) {
 
   n <- nrow(data)
 

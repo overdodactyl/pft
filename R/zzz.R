@@ -1,5 +1,5 @@
 # Declare aes()-bound column names that R CMD check would otherwise flag
-# as "no visible binding" in plot_pft(). They are not free variables but
+# as "no visible binding" in pft_plot(). They are not free variables but
 # ggplot2 aesthetic references; this is the standard suppression pattern.
 utils::globalVariables(c("measure", "zscore", "ymin", "ymax", "fill"))
 

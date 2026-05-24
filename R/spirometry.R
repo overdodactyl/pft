@@ -1,7 +1,7 @@
 #' @title Compute spirometry reference values for given demographics
 #'
 #' @description
-#' `spirometry_normals()` computes  ATS-compliant upper and lower normal limits
+#' `pft_spirometry()` computes  ATS-compliant upper and lower normal limits
 #' for common spirometry measures including FEV1, FVC, FEV1/FVC, FEF2575, and FEF75.
 #'
 #' @param data A data frame containing columns for sex ("M","F"),
@@ -46,10 +46,10 @@
 #'                    age=c(30.1,5.1),
 #'                    height=c(178,50),
 #'                    race=c("SEAsia","NEAsia"))
-#' spirometry_normals(data)
+#' pft_spirometry(data)
 #'
 #' @export
-spirometry_normals <- function(data, year = 2012) {
+pft_spirometry <- function(data, year = 2012) {
 
   if (year == 2012) {
     fits <- spirometry_lms_fit(
@@ -98,7 +98,7 @@ spirometry_normals <- function(data, year = 2012) {
 # and upper normal limits for a set of spirometry measures, using the GLI
 # LMS spline-lookup approach (Quanjer 2012; Bowerman 2023).
 #
-# Internal; not exported. Used by spirometry_normals() for both the GLI 2012
+# Internal; not exported. Used by pft_spirometry() for both the GLI 2012
 # (race-adjusted) and GLI 2022 (race-neutral) codepaths.
 #
 # Inputs:

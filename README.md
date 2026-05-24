@@ -32,9 +32,9 @@ for serial measurements, and clinical-style visualisation.
 
 | Function | Computes | Source standard |
 |---|---|---|
-| `spirometry_normals()` | FEV1, FVC, FEV1/FVC, FEF25-75, FEF75 | GLI 2012 (Quanjer) or GLI Global 2022 (Bowerman) |
-| `volume_normals()` | FRC, TLC, RV, RV/TLC, ERV, IC, VC | GLI 2021 static lung volumes (Hall) |
-| `diffusion_normals()` | TLCO/DLCO, KCO, VA (SI or traditional units) | GLI 2017 TLCO (Stanojevic, corrected 2020) |
+| `pft_spirometry()` | FEV1, FVC, FEV1/FVC, FEF25-75, FEF75 | GLI 2012 (Quanjer) or GLI Global 2022 (Bowerman) |
+| `pft_volumes()` | FRC, TLC, RV, RV/TLC, ERV, IC, VC | GLI 2021 static lung volumes (Hall) |
+| `pft_diffusion()` | TLCO/DLCO, KCO, VA (SI or traditional units) | GLI 2017 TLCO (Stanojevic, corrected 2020) |
 
 Each emits `*_pred`, `*_lln`, `*_uln`. If a `<measure>_measured` column is also present, `*_zscore` and `*_pctpred` are appended automatically.
 
@@ -43,13 +43,13 @@ Each emits `*_pred`, `*_lln`, `*_uln`. If a `<measure>_measured` column is also 
 | Function | Purpose | Source |
 |---|---|---|
 | `pft_interpret()` | Single-call wrapper combining all of the below | Stanojevic 2022 |
-| `ats_classification()` | Normal / Non-specific / Obstructed / Restricted / Mixed | Stanojevic 2022 Fig 8, Tables 5/8 |
-| `severity_grade()` | normal / mild / moderate / severe from z-score | Stanojevic 2022 (severity section) |
-| `bronchodilator_response()` | >10% of predicted change in FEV1 or FVC | Stanojevic 2022 (BDR section) |
-| `prism_screen()` | Preserved Ratio Impaired Spirometry flag | Stanojevic 2022 |
-| `serial_change_score()` | Conditional change z-score for serial measurements | Stanojevic 2022 |
-| `validate_pft()` | QC checks on PFT inputs (FEV1 > FVC, out-of-range demographics, etc.) | — |
-| `plot_pft()` | Clinical-style z-score figure | — |
+| `pft_classify()` | Normal / Non-specific / Obstructed / Restricted / Mixed | Stanojevic 2022 Fig 8, Tables 5/8 |
+| `pft_severity()` | normal / mild / moderate / severe from z-score | Stanojevic 2022 (severity section) |
+| `pft_bdr()` | >10% of predicted change in FEV1 or FVC | Stanojevic 2022 (BDR section) |
+| `pft_prism()` | Preserved Ratio Impaired Spirometry flag | Stanojevic 2022 |
+| `pft_change()` | Conditional change z-score for serial measurements | Stanojevic 2022 |
+| `pft_validate()` | QC checks on PFT inputs (FEV1 > FVC, out-of-range demographics, etc.) | — |
+| `pft_plot()` | Clinical-style z-score figure | — |
 
 All functions are data-frame in, data-frame out — composable with `dplyr`.
 
@@ -69,20 +69,20 @@ patients <- data.frame(
 
 # Compute spirometry, lung volume, and diffusion reference values
 patients |>
-  spirometry_normals(year = 2022) |>
-  volume_normals() |>
-  diffusion_normals(SI.units = TRUE)
+  pft_spirometry(year = 2022) |>
+  pft_volumes() |>
+  pft_diffusion(SI.units = TRUE)
 
 # Add measured values to also get z-scores and percent predicted
 patients$fev1_measured <- c(3.2, 2.1)
 patients$fvc_measured  <- c(4.5, 2.8)
-spirometry_normals(patients, year = 2022)
+pft_spirometry(patients, year = 2022)
 # -> adds fev1_pred_2022, fev1_lln_2022, fev1_uln_2022,
 #         fev1_zscore_2022, fev1_pctpred_2022, and equivalents for fvc.
 ```
 
 To classify a patient's pattern, attach their measured values plus LLNs and
-pipe through `ats_classification()`:
+pipe through `pft_classify()`:
 
 ```r
 patient <- data.frame(
@@ -91,7 +91,7 @@ patient <- data.frame(
   fev1fvc = 0.66, fev1fvc_lln = 0.70,
   tlc = 6.2,   tlc_lln = 5.0
 )
-ats_classification(patient)
+pft_classify(patient)
 #>   fev1 fev1_lln  fvc fvc_lln fev1fvc fev1fvc_lln tlc tlc_lln ats_classification ats_pattern_combination
 #> 1  2.5      3.0  3.8     3.5    0.66        0.70 6.2     5.0         Obstructed                    ANAN
 ```

@@ -1,5 +1,5 @@
 # Internal helpers shared across the reference functions
-# (spirometry_normals, volume_normals, diffusion_normals).
+# (pft_spirometry, pft_volumes, pft_diffusion).
 
 # Append the per-measure LMS outputs (pred, lln, uln) and, when measured
 # values are supplied in the input data frame as `<measure>_measured`

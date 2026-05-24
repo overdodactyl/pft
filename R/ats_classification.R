@@ -1,7 +1,7 @@
 #' @title Classify ATS spirometry patterns from spirometry and lung-volume measurements
 #'
 #' @description
-#' `ats_classification()` assigns ATS patterns using spirometry and lung volume data.
+#' `pft_classify()` assigns ATS patterns using spirometry and lung volume data.
 #'
 #' @param data A data frame containing columns for fev1, fvc, fev1fvc, and their associated LLNs.
 #'
@@ -28,10 +28,10 @@
 #'                              fev1fvc_lln = c(0.681, 0.700),
 #'                              tlc = c(1.5, 2.3),
 #'                              tlc_lln = c(2, 2.5))
-#'           ats_classification(data)
+#'           pft_classify(data)
 #'
 #' @export
-ats_classification <- function(data) {
+pft_classify <- function(data) {
 
   # The pattern label for every (fev1, fvc, fev1fvc, tlc) abnormal/normal
   # combination. The 4-character key positions correspond to FEV1, FVC,

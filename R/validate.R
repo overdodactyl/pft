@@ -1,7 +1,7 @@
 #' @title Validate pulmonary function test inputs
 #'
 #' @description
-#' `validate_pft()` flags biologically implausible or out-of-spec inputs
+#' `pft_validate()` flags biologically implausible or out-of-spec inputs
 #' before they reach a reference function. It is a cheap defensive step
 #' to catch data-entry mistakes, miscoded sex/race, swapped pre/post
 #' columns, and so on. Returns the original data frame with two extra
@@ -31,10 +31,10 @@
 #' @examples
 #' d <- data.frame(sex = c("M","X"), age = c(45, 250),
 #'                 height = c(178, 30))
-#' validate_pft(d)
+#' pft_validate(d)
 #'
 #' @export
-validate_pft <- function(data) {
+pft_validate <- function(data) {
   n <- nrow(data)
   issues <- replicate(n, character(0), simplify = FALSE)
 

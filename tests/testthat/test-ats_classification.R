@@ -1,7 +1,7 @@
 library(dplyr)
 
 ## Generate predictions
-preds <- ats_classification(ats_test_grid)
+preds <- pft_classify(ats_test_grid)
 
 test_that("ats_classification", {
   expect_equal(preds$ats_classification, ats_test_grid$ats_true)
@@ -24,7 +24,7 @@ test_that("FVC between FEV1_lln and FVC_lln classifies as Non-specific", {
     fev1fvc = 0.80,    fev1fvc_lln = 0.70, # ratio normal
     tlc  = 6.0,        tlc_lln  = 5.0    # TLC normal
   )
-  out <- ats_classification(d)
+  out <- pft_classify(d)
   expect_equal(out$ats_classification, "Non-specific")
   expect_equal(out$ats_pattern_combination, "NANN")
 })
@@ -44,7 +44,7 @@ test_that("NA in any input column produces NA labels", {
     tlc = c(6.0, 6.0, NA),
     tlc_lln = c(5.0, 5.0, 5.0)
   )
-  out <- ats_classification(d)
+  out <- pft_classify(d)
   expect_equal(out$ats_classification, c("Normal", NA, NA))
   expect_equal(out$ats_pattern_combination, c("NNNN", NA, NA))
 })
@@ -61,7 +61,7 @@ test_that("classic obstruction profile", {
                   fvc  = 4.5, fvc_lln  = 4.0,
                   fev1fvc = 0.55, fev1fvc_lln = 0.70,
                   tlc  = 6.5, tlc_lln  = 5.0)
-  out <- ats_classification(d)
+  out <- pft_classify(d)
   expect_equal(out$ats_classification, "Obstructed")
 })
 
@@ -72,7 +72,7 @@ test_that("classic restriction profile", {
                   fvc  = 2.5, fvc_lln  = 3.5,
                   fev1fvc = 0.80, fev1fvc_lln = 0.70,
                   tlc  = 4.0, tlc_lln  = 5.0)
-  out <- ats_classification(d)
+  out <- pft_classify(d)
   expect_equal(out$ats_classification, "Restricted")
 })
 
@@ -82,7 +82,7 @@ test_that("classic mixed profile", {
                   fvc  = 2.5, fvc_lln  = 3.5,
                   fev1fvc = 0.55, fev1fvc_lln = 0.70,
                   tlc  = 4.0, tlc_lln  = 5.0)
-  out <- ats_classification(d)
+  out <- pft_classify(d)
   expect_equal(out$ats_classification, "Mixed")
 })
 
@@ -92,7 +92,7 @@ test_that("classic non-specific profile", {
                   fvc  = 3.0, fvc_lln  = 3.5,
                   fev1fvc = 0.75, fev1fvc_lln = 0.70,
                   tlc  = 5.5, tlc_lln  = 5.0)
-  out <- ats_classification(d)
+  out <- pft_classify(d)
   expect_equal(out$ats_classification, "Non-specific")
 })
 
@@ -101,7 +101,7 @@ test_that("normal profile across all four inputs", {
                   fvc  = 4.5, fvc_lln  = 4.0,
                   fev1fvc = 0.80, fev1fvc_lln = 0.70,
                   tlc  = 6.5, tlc_lln  = 5.0)
-  out <- ats_classification(d)
+  out <- pft_classify(d)
   expect_equal(out$ats_classification, "Normal")
 })
 
@@ -113,7 +113,7 @@ test_that("ats_classification preserves input columns and adds 2 new ones", {
                   fev1fvc = 0.75, fev1fvc_lln = 0.70,
                   tlc  = 6.0, tlc_lln  = 5.0,
                   patient_id = 1)
-  out <- ats_classification(d)
+  out <- pft_classify(d)
   expect_equal(nrow(out), nrow(d))
   expect_true("patient_id" %in% colnames(out))
   expect_true(all(c("ats_classification", "ats_pattern_combination") %in% colnames(out)))

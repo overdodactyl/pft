@@ -1,7 +1,7 @@
 #' @title Conditional change score for serial PFT measurements
 #'
 #' @description
-#' `serial_change_score()` computes a z-score-style index of whether a
+#' `pft_change()` computes a z-score-style index of whether a
 #' change between two pulmonary function measurements is larger than
 #' would be expected by within-subject variability and regression to the
 #' mean. The conditional change score (CCS) is recommended by the
@@ -37,10 +37,10 @@
 #'
 #' @examples
 #' # Two measurements 1 year apart, FEV1 z dropped from -1 to -2
-#' serial_change_score(z1 = -1, z2 = -2)
+#' pft_change(z1 = -1, z2 = -2)
 #'
 #' @export
-serial_change_score <- function(z1, z2, r = 0.7) {
+pft_change <- function(z1, z2, r = 0.7) {
   if (r <= -1 || r >= 1) stop("r must lie strictly between -1 and 1")
   ccs <- (z2 - r * z1) / sqrt(1 - r^2)
   tibble::tibble(
