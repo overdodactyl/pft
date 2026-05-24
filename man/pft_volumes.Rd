@@ -8,25 +8,27 @@ pft_volumes(data)
 }
 \arguments{
 \item{data}{A data frame containing columns for sex ("M","F"),
-age (in years, range 5 - 80) and height (in centimeters). If `data`
-also contains any of `frc_measured`, `tlc_measured`, `rv_measured`,
-`rv_tlc_measured`, `erv_measured`, `ic_measured`, `vc_measured`,
+age (in years, range 5 - 80) and height (in centimeters). If \code{data}
+also contains any of \code{frc_measured}, \code{tlc_measured}, \code{rv_measured},
+\code{rv_tlc_measured}, \code{erv_measured}, \code{ic_measured}, \code{vc_measured},
 the corresponding measured value is used to compute a z-score and
 percent-predicted (see Value).}
 }
 \value{
 The original data frame with extra columns appended for each
-  measure:
-  - `<measure>_pred`: predicted (median) value.
-  - `<measure>_lln`:  lower limit of normal (5th percentile).
-  - `<measure>_uln`:  upper limit of normal (95th percentile).
-  If a `<measure>_measured` column was supplied in `data`, two
-  additional columns are emitted:
-  - `<measure>_zscore`:  LMS z-score `((measured/M)^L - 1) / (L*S)`.
-  - `<measure>_pctpred`: percent predicted `(measured / pred) * 100`.
+measure:
+\itemize{
+\item \verb{<measure>_pred}: predicted (median) value.
+\item \verb{<measure>_lln}:  lower limit of normal (5th percentile).
+\item \verb{<measure>_uln}:  upper limit of normal (95th percentile).
+If a \verb{<measure>_measured} column was supplied in \code{data}, two
+additional columns are emitted:
+\item \verb{<measure>_zscore}:  LMS z-score \code{((measured/M)^L - 1) / (L*S)}.
+\item \verb{<measure>_pctpred}: percent predicted \code{(measured / pred) * 100}.
+}
 }
 \description{
-`pft_volumes()` computes ATS-compliant upper and lower normal limits
+\code{pft_volumes()} computes ATS-compliant upper and lower normal limits
 for lung volume measures including FRC, TLC, RV, ERV, IC, and VC.
 }
 \examples{

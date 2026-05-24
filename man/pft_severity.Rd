@@ -10,13 +10,13 @@ pft_severity(zscore)
 \item{zscore}{Numeric vector of z-scores.}
 }
 \value{
-Character vector the same length as `zscore` with values
-  `"normal"`, `"mild"`, `"moderate"`, `"severe"`, or `NA`.
+Character vector the same length as \code{zscore} with values
+\code{"normal"}, \code{"mild"}, \code{"moderate"}, \code{"severe"}, or \code{NA}.
 }
 \description{
 Assigns one of four severity categories to a z-score per the
-Stanojevic et al. ERS/ATS 2022 interpretation standard: `"normal"`
-(z > -1.645), `"mild"`, `"moderate"`, or `"severe"`. The same three-
+Stanojevic et al. ERS/ATS 2022 interpretation standard: \code{"normal"}
+(z > -1.645), \code{"mild"}, \code{"moderate"}, or \code{"severe"}. The same three-
 level (mild/moderate/severe) grading applies uniformly to spirometry,
 lung-volume, and diffusion measures.
 }

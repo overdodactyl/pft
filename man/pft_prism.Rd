@@ -7,12 +7,12 @@
 pft_prism(data)
 }
 \arguments{
-\item{data}{A data frame containing `fev1`, `fev1_lln`, `fev1fvc`,
-and `fev1fvc_lln` columns.}
+\item{data}{A data frame containing \code{fev1}, \code{fev1_lln}, \code{fev1fvc},
+and \code{fev1fvc_lln} columns.}
 }
 \value{
-The original data frame with a `prism` logical column appended.
-  `NA` propagates from any of the four input columns.
+The original data frame with a \code{prism} logical column appended.
+\code{NA} propagates from any of the four input columns.
 }
 \description{
 PRISm is defined as a low FEV1 with a preserved FEV1/FVC ratio: that
@@ -21,7 +21,7 @@ is associated with elevated all-cause mortality and progression to
 chronic respiratory disease, and is highlighted as a distinct entity
 in the Stanojevic et al. ERJ 2022 interpretation standard.
 
-This function adds a `prism` logical column to the data frame. PRISm
+This function adds a \code{prism} logical column to the data frame. PRISm
 is a spirometry-only screen and does not require a TLC measurement.
 }
 \examples{

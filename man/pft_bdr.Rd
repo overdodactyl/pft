@@ -11,25 +11,27 @@ pft_bdr(pre, post, predicted, threshold = 10)
 measurements (same units, same length).}
 
 \item{predicted}{Numeric vector of predicted (median) values for the
-same measure, typically the `<measure>_pred` column from a previous
-call to `pft_spirometry()`.}
+same measure, typically the \verb{<measure>_pred} column from a previous
+call to \code{pft_spirometry()}.}
 
 \item{threshold}{Percent-of-predicted change considered significant.
 Defaults to 10 (the Stanojevic 2022 criterion).}
 }
 \value{
 A data frame with one row per input observation and columns:
-  - `pct_pred_change`: `(post - pre) / predicted * 100`.
-  - `is_significant`: logical, `TRUE` when `pct_pred_change > threshold`.
-  `NA` is propagated wherever any of `pre`, `post`, `predicted` is `NA`.
+\itemize{
+\item \code{pct_pred_change}: \code{(post - pre) / predicted * 100}.
+\item \code{is_significant}: logical, \code{TRUE} when \code{pct_pred_change > threshold}.
+\code{NA} is propagated wherever any of \code{pre}, \code{post}, \code{predicted} is \code{NA}.
+}
 }
 \description{
 Classifies bronchodilator response (BDR) by the percent change in
 the measured value relative to the patient's predicted value, as
 recommended by Stanojevic et al. ERJ 2022. Significant BDR is defined
-as a post-bronchodilator increase of more than 10% of the predicted
+as a post-bronchodilator increase of more than 10\% of the predicted
 value in either FEV1 or FVC. This replaces the 2005 standard, which
-used a >=12% AND >=200 mL change from baseline.
+used a >=12\% AND >=200 mL change from baseline.
 }
 \examples{
 pft_bdr(pre = 2.5, post = 3.0, predicted = 4.0)

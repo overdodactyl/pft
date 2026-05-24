@@ -10,44 +10,44 @@ pft_interpret(data, year = 2012, SI.units = FALSE)
 \item{data}{A data frame containing whatever inputs are available.
 See Details for the column-name conventions.}
 
-\item{year}{GLI spirometry equation year. See [pft_spirometry()].}
+\item{year}{GLI spirometry equation year. See \code{\link[=pft_spirometry]{pft_spirometry()}}.}
 
 \item{SI.units}{Whether to report diffusion in SI units. See
-[pft_diffusion()].}
+\code{\link[=pft_diffusion]{pft_diffusion()}}.}
 }
 \value{
 The original data frame with every applicable reference value,
-  z-score, percent predicted, severity grade, pattern label, PRISm
-  flag, and BDR result appended.
+z-score, percent predicted, severity grade, pattern label, PRISm
+flag, and BDR result appended.
 }
 \description{
-`pft_interpret()` is a single-call workflow that combines every
+\code{pft_interpret()} is a single-call workflow that combines every
 interpretation primitive in this package into a complete clinical
 report per the Stanojevic et al. ERJ 2022 standard. It auto-detects
 which computations are possible from the input columns and skips
 anything it cannot do:
 
 \itemize{
-  \item If sex / age / height (and race, for `year = 2012`) are present,
-    it computes spirometry reference values via [pft_spirometry()].
-  \item If sex / age / height are present, it computes lung-volume
-    reference values via [pft_volumes()].
-  \item If sex / age / height are present, it computes diffusion
-    reference values via [pft_diffusion()].
-  \item For each measure whose `_measured` column is present, z-score
-    and percent-predicted are appended (see the individual reference
-    functions for details).
-  \item For each measure with a z-score, a `<measure>_severity`
-    column is appended via [pft_severity()].
-  \item If `fev1_measured`, `fvc_measured`, `fev1fvc_measured`, and
-    `tlc_measured` columns are present, the ATS pattern classifier
-    ([pft_classify()]) labels each row.
-  \item If `fev1_measured`, `fev1fvc_measured`, and their LLNs are
-    resolvable, [pft_prism()] adds a `prism` flag (independent of
-    TLC).
-  \item If `<measure>_pre` and `<measure>_post` columns are present
-    for any spirometry measure, [pft_bdr()] adds
-    `<measure>_bdr_pct` and `<measure>_bdr_significant` columns.
+\item If sex / age / height (and race, for \code{year = 2012}) are present,
+it computes spirometry reference values via \code{\link[=pft_spirometry]{pft_spirometry()}}.
+\item If sex / age / height are present, it computes lung-volume
+reference values via \code{\link[=pft_volumes]{pft_volumes()}}.
+\item If sex / age / height are present, it computes diffusion
+reference values via \code{\link[=pft_diffusion]{pft_diffusion()}}.
+\item For each measure whose \verb{_measured} column is present, z-score
+and percent-predicted are appended (see the individual reference
+functions for details).
+\item For each measure with a z-score, a \verb{<measure>_severity}
+column is appended via \code{\link[=pft_severity]{pft_severity()}}.
+\item If \code{fev1_measured}, \code{fvc_measured}, \code{fev1fvc_measured}, and
+\code{tlc_measured} columns are present, the ATS pattern classifier
+(\code{\link[=pft_classify]{pft_classify()}}) labels each row.
+\item If \code{fev1_measured}, \code{fev1fvc_measured}, and their LLNs are
+resolvable, \code{\link[=pft_prism]{pft_prism()}} adds a \code{prism} flag (independent of
+TLC).
+\item If \verb{<measure>_pre} and \verb{<measure>_post} columns are present
+for any spirometry measure, \code{\link[=pft_bdr]{pft_bdr()}} adds
+\verb{<measure>_bdr_pct} and \verb{<measure>_bdr_significant} columns.
 }
 
 This is the recommended entry point for clinical-style reporting; the
@@ -56,14 +56,14 @@ callers who need finer-grained control.
 }
 \details{
 To trigger z-scores and percent-predicted on a measure, include the
-corresponding `<measure>_measured` column in `data` (e.g.
-`fev1_measured`, `frc_measured`, `dlco_measured`). To trigger BDR,
-include `<measure>_pre` and `<measure>_post` columns for any of FEV1,
+corresponding \verb{<measure>_measured} column in \code{data} (e.g.
+\code{fev1_measured}, \code{frc_measured}, \code{dlco_measured}). To trigger BDR,
+include \verb{<measure>_pre} and \verb{<measure>_post} columns for any of FEV1,
 FVC, FEV1/FVC.
 
 All outputs trace to a specific equation, table, or figure in
 Stanojevic et al. ERJ 2022 or the underlying GLI reference papers; see
-the `@references` blocks on the individual functions.
+the \verb{@references} blocks on the individual functions.
 }
 \examples{
 patient <- data.frame(

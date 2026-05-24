@@ -9,9 +9,9 @@ pft_diffusion(data, SI.units = FALSE)
 \arguments{
 \item{data}{A data frame containing columns for sex ("M","F"),
 age (in years, in the range 5-90) and height (in centimeters).
-If `data` also contains a `<measure>_measured` column for any of
-the active measures (`tlco`, `kco_si`, `va` under SI units;
-`dlco`, `kco_tr`, `va` under traditional), the measured value is
+If \code{data} also contains a \verb{<measure>_measured} column for any of
+the active measures (\code{tlco}, \code{kco_si}, \code{va} under SI units;
+\code{dlco}, \code{kco_tr}, \code{va} under traditional), the measured value is
 used to compute z-score and percent-predicted (see Value).}
 
 \item{SI.units}{A boolean. Returns the reference values in SI units if TRUE
@@ -19,17 +19,19 @@ used to compute z-score and percent-predicted (see Value).}
 }
 \value{
 The original data frame with extra columns appended for each
-  measure:
-  - `<measure>_pred`: predicted (median) value.
-  - `<measure>_lln`:  lower limit of normal (5th percentile).
-  - `<measure>_uln`:  upper limit of normal (95th percentile).
-  If a `<measure>_measured` column was supplied in `data`, two
-  additional columns are emitted:
-  - `<measure>_zscore`:  LMS z-score `((measured/M)^L - 1) / (L*S)`.
-  - `<measure>_pctpred`: percent predicted `(measured / pred) * 100`.
+measure:
+\itemize{
+\item \verb{<measure>_pred}: predicted (median) value.
+\item \verb{<measure>_lln}:  lower limit of normal (5th percentile).
+\item \verb{<measure>_uln}:  upper limit of normal (95th percentile).
+If a \verb{<measure>_measured} column was supplied in \code{data}, two
+additional columns are emitted:
+\item \verb{<measure>_zscore}:  LMS z-score \code{((measured/M)^L - 1) / (L*S)}.
+\item \verb{<measure>_pctpred}: percent predicted \code{(measured / pred) * 100}.
+}
 }
 \description{
-`pft_diffusion()` computes ATS-compliant upper and lower normal limits
+\code{pft_diffusion()} computes ATS-compliant upper and lower normal limits
 for carbon monoxide measured diffusion capacity and European equivalents
 including DLCO (or TLCO), KCO, and VA.
 }

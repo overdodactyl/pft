@@ -11,10 +11,10 @@ pft_classify(data)
 }
 \value{
 The original data frame with an additional column for ATS spirometry pattern labels,
-        and a string indicating the normal/abnormal test values that assigned the pattern.
+and a string indicating the normal/abnormal test values that assigned the pattern.
 }
 \description{
-`pft_classify()` assigns ATS patterns using spirometry and lung volume data.
+\code{pft_classify()} assigns ATS patterns using spirometry and lung volume data.
 }
 \examples{
 data <- data.frame(fev1 = c(3.453, 2.385),

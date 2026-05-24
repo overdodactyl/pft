@@ -7,12 +7,12 @@
 pft_plot(data)
 }
 \arguments{
-\item{data}{A one-row data frame produced by [pft_interpret()] or by
+\item{data}{A one-row data frame produced by \code{\link[=pft_interpret]{pft_interpret()}} or by
 the reference functions with measured values supplied. Columns
-matching `<measure>_zscore` are detected automatically.}
+matching \verb{<measure>_zscore} are detected automatically.}
 }
 \value{
-A `ggplot` object.
+A \code{ggplot} object.
 }
 \description{
 Produces a "z-score lollipop" figure summarising a single patient's
@@ -21,7 +21,7 @@ z-score, and shaded reference bands for the Stanojevic 2022 severity
 grading (normal / mild / moderate / severe). This is the canonical
 visual representation recommended for clinician-facing PFT reports.
 
-Requires the `ggplot2` package (a Suggested dependency).
+Requires the \code{ggplot2} package (a Suggested dependency).
 }
 \examples{
 \dontrun{

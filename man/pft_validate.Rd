@@ -10,31 +10,31 @@ pft_validate(data)
 \item{data}{A data frame with any subset of the PFT input columns.}
 }
 \value{
-The original data frame with `qc_pass` and `qc_issues`
-  columns appended.
+The original data frame with \code{qc_pass} and \code{qc_issues}
+columns appended.
 }
 \description{
-`pft_validate()` flags biologically implausible or out-of-spec inputs
+\code{pft_validate()} flags biologically implausible or out-of-spec inputs
 before they reach a reference function. It is a cheap defensive step
 to catch data-entry mistakes, miscoded sex/race, swapped pre/post
 columns, and so on. Returns the original data frame with two extra
-columns: `qc_pass` (logical) and `qc_issues` (character giving a
+columns: \code{qc_pass} (logical) and \code{qc_issues} (character giving a
 semicolon-separated list of failed checks, empty string when none).
 
 Checks performed (each row evaluated independently):
 \itemize{
-  \item `sex` is one of "M", "F" (case-sensitive), if present.
-  \item `age` is between 0 and 120.
-  \item `height` is between 50 and 250 cm.
-  \item `race`, if present, is one of the GLI 2012 categories.
-  \item Measured FEV1 is not greater than measured FVC (within 1%
-    tolerance for measurement noise).
-  \item Post-bronchodilator value is not below 50% of pre value
-    (catches obvious swaps).
+\item \code{sex} is one of "M", "F" (case-sensitive), if present.
+\item \code{age} is between 0 and 120.
+\item \code{height} is between 50 and 250 cm.
+\item \code{race}, if present, is one of the GLI 2012 categories.
+\item Measured FEV1 is not greater than measured FVC (within 1\%
+tolerance for measurement noise).
+\item Post-bronchodilator value is not below 50\% of pre value
+(catches obvious swaps).
 }
 
 Checks are skipped when the corresponding columns are absent or
-contain `NA`. The function never errors -- it only annotates.
+contain \code{NA}. The function never errors -- it only annotates.
 }
 \examples{
 d <- data.frame(sex = c("M","X"), age = c(45, 250),

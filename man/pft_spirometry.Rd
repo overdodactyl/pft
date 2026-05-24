@@ -8,35 +8,37 @@ pft_spirometry(data, year = 2012)
 }
 \arguments{
 \item{data}{A data frame containing columns for sex ("M","F"),
-   race ("AfrAm","NEAsia","SEAsia","Other/mixed", "Caucasian"),
-   age (in years, in the range 3-95), and height (in centimeters).
-   Rows with `NA` in sex, age, or height (or, for GLI 2012, in race)
-   are returned with `NA` reference values. Race is ignored when
-   year = 2022 (GLI Global equations are race-neutral).
+race ("AfrAm","NEAsia","SEAsia","Other/mixed", "Caucasian"),
+age (in years, in the range 3-95), and height (in centimeters).
+Rows with \code{NA} in sex, age, or height (or, for GLI 2012, in race)
+are returned with \code{NA} reference values. Race is ignored when
+year = 2022 (GLI Global equations are race-neutral).
 
-   If `data` also contains any of `fev1_measured`, `fvc_measured`,
-   `fev1fvc_measured`, `fef2575_measured`, `fef75_measured`, the
-   corresponding measured value is used to compute a z-score and
-   percent-predicted for that measure (see Value).}
+If \code{data} also contains any of \code{fev1_measured}, \code{fvc_measured},
+\code{fev1fvc_measured}, \code{fef2575_measured}, \code{fef75_measured}, the
+corresponding measured value is used to compute a z-score and
+percent-predicted for that measure (see Value).}
 
 \item{year}{The year of GLI published equations. Valid options are
-2012 (multi-ethnic, requires a `race` column) and 2022 (race-neutral
-"GLI Global"; the `race` column, if present, is ignored).}
+2012 (multi-ethnic, requires a \code{race} column) and 2022 (race-neutral
+"GLI Global"; the \code{race} column, if present, is ignored).}
 }
 \value{
 The original data frame with extra columns appended for each
-   measure:
-   - `<measure>_pred`: predicted (median) value.
-   - `<measure>_lln`:  lower limit of normal (5th percentile).
-   - `<measure>_uln`:  upper limit of normal (95th percentile).
-   If a `<measure>_measured` column was supplied in `data`, two
-   additional columns are emitted:
-   - `<measure>_zscore`:  LMS z-score `((measured/M)^L - 1) / (L*S)`.
-   - `<measure>_pctpred`: percent predicted `(measured / pred) * 100`.
-   For `year = 2022` the output column names carry a `_2022` suffix.
+measure:
+\itemize{
+\item \verb{<measure>_pred}: predicted (median) value.
+\item \verb{<measure>_lln}:  lower limit of normal (5th percentile).
+\item \verb{<measure>_uln}:  upper limit of normal (95th percentile).
+If a \verb{<measure>_measured} column was supplied in \code{data}, two
+additional columns are emitted:
+\item \verb{<measure>_zscore}:  LMS z-score \code{((measured/M)^L - 1) / (L*S)}.
+\item \verb{<measure>_pctpred}: percent predicted \code{(measured / pred) * 100}.
+For \code{year = 2022} the output column names carry a \verb{_2022} suffix.
+}
 }
 \description{
-`pft_spirometry()` computes  ATS-compliant upper and lower normal limits
+\code{pft_spirometry()} computes  ATS-compliant upper and lower normal limits
 for common spirometry measures including FEV1, FVC, FEV1/FVC, FEF2575, and FEF75.
 }
 \examples{

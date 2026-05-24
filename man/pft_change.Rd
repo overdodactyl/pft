@@ -15,11 +15,13 @@ intervals.}
 }
 \value{
 A data frame with columns:
-  - `ccs`: conditional change score.
-  - `is_significant`: logical, `TRUE` when `|ccs| > 1.645`.
+\itemize{
+\item \code{ccs}: conditional change score.
+\item \code{is_significant}: logical, \code{TRUE} when \verb{|ccs| > 1.645}.
+}
 }
 \description{
-`pft_change()` computes a z-score-style index of whether a
+\code{pft_change()} computes a z-score-style index of whether a
 change between two pulmonary function measurements is larger than
 would be expected by within-subject variability and regression to the
 mean. The conditional change score (CCS) is recommended by the
@@ -27,16 +29,16 @@ Stanojevic et al. ERJ 2022 interpretation standard as the preferred
 way to interpret serial PFT measurements over time.
 
 The CCS is:
-  \deqn{CCS = (z_2 - r \cdot z_1) / \sqrt{1 - r^2}}
-where `z1` and `z2` are the z-scores of the first and second
-measurements (against a reference equation), and `r` is the
+\deqn{CCS = (z_2 - r \cdot z_1) / \sqrt{1 - r^2}}
+where \code{z1} and \code{z2} are the z-scores of the first and second
+measurements (against a reference equation), and \code{r} is the
 within-subject autocorrelation of z-scores at the time interval of
-interest. A `|CCS| > 1.645` indicates a change exceeding the typical
+interest. A \verb{|CCS| > 1.645} indicates a change exceeding the typical
 within-subject variability (one-sided p < 0.05 under normality).
 
 This implementation covers adults only. The Stanojevic 2022 standard
-notes that the autocorrelation `r` depends on the measure and the
-interval between measurements; we expose `r` as an argument so callers
+notes that the autocorrelation \code{r} depends on the measure and the
+interval between measurements; we expose \code{r} as an argument so callers
 can plug in interval-specific values from the literature.
 }
 \examples{
