@@ -67,6 +67,60 @@ test_that("va_pred",      { expect_equal(preds_traditional_units$va_pred,      g
 test_that("kco_tr_pred",  { expect_equal(preds_traditional_units$kco_tr_pred,  gli_test_groundtruth$kcotr_predicted)   })
 test_that("kco_si_pred",  { expect_equal(preds_si_units$kco_si_pred,           gli_test_groundtruth$kcosi_predicted)   })
 
+## --- Stanojevic 2017 Table 3 worked examples (paper p. 8) ---------------
+## Paper Table 3 lists predicted TLCO (mmol/min/kPa) for three
+## representative male demographics using GLI 2017.
+##
+## Tolerance is 0.2 L (looser than the paper's 1-dp printing) because
+## Table 3 was likely not regenerated when Table 2 was amended in the
+## 2020 author correction. The package uses the corrected Table 2 (the
+## footnote on Table 2 explicitly marks it as amended; Table 3's
+## caption does not). See papers/gli_2017_diffusion/verification.md.
+
+test_that("Stanojevic 2017 Table 3 TLCO predictions are in the published range", {
+  cases <- data.frame(
+    sex      = "M",
+    age      = c(64, 20, 10),
+    height   = c(178, 178, 150),
+    paper_tlco = c(9.2, 10.9, 6.4)
+  )
+  out <- pft_diffusion(cases[, c("sex","age","height")], SI.units = TRUE)
+  for (i in seq_len(nrow(cases))) {
+    expect_equal(out$tlco_pred[i], cases$paper_tlco[i], tolerance = 0.2,
+                 label = sprintf("Table 3 row %d (ht=%d age=%d)",
+                                 i, cases$height[i], cases$age[i]))
+  }
+})
+
+## --- Confirmation that the 2020 author correction IS applied ------------
+## Demographics: Male 30y 178cm. The supplement-1 worked example
+## (which was NOT updated when Table 2 was amended in 2020) states
+## tlco_pred = 10.970 using the UNCORRECTED 2017 equations. The
+## package, using the CORRECTED Table 2 (post-2020), should give a
+## value NEAR but NOT EQUAL to 10.970. A future regression where the
+## build script accidentally restores the 2017 originals would push
+## the package output back to ~10.970 and fail this test.
+##
+## See papers/gli_2017_diffusion/verification.md for the full
+## coefficient-by-coefficient comparison between 2017 and 2020.
+
+test_that("Stanojevic 2020 correction is applied (TLCO.M differs from 2017 original)", {
+  d <- data.frame(sex = "M", age = 30, height = 178)
+  out <- pft_diffusion(d, SI.units = TRUE)
+  # Corrected (2020) value is ~11.058. Uncorrected (2017) was ~10.970.
+  # Tight assertion on the corrected value:
+  expect_equal(out$tlco_pred, 11.0577, tolerance = 1e-3,
+               label = "TLCO.M pred at corrected (2020) Table 2 values")
+  # Negative assertion: package must NOT produce the uncorrected value
+  # at this demographic.
+  expect_false(isTRUE(all.equal(out$tlco_pred, 10.970, tolerance = 1e-3)),
+               label = "TLCO.M pred should not match the uncorrected 2017 value")
+  # And the per-measure L must be the corrected 0.39482, not 0.38713.
+  tlco_m_row <- transfer_coeff[transfer_coeff$class == "TLCO.M", ]
+  expect_equal(tlco_m_row$L, 0.39482, tolerance = 1e-5,
+               label = "TLCO.M L coefficient is the corrected (2020) value")
+})
+
 ## --- z-score and % predicted (formula sanity) --------------------------
 
 test_that("diffusion z-score is 0 at predicted and ~+/-1.645 at LLN/ULN (traditional units)", {
