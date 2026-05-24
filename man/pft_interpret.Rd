@@ -68,6 +68,12 @@ column is appended via \code{\link[=pft_severity]{pft_severity()}}.
 \item If \code{fev1_measured}, \code{fvc_measured}, \code{fev1fvc_measured}, and
 \code{tlc_measured} columns are present, the ATS pattern classifier
 (\code{\link[=pft_classify]{pft_classify()}}) labels each row.
+\item If \code{tlc_measured}, \code{rv_tlc_measured}, and \code{fev1fvc_measured}
+are present (with their LLNs / ULNs computable), the lung-
+volume sub-pattern classifier (\code{\link[=pft_volume_subpattern]{pft_volume_subpattern()}}) adds
+a \code{volume_subpattern} column. When \code{frc_tlc_measured} /
+\code{frc_tlc_uln} are also present, both volume ratios are
+consulted per Stanojevic 2022 Figure 10.
 \item If \code{fev1_measured}, \code{fev1fvc_measured}, and their LLNs are
 resolvable, \code{\link[=pft_prism]{pft_prism()}} adds a \code{prism} flag (independent of
 TLC).

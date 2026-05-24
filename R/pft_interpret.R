@@ -22,6 +22,12 @@
 #'   \item If `fev1_measured`, `fvc_measured`, `fev1fvc_measured`, and
 #'     `tlc_measured` columns are present, the ATS pattern classifier
 #'     ([pft_classify()]) labels each row.
+#'   \item If `tlc_measured`, `rv_tlc_measured`, and `fev1fvc_measured`
+#'     are present (with their LLNs / ULNs computable), the lung-
+#'     volume sub-pattern classifier ([pft_volume_subpattern()]) adds
+#'     a `volume_subpattern` column. When `frc_tlc_measured` /
+#'     `frc_tlc_uln` are also present, both volume ratios are
+#'     consulted per Stanojevic 2022 Figure 10.
 #'   \item If `fev1_measured`, `fev1fvc_measured`, and their LLNs are
 #'     resolvable, [pft_prism()] adds a `prism` flag (independent of
 #'     TLC).
@@ -158,6 +164,34 @@ pft_interpret <- function(data, year = 2012, SI.units = FALSE,
     pat_out <- pft_classify(pat_data, standard = standard)
     data$ats_classification     <- pat_out$ats_classification
     data$ats_pattern_combination <- pat_out$ats_pattern_combination
+  }
+
+  # 3.5 Volume sub-pattern classifier (Stanojevic 2022 Figure 10), if
+  # TLC ULN and RV/TLC inputs are available. pft_volumes() emits
+  # tlc_lln / tlc_uln and rv_tlc_lln / rv_tlc_uln from Hall 2021; we
+  # need the measured TLC and RV/TLC as well, plus FEV1/FVC and its
+  # LLN (for the Mixed vs Complex restriction split).
+  vsp_required <- c("tlc_measured", "tlc_lln", "tlc_uln",
+                    "fev1fvc_measured", "fev1fvc_lln",
+                    "rv_tlc_measured", "rv_tlc_uln")
+  if (all(vsp_required %in% colnames(data))) {
+    vsp_data <- data.frame(
+      tlc         = data$tlc_measured,
+      tlc_lln     = data$tlc_lln,
+      tlc_uln     = data$tlc_uln,
+      fev1fvc     = data$fev1fvc_measured,
+      fev1fvc_lln = data$fev1fvc_lln,
+      rv_tlc      = data$rv_tlc_measured,
+      rv_tlc_uln  = data$rv_tlc_uln
+    )
+    # Optional FRC/TLC (no Hall 2021 reference equation, but accepted
+    # by pft_volume_subpattern() if the caller has external values).
+    if (all(c("frc_tlc_measured", "frc_tlc_uln") %in% colnames(data))) {
+      vsp_data$frc_tlc     <- data$frc_tlc_measured
+      vsp_data$frc_tlc_uln <- data$frc_tlc_uln
+    }
+    data$volume_subpattern <-
+      pft_volume_subpattern(vsp_data)$volume_subpattern
   }
 
   # 4. PRISm screen, if the spirometry-only inputs are resolvable.
