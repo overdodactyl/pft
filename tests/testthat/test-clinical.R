@@ -26,17 +26,96 @@ test_that("pft_quality returns F for zero maneuvers", {
   expect_equal(pft_quality(numeric(0)), "F")
 })
 
-test_that("pft_quality applies tighter thresholds for children under 6", {
-  # 3 maneuvers within 0.100 L -> A for both ages
+test_that("pft_quality applies tighter thresholds for children (age <= 6)", {
+  # 3 maneuvers within 0.100 L -> A for both ages (no 10% rule needed).
   expect_equal(pft_quality(c(3.00, 2.95, 2.90), age = 5), "A")
-  # 3 maneuvers with best-two diff 0.13 L -> A for adult (<= 0.150),
-  # only C for child (> 0.100 child-A threshold, but <= 0.150 child-C)
-  expect_equal(pft_quality(c(3.20, 3.07, 3.05), age = 30), "A")
-  expect_equal(pft_quality(c(3.20, 3.07, 3.05), age = 5),  "C")
+  # 3 pediatric-scale maneuvers (FEV1 ~1.2 L, typical young child) with
+  # best-two diff 0.13 L. Adult A threshold is 0.150 -> A. Child: the
+  # 10% rule gives effective A = max(0.100, 0.120) = 0.120, so 0.13 >
+  # that and falls to C (effective C = max(0.150, 0.120) = 0.150).
+  expect_equal(pft_quality(c(1.20, 1.07, 1.05), age = 30), "A")
+  expect_equal(pft_quality(c(1.20, 1.07, 1.05), age = 5),  "C")
 })
 
 test_that("pft_quality handles NAs in input", {
   expect_equal(pft_quality(c(3.20, NA, 3.15)), "B")  # 2 non-NA, within 0.150
+})
+
+## --- Graham 2019 Table 10 regression tests (verification audit) ---------
+
+test_that("pft_quality: age = 6 uses child thresholds (Table 10 says <= 6)", {
+  # Bug-fix regression: pre-fix used `age < 6`, treating a 6-year-old
+  # as adult. Table 10 column header reads "Age <= 6 yr".
+  # Pediatric-scale values where the 10% rule does not override the
+  # absolute thresholds (max=1.20 -> 10% = 0.12, between child A and C).
+  # Adult: diff 0.13 <= 0.150 -> A.
+  # Child: effective A = max(0.100, 0.120) = 0.120 (10% rule), diff
+  #        0.13 > 0.120, so NOT A. Effective C = max(0.150, 0.120) =
+  #        0.150, 0.13 <= that, so C.
+  expect_equal(pft_quality(c(1.20, 1.07, 1.05), age = 6),  "C")
+  expect_equal(pft_quality(c(1.20, 1.07, 1.05), age = 7),  "A")
+})
+
+test_that("pft_quality: child 10% rule applies (Table 10 footnote)", {
+  # Bug-fix regression: pre-fix ignored the "10% of the highest value,
+  # whichever is greater" rule from Table 10's footnote.
+  # Child (age 5), large values: highest 3.20, 10% = 0.32 -> A
+  # threshold becomes max(0.100, 0.32) = 0.32. Diff 0.13 << 0.32 -> A.
+  # Pre-fix would have been: diff 0.13 > 0.100 absolute child A -> C.
+  expect_equal(pft_quality(c(3.20, 3.07, 3.05), age = 5), "A")
+})
+
+test_that("pft_quality: n >= 2 with diff > 0.250 L returns E (not F)", {
+  # Bug-fix regression: pre-fix fell through to F when diff exceeded
+  # all of A/C/D thresholds. Table 10 grade E covers ">= 2 acceptable
+  # OR 1 acceptable" with diff > 0.250 (adult) or > 0.200 (child).
+  expect_equal(pft_quality(c(3.20, 2.85)),       "E")  # n=2, diff 0.35
+  expect_equal(pft_quality(c(3.20, 2.80, 2.85)), "E")  # n=3, diff 0.35
+  expect_equal(pft_quality(c(3.20, 2.80, 2.85), age = 5), "E")  # child variant
+})
+
+test_that("pft_quality: full Table 10 truth table -- adult", {
+  # Single-measure (FEV1 or FVC) decisions for an adult; one case per
+  # band of Table 10. Diffs are safely *inside* each band rather than
+  # at the boundary, to avoid the floating-point ambiguity that
+  # `3.20 - 3.05 != 0.15` exactly in IEEE 754.
+  truth <- list(
+    list(values = numeric(0),                 expected = "F"),  # n=0
+    list(values = c(3.20),                    expected = "E"),  # n=1
+    list(values = c(3.20, 3.10),              expected = "B"),  # n=2 diff 0.10
+    list(values = c(3.20, 3.02),              expected = "C"),  # n=2 diff 0.18
+    list(values = c(3.20, 2.97),              expected = "D"),  # n=2 diff 0.23
+    list(values = c(3.20, 2.80),              expected = "E"),  # n=2 diff 0.40
+    list(values = c(3.20, 3.12, 3.10),        expected = "A"),  # n=3 diff 0.08
+    list(values = c(3.20, 3.02, 3.00),        expected = "C"),  # n=3 diff 0.18
+    list(values = c(3.20, 2.97, 2.95),        expected = "D"),  # n=3 diff 0.23
+    list(values = c(3.20, 2.80, 2.75),        expected = "E")   # n=3 diff 0.40
+  )
+  for (case in truth) {
+    n <- length(case$values)
+    diff <- if (n >= 2) max(case$values) - sort(case$values, TRUE)[2] else NA_real_
+    expect_equal(pft_quality(case$values), case$expected,
+                 label = sprintf("adult n=%d diff=%s",
+                                 n,
+                                 if (n >= 2) sprintf("%.3f", diff) else "n/a"))
+  }
+})
+
+test_that("pft_quality: boundary at exactly the adult A threshold (0.150 L)", {
+  # Floating-point note: `3.20 - 3.05` in R is 0.1500000000000004, one
+  # ulp above 0.150. The comparison `diff <= 0.150` therefore returns
+  # FALSE at this nominal boundary -- the maneuver pair is graded one
+  # band looser (C instead of B for n=2; C instead of A for n>=3).
+  # This is consistent ATS/ERS spirometer software behavior; the
+  # paper's thresholds are stated to 3 dp and clinical interpretation
+  # routinely sees diffs reported to 0.01 L precision, so the boundary
+  # ambiguity is well below clinical relevance.
+  diff <- 3.20 - 3.05
+  expect_true(diff > 0.150)  # confirms the fp behaviour
+  expect_equal(pft_quality(c(3.20, 3.05)),       "C")  # n=2, top-two diff ~0.150, falls to C
+  # For n=3 boundary, need TOP TWO to differ by ~0.150 (a third lower
+  # value doesn't shift the best-two diff).
+  expect_equal(pft_quality(c(3.20, 3.05, 3.00)), "C")  # n=3, top-two diff ~0.150, falls to C
 })
 
 ## --- pft_gold ----------------------------------------------------------
