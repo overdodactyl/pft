@@ -1,5 +1,45 @@
 # pft (development version)
 
+## Equation-migration audit: pft_compare()
+
+`pft_compare(data)` runs the spirometry + interpretation pipeline
+twice on the same input -- once under the race-stratified GLI 2012
+equations (Quanjer 2012) and once under the race-neutral GLI Global
+2022 equations (Bowerman 2023) -- and emits a single tibble with
+both sets of outputs plus per-row reclassification deltas. This is
+the analytical workhorse for institutions migrating to GLI 2022 and
+the canonical equity-audit tool for "how does this patient's
+interpretation change under the new equations?"
+
+Output contains the standard GLI 2012 columns (unsuffixed), the
+GLI Global 2022 companions (`fev1_zscore_2022`,
+`ats_classification_2022`, `volume_subpattern_2022`, etc.), the
+shared GLI 2021 lung-volume / GLI 2017 diffusion columns (not
+duplicated; not year-stratified), and per-row deltas:
+
+* `<measure>_zscore_delta` (numeric; 2022 minus 2012) for fev1,
+  fvc, fev1fvc.
+* `<measure>_severity_changed` (logical) for each spirometry
+  measure.
+* `ats_pattern_changed` (logical) and `ats_pattern_change`
+  (character, e.g., `"Non-specific -> Normal"` for reclassified
+  rows, `""` for unchanged rows, `NA` when either label is `NA`).
+* `prism_changed`, `volume_subpattern_changed` (logical).
+
+A `summary.pft_compare()` method prints a cohort-level
+reclassification report: mean z-score delta per measure, severity
+reclassification counts, ATS pattern reclassification counts plus a
+"most common transitions" table, and PRISm / volume-sub-pattern
+reclassification counts.
+
+The `_changed` flags propagate `NA` (rather than collapsing to
+`FALSE`) when either input label is `NA`, so downstream rates like
+`mean(ats_pattern_changed, na.rm = TRUE)` give an interpretable
+reclassification rate over patients where both pipelines actually
+produced a label.
+
+Test count: 1195 -> 1249 (+54).
+
 ## New interpretation primitives (audit follow-up)
 
 The just-completed source-paper verification audit documented
