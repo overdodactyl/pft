@@ -74,6 +74,56 @@ test_that("erv_pred",    { expect_equal(preds$erv_pred,    gli_test_groundtruth$
 test_that("ic_pred",     { expect_equal(preds$ic_pred,     gli_test_groundtruth$ic_predicted)     })
 test_that("vc_pred",     { expect_equal(preds$vc_pred,     gli_test_groundtruth$vc_predicted)     })
 
+## --- Hall 2021 supplement worked example (FRC) --------------------------
+## Anchors pft_volumes() output against the paper's worked example
+## (supplement p. 9). Male 30y, 178cm, FRC = 3.7 L.
+##
+## Tolerance notes (see papers/gli_2021_volumes/verification.md):
+## - frc_pred / frc_pctpred match the paper exactly within ~1e-5; tight
+##   tolerance (1e-3) is fine.
+## - frc_lln / frc_zscore differ from the paper's reported values by
+##   ~5e-4 because the paper's worked example carries small internal
+##   inconsistencies between its reported intermediate S and the
+##   reported LLN / zscore (applying the LLN formula to the paper's
+##   own reported S = 0.2190672 yields LLN = 2.25148, not the
+##   paper-reported 2.251922). The package consistently applies the
+##   Table 3 equation; tolerance 1e-2 is used to absorb the paper's
+##   rounding noise.
+
+test_that("Hall 2021 supplement FRC worked example matches pft_volumes", {
+  d <- data.frame(sex = "M", age = 30, height = 178, frc_measured = 3.7)
+  out <- pft_volumes(d)
+  expect_equal(out$frc_pred,    3.307587,  tolerance = 1e-3,
+               label = "frc_pred vs supplement p. 9")
+  expect_equal(out$frc_pctpred, 111.864,   tolerance = 1e-2,
+               label = "frc_pctpred vs supplement p. 9")
+  expect_equal(out$frc_lln,     2.251922,  tolerance = 1e-2,
+               label = "frc_lln vs supplement p. 9")
+  expect_equal(out$frc_zscore,  0.5211515, tolerance = 1e-2,
+               label = "frc_zscore vs supplement p. 9")
+})
+
+## --- Hall 2021 supplement Table S4 VC predictions -----------------------
+## Independent paper-anchored predictions for VC across age and sex.
+## Eight (sex x age) combinations at fixed height; tolerance 0.01 L
+## matches the paper's 2-dp printing precision.
+
+test_that("Hall 2021 supplement Table S4 VC predictions match", {
+  cases <- data.frame(
+    sex    = c("M","M","M","M","F","F","F","F"),
+    age    = c(15, 20, 40, 60, 15, 20, 40, 60),
+    height = c(175,175,175,175,165,165,165,165),
+    expected_vc = c(4.66, 5.00, 5.37, 4.89,
+                    3.63, 3.84, 4.06, 3.51)
+  )
+  out <- pft_volumes(cases[, c("sex","age","height")])
+  for (i in seq_len(nrow(cases))) {
+    expect_equal(out$vc_pred[i], cases$expected_vc[i], tolerance = 0.01,
+                 label = sprintf("VC pred %s age=%d ht=%d",
+                                 cases$sex[i], cases$age[i], cases$height[i]))
+  }
+})
+
 ## --- z-score and % predicted (formula sanity) --------------------------
 
 test_that("volumes z-score is 0 at predicted and ~+/-1.645 at LLN/ULN", {
