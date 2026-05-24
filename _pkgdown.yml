@@ -35,24 +35,35 @@ reference:
       - pft_prism
       - pft_change
 
-  - title: Workflow and utilities
+  - title: Clinical extensions
     desc: >
-      End-to-end interpretation in a single call, input QC, and
-      clinical-style visualisation.
+      Maneuver-level quality grading (ATS/ERS 2019), COPD-specific
+      severity (GOLD), and cohort-level summarisation.
+    contents:
+      - pft_quality
+      - pft_gold
+      - pft_cohort_summary
+
+  - title: Workflow and reporting
+    desc: >
+      End-to-end interpretation in a single call, input QC,
+      clinical-style visualisation, and HTML report rendering.
     contents:
       - pft_interpret
       - pft_validate
       - pft_plot
+      - pft_report
 
   - title: Re-exports
     contents:
       - as_tibble
 
 articles:
-  - title: Getting started
+  - title: Reference
     navbar: ~
     contents:
       - pft
+      - glossary
 
 navbar:
   structure:
