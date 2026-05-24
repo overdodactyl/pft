@@ -1,5 +1,12 @@
 # pft (development version)
 
+## Minimum R version bumped to 4.0
+
+`DESCRIPTION` declared `R (>= 2.10)`, which is 12+ years stale and
+matches none of the actual transitive dependency floors (the
+`tidyverse`-aligned packages `rlang` and `tibble` long ago dropped
+support for pre-4.0 R). Bumped to `R (>= 4.0)` to match reality.
+
 ## New interpretation primitives (audit follow-up)
 
 The just-completed source-paper verification audit documented
