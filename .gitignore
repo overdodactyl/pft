@@ -13,10 +13,12 @@ docs/
 # papers/ is tracked.
 papers/
 
-# Scratch outputs from verification scripts under notes/. The .R
-# scripts are version-controlled (reproducible); their .out dumps are
-# regeneratable and bulky.
-notes/*.out
+# notes/ holds local audit scratchpads (verification + spotcheck .R
+# scripts plus their .out dumps). They depend on the local papers/
+# directory and are not tracked. Only the .md memos under notes/ are
+# committed.
+notes/*
+!notes/*.md
 /doc/
 /Meta/
 
