@@ -26,6 +26,10 @@
   Callers that were relying on the auto-conversion will now get
   numerically wrong corrections instead of a warning, so audit any
   upstream code that produced this argument.
+* `pft_required_columns()` has been removed. It returned a hardcoded
+  list of column names per function — documentation written as code,
+  which had to be hand-synced with the actual function signatures. The
+  same content is now in `vignette("input-format")`.
 
 ## New features
 
@@ -116,11 +120,6 @@ extraction is documented in
   supported. Defaults match the canonical column names, so existing
   code keeps working unchanged. The user's original column names are
   preserved in the output.
-* New `pft_required_columns()` function programmatically returns the
-  required + optional columns each reference function consumes,
-  including which `<measure>_measured`, `<measure>_pre`, and
-  `<measure>_post` columns unlock z-scores, percent predicted, and
-  bronchodilator response.
 * New "Input data format" vignette walks through the data-frame
   contract, units and types per column, the override syntax, and
   common errors.

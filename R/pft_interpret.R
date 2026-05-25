@@ -60,9 +60,8 @@
 #'   `pft_interpret()` reads from `sex`, `age`, `height`, and (for
 #'   `year = 2012`) `race`. Override via a bare name (`sex = Sex`), a
 #'   string (`sex = "Sex"`), or an rlang injection (`sex = !!my_var`).
-#'   See [pft_required_columns()] for the full input contract. The
-#'   `_measured`, `_pre`, and `_post` columns are still auto-detected
-#'   by name and not overridable.
+#'   The `_measured`, `_pre`, and `_post` columns are still
+#'   auto-detected by name and not overridable.
 #'
 #' @return The original data frame with every applicable reference value,
 #'   z-score, percent predicted, severity grade, pattern label, PRISm

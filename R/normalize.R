@@ -211,7 +211,7 @@ pft_normalize_inputs <- function(data,
   missing_cols <- setdiff(required, colnames(data))
   if (length(missing_cols) > 0) {
     stop(sprintf(
-      "pft: required column(s) missing from input: %s.\n  Expected: %s\n  See ?pft_required_columns.",
+      "pft: required column(s) missing from input: %s.\n  Expected: %s",
       paste(sprintf("'%s'", missing_cols), collapse = ", "),
       paste(sprintf("'%s'", required), collapse = ", ")
     ), call. = FALSE)

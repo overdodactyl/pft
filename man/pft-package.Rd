@@ -36,8 +36,7 @@ names are preserved in the output.
 Optional \verb{<measure>_measured}, \verb{<measure>_pre}, and
 \verb{<measure>_post} columns unlock z-score, percent-predicted, and
 bronchodilator-response outputs respectively; these are looked up
-by literal name (not overridable). See \code{\link[=pft_required_columns]{pft_required_columns()}}
-for the authoritative input contract per function, or
+by literal name (not overridable). See
 \code{vignette("input-format")} for a walkthrough.
 }
 

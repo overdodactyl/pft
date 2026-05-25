@@ -25,8 +25,7 @@
 #'    2012) `race`. If your data frame names them differently, override
 #'    via a bare name (`sex = Sex`), a string (`sex = "Sex"`), or an
 #'    rlang injection (`sex = !!my_var`). The user's original column
-#'    names are preserved in the output. See [pft_required_columns()]
-#'    for the full input contract.
+#'    names are preserved in the output.
 #'
 #' @return The original data frame with extra columns appended for each
 #'    measure:

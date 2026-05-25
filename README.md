@@ -44,7 +44,6 @@ single-patient and cohort figures.
 | `pft_spirometry()` | FEV1, FVC, FEV1/FVC, FEF25-75, FEF75 | GLI 2012 (Quanjer) or GLI Global 2022 (Bowerman) |
 | `pft_volumes()` | FRC, TLC, RV, RV/TLC, ERV, IC, VC | GLI 2021 static lung volumes (Hall) |
 | `pft_diffusion()` | TLCO/DLCO, KCO, VA (SI or traditional units) | GLI 2017 TLCO (Stanojevic, corrected 2020) |
-| `pft_required_columns()` | Documents input columns each step expects | — |
 
 Each reference function emits `*_pred`, `*_lln`, `*_uln`. If a `<measure>_measured` column is also present, `*_zscore` and `*_pctpred` are appended automatically.
 

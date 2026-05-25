@@ -35,8 +35,7 @@ percent-predicted for that measure (see Value).}
 2012) \code{race}. If your data frame names them differently, override
 via a bare name (\code{sex = Sex}), a string (\code{sex = "Sex"}), or an
 rlang injection (\code{sex = !!my_var}). The user's original column
-names are preserved in the output. See \code{\link[=pft_required_columns]{pft_required_columns()}}
-for the full input contract.}
+names are preserved in the output.}
 }
 \value{
 The original data frame with extra columns appended for each

@@ -30,9 +30,8 @@
 #' Optional `<measure>_measured`, `<measure>_pre`, and
 #' `<measure>_post` columns unlock z-score, percent-predicted, and
 #' bronchodilator-response outputs respectively; these are looked up
-#' by literal name (not overridable). See [pft_required_columns()]
-#' for the authoritative input contract per function, or
-#' `vignette("input-format")` for a walkthrough.
+#' by literal name (not overridable). See `vignette("input-format")`
+#' for a walkthrough.
 #'
 #' @section Conventions used throughout:
 #' To support unambiguous clinical and research use, the following

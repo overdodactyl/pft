@@ -20,27 +20,31 @@ how to point pft at columns whose names don't match the canonical ones.
 
 # Required vs. optional columns
 
-`pft_required_columns()` is the authoritative source for the input
-contract. It returns a list with two character vectors per function:
+Three categories of column drive the reference functions:
 
-```{r}
-pft_required_columns("pft_spirometry", year = 2012)
-pft_required_columns("pft_spirometry", year = 2022)
-pft_required_columns("pft_volumes")
-pft_required_columns("pft_diffusion", SI.units = FALSE)
-pft_required_columns("pft_interpret", year = 2012)
-```
+**Required** -- demographics that must be present, or the function
+errors:
 
-**`required`** -- columns that must be present. Missing required
-columns raise an error.
+* `pft_spirometry(year = 2012)` and `pft_interpret(year = 2012)`:
+  `sex`, `age`, `height`, `race`.
+* `pft_spirometry(year = 2022)` and `pft_interpret(year = 2022)`:
+  `sex`, `age`, `height` (the GLI Global 2022 equations are
+  race-neutral and ignore `race`).
+* `pft_volumes()` and `pft_diffusion()`: `sex`, `age`, `height`.
 
-**`optional_measured`** -- columns whose presence unlocks z-score and
-percent-predicted outputs for that measure. Missing these is silent;
-the function simply emits fewer output columns.
+**Optional measured** -- `<measure>_measured` columns whose presence
+unlocks z-score and percent-predicted outputs for that measure.
+Missing these is silent; the function simply emits fewer output
+columns. Recognised measures by function:
 
-**`optional_bdr`** -- (`pft_interpret` only) `<measure>_pre` and
-`<measure>_post` columns that, when present, unlock bronchodilator
-response calculations.
+* Spirometry: `fev1`, `fvc`, `fev1fvc`, `fef2575`, `fef75`.
+* Volumes: `frc`, `tlc`, `rv`, `rv_tlc`, `erv`, `ic`, `vc`.
+* Diffusion (traditional units): `dlco`, `kco_tr`, `va`.
+* Diffusion (SI units): `tlco`, `kco_si`, `va`.
+
+**Optional BDR** -- (`pft_interpret()` only) `<measure>_pre` and
+`<measure>_post` columns for `fev1`, `fvc`, or `fev1fvc`. When
+present, bronchodilator-response columns are appended.
 
 # Units and types
 
@@ -162,9 +166,9 @@ The checks performed are documented in `?pft_validate`.
 
 **`required column(s) missing from input: 'race'`** -- you called
 `pft_spirometry(d, year = 2012)` without a `race` column. Either
-supply one (canonical levels listed in
-`pft_required_columns("pft_spirometry", year = 2012)$required`) or
-call `pft_spirometry(d, year = 2022)` for the race-neutral equations.
+supply one (canonical levels: `"Caucasian"`, `"AfrAm"`, `"NEAsia"`,
+`"SEAsia"`, `"Other/mixed"`) or call `pft_spirometry(d, year = 2022)`
+for the race-neutral equations.
 
 **Warning: `pft input normalization: ...`** -- one or more sex or
 race values were normalised (e.g. `"male"` → `"M"`) or set to NA

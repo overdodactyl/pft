@@ -37,9 +37,8 @@ on the same cohort.}
 \code{pft_interpret()} reads from \code{sex}, \code{age}, \code{height}, and (for
 \code{year = 2012}) \code{race}. Override via a bare name (\code{sex = Sex}), a
 string (\code{sex = "Sex"}), or an rlang injection (\code{sex = !!my_var}).
-See \code{\link[=pft_required_columns]{pft_required_columns()}} for the full input contract. The
-\verb{_measured}, \verb{_pre}, and \verb{_post} columns are still auto-detected
-by name and not overridable.}
+The \verb{_measured}, \verb{_pre}, and \verb{_post} columns are still
+auto-detected by name and not overridable.}
 }
 \value{
 The original data frame with every applicable reference value,
