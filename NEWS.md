@@ -42,6 +42,14 @@
   `n_above_uln`), all of which are easier computed inline from a
   `pft_long()` result. `pft_long()` and the `broom::tidy()` S3
   method are kept.
+* `pft_interpret()` no longer auto-derives `fev1fvc_measured` from
+  `fev1_measured / fvc_measured` (and the analogous
+  `frc_tlc_measured`). Trust-the-caller: supply the ratio column
+  explicitly if you want pattern classification, PRISm, or the
+  volume sub-pattern stages to run. Note that in ATS/ERS "best test"
+  workflows the reported ratio comes from a single maneuver and may
+  not equal `fev1 / fvc` constructed from best-of-N picks, so the
+  caller's explicit ratio is the safer source.
 
 ## New features
 

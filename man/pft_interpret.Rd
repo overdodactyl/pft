@@ -53,9 +53,6 @@ which computations are possible from the input columns and skips
 anything it cannot do:
 
 \itemize{
-\item If \code{fev1_measured} and \code{fvc_measured} are present but
-\code{fev1fvc_measured} is not, the ratio is auto-derived. The same
-applies to \code{frc_tlc_measured} from \code{frc_measured} / \code{tlc_measured}.
 \item If sex / age / height (and race, for \code{year = 2012}) are present,
 it computes spirometry reference values via \code{\link[=pft_spirometry]{pft_spirometry()}}.
 \item If sex / age / height are present, it computes lung-volume
