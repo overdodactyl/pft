@@ -4,7 +4,7 @@ citHeader("Please cite the underlying reference standard for whichever",
 
 bibentry(
   bibtype = "Manual",
-  title   = "pft: Compute ATS-Compliant PFT Reference Values",
+  title   = "pft: Pulmonary Function Test Interpretation per ERS/ATS 2022",
   author  = c(person("Pat", "Johnson"),
               person("Zach", "Quicksall"),
               person("Jairo", "Pena")),
