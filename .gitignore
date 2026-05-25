@@ -13,12 +13,9 @@ docs/
 # papers/ is tracked.
 papers/
 
-# notes/ holds local audit scratchpads (verification + spotcheck .R
-# scripts plus their .out dumps). They depend on the local papers/
-# directory and are not tracked. Only the .md memos under notes/ are
-# committed.
-notes/*
-!notes/*.md
+# notes/ holds local audit scratchpads and clinical-review memos.
+# Nothing under it is tracked.
+notes/
 /doc/
 /Meta/
 
