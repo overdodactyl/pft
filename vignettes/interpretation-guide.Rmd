@@ -1,0 +1,214 @@
+---
+title: "Interpreting pft results: from z-score to clinical action"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Interpreting pft results: from z-score to clinical action}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(pft)
+```
+
+The Getting-started vignette focused on *how* to compute reference
+values and z-scores. This vignette is about *what to do with them*:
+the severity bands, the pattern decision tree, the difference between
+the 2022 Stanojevic and 2005 Pellegrino standards, and worked case
+studies that map common z-score / pattern combinations to typical
+next steps. This is reference material for clinicians and researchers
+reading a pft report.
+
+# Severity bands
+
+`pft_severity()` translates a z-score into one of four bands per the
+Stanojevic 2022 standard. The cut-points come straight from the
+paper's interpretation table:
+
+```{r}
+data.frame(
+  band     = c("normal", "mild", "moderate", "severe"),
+  z_lower  = c(-1.645, -2.5, -4,    -Inf),
+  z_upper  = c( Inf,   -1.645, -2.5, -4)
+)
+```
+
+A vectorised call:
+
+```{r}
+pft_severity(c(0.2, -1.7, -3.0, -5.0))
+```
+
+The 2005 Pellegrino bands grade *percent predicted* of FEV1 rather
+than z-score and have five tiers (mild, moderate, moderately-severe,
+severe, very-severe). They are appropriate when reproducing legacy
+reports or when matching a clinic's existing severity-grading
+convention; use `pft_severity_2005()`:
+
+```{r}
+pft_severity_2005(c(85, 65, 55, 40, 30))
+```
+
+The same `standard = c("2022", "2005")` argument flows through
+`pft_classify()`, `pft_compare()`, and `pft_interpret()` so a whole
+report can be re-rendered against either standard without changing
+input data.
+
+# Pattern decision tree
+
+`pft_classify()` assigns one of five interpretive patterns per
+Stanojevic 2022 Figure 8 / Table 5:
+
+* **Normal** -- FEV1/FVC, FVC, and FEV1 all >= LLN.
+* **Obstructed** -- FEV1/FVC < LLN.
+* **Restricted** -- FEV1/FVC >= LLN, FVC < LLN, *and* TLC < LLN.
+* **Mixed** -- FEV1/FVC < LLN *and* TLC < LLN.
+* **Non-specific** -- FEV1/FVC >= LLN, FVC < LLN, TLC >= LLN. The
+  spirometry-only version of this pattern (TLC unavailable) is
+  PRISm, surfaced by `pft_prism()`.
+
+When TLC is missing, the classifier falls back to the
+spirometry-only branches in Table 5 (Normal, Obstructed,
+Non-specific / PRISm); Restricted and Mixed require TLC.
+
+```{r}
+case <- data.frame(
+  fev1    = c(2.5, 2.5, 1.5, 1.5,  3.5),
+  fev1_lln= c(3.0, 3.0, 2.5, 2.5,  3.0),
+  fvc     = c(3.8, 3.8, 2.2, 2.2,  4.5),
+  fvc_lln = c(3.5, 3.5, 2.5, 2.5,  4.0),
+  fev1fvc = c(0.66, 0.66, 0.68, 0.80, 0.78),
+  fev1fvc_lln = 0.70,
+  tlc     = c(6.0, 5.5, 4.0, 4.0,  6.5),
+  tlc_lln = c(5.5, 5.5, 5.5, 5.5,  5.5)
+)
+pft_classify(case)[, c("ats_classification")]
+```
+
+Reading row by row:
+
+1. FEV1/FVC < LLN, TLC normal -> **Obstructed**.
+2. FEV1/FVC < LLN *and* TLC < LLN -> **Mixed**.
+3. FEV1/FVC normal, FVC < LLN, TLC < LLN -> **Restricted**.
+4. FEV1/FVC normal, FVC < LLN, TLC normal -> **Non-specific**.
+5. Everything >= LLN -> **Normal**.
+
+# From label to clinical action
+
+`pft_clinical_guidance()` maps the pattern + severity columns into a
+short narrative string suggesting the typical next step per the
+2022 standard. The text is conservative; it describes the standard's
+recommended work-up rather than making a diagnosis.
+
+```{r}
+result <- pft_clinical_guidance(case)
+cbind(case[, "fev1_lln"], pft_classify(case)$ats_classification,
+      result$guidance)
+```
+
+For a real workflow this is one column in the output of
+`pft_interpret()`; the wrapper `pft_full_report()` chains validation,
+interpretation, plotting, and the rendered HTML report into a single
+call.
+
+# When to use 2022 vs 2005
+
+The two standards differ in three ways:
+
+| Aspect                | 2022 (Stanojevic) | 2005 (Pellegrino) |
+|-----------------------|-------------------|-------------------|
+| Severity input        | z-score           | % predicted (FEV1) |
+| Bronchodilator response | > 10 % predicted | >= 12 % AND >= 200 mL |
+| Pattern flowchart     | Fig 8 / Table 5    | Fig 2             |
+
+The 2022 standard is the recommended default and is the one used by
+`pft_interpret()` out of the box. Use the 2005 path when:
+
+* Reproducing a historical report or matching an EMR template that
+  was built against the older flowchart.
+* Performing a reclassification audit -- running the same cohort
+  through both standards highlights patients whose label changed
+  with the migration. `pft_compare()` produces the side-by-side
+  result; `pft_cohort_summary()` then aggregates it.
+
+```{r, eval = FALSE}
+cohort_compare <- pft_compare(my_cohort)         # runs both
+summary(cohort_compare)                          # cohort report
+pft_cohort_summary(cohort_compare)$reclassification
+```
+
+# Case studies
+
+## Case 1: moderate obstruction (typical COPD work-up)
+
+```{r}
+copd <- data.frame(
+  sex = "M", age = 68, height = 175, race = "Caucasian",
+  fev1_measured    = 1.6,
+  fvc_measured     = 3.0,
+  fev1fvc_measured = 1.6 / 3.0,
+  tlc_measured     = 6.8
+)
+r <- pft_interpret(copd)
+r[, c("ats_classification", "fev1_severity", "fev1_zscore",
+       "fev1_pctpred")]
+pft_clinical_guidance(r)$guidance
+```
+
+The pattern is **Obstructed** with **moderate** severity. GOLD
+staging (FEV1 % predicted) classifies this as **GOLD 2**:
+
+```{r}
+pft_gold(r$fev1_pctpred, fev1fvc = r$fev1fvc_measured)
+```
+
+## Case 2: restriction with normal diffusion vs reduced diffusion
+
+```{r}
+extra_parenchymal <- data.frame(
+  sex = "F", age = 55, height = 160, race = "Caucasian",
+  fev1_measured    = 1.2, fvc_measured     = 1.5,
+  fev1fvc_measured = 0.80, tlc_measured    = 3.8,
+  rv_tlc_measured  = 0.30, dlco_measured   = 22.0,
+  va_measured      = 4.6,  kco_tr_measured = 4.5
+)
+r <- pft_interpret(extra_parenchymal)
+r[, c("ats_classification", "diffusion_category",
+       "volume_subpattern")]
+```
+
+Restricted lungs with **Volume loss** diffusion pattern (low DLCO,
+low VA, preserved KCO) and a **Simple restriction** sub-pattern
+point toward extra-parenchymal restriction (chest wall, neuromuscular,
+post-lobectomy). Contrast with a parenchymal restriction case where
+KCO would also be low.
+
+## Case 3: PRISm without TLC
+
+When TLC isn't available, `pft_prism()` flags the spirometry-only
+non-specific picture: low FEV1, low FVC, preserved ratio.
+
+```{r}
+no_tlc <- data.frame(
+  sex = "M", age = 50, height = 175, race = "Caucasian",
+  fev1_measured    = 2.2, fvc_measured     = 2.8,
+  fev1fvc_measured = 0.79
+)
+r <- pft_interpret(no_tlc)
+r[, c("ats_classification", "prism")]
+```
+
+The patient screens positive for **PRISm**. Stanojevic 2022 notes
+PRISm is associated with elevated all-cause mortality and progression
+to chronic respiratory disease; follow-up is recommended even though
+the pattern itself isn't disease-specific.
+
+# See also
+
+* `vignette("longitudinal-analysis")` -- decline, conditional change,
+  FEV1Q.
+* `vignette("diffusion-capacity")` -- DLCO interpretation, Hb
+  correction, Hughes & Pride categories.
+* `vignette("input-format")` -- input contract and `pft_validate()`
+  worked examples.
