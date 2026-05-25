@@ -14,6 +14,10 @@
 #'   \item `age` is between 0 and 120.
 #'   \item `height` is between 50 and 250 cm.
 #'   \item `race`, if present, is one of the GLI 2012 categories.
+#'   \item Every recognised measured / pre / post volume or ratio column
+#'     is strictly positive (zero or negative values are biologically
+#'     impossible and would silently produce `NaN` z-scores from the
+#'     LMS power transform).
 #'   \item Measured FEV1 is not greater than measured FVC (within 1%
 #'     tolerance for measurement noise).
 #'   \item Post-bronchodilator value is not below 50% of pre value
@@ -65,6 +69,25 @@ pft_validate <- function(data) {
     bad <- !is.na(data$race) &
       !data$race %in% c("AfrAm","NEAsia","SEAsia","Other/mixed","Caucasian")
     add(bad, "race not a recognised GLI 2012 category (case-sensitive; see ?pft_spirometry)")
+  }
+
+  # Measured / pre / post volume and ratio columns must be strictly
+  # positive. Zero or negative is biologically impossible and would
+  # silently NaN the LMS z-score via ratio^L for non-integer L.
+  positive_measures <- c(
+    "fev1", "fvc", "fev1fvc", "fef2575", "fef75",
+    "frc", "tlc", "rv", "rv_tlc", "erv", "ic", "vc",
+    "dlco", "tlco", "kco_si", "kco_tr", "va"
+  )
+  positive_cols <- c(
+    paste0(positive_measures, "_measured"),
+    paste0(c("fev1", "fvc", "fev1fvc"), "_pre"),
+    paste0(c("fev1", "fvc", "fev1fvc"), "_post")
+  )
+  for (col in intersect(positive_cols, colnames(data))) {
+    v   <- data[[col]]
+    bad <- !is.na(v) & v <= 0
+    add(bad, sprintf("%s <= 0 (implausible)", col))
   }
 
   # FEV1 should not exceed FVC. Allow 1% tolerance for measurement noise.

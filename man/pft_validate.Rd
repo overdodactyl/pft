@@ -27,6 +27,10 @@ Checks performed (each row evaluated independently):
 \item \code{age} is between 0 and 120.
 \item \code{height} is between 50 and 250 cm.
 \item \code{race}, if present, is one of the GLI 2012 categories.
+\item Every recognised measured / pre / post volume or ratio column
+is strictly positive (zero or negative values are biologically
+impossible and would silently produce \code{NaN} z-scores from the
+LMS power transform).
 \item Measured FEV1 is not greater than measured FVC (within 1\%
 tolerance for measurement noise).
 \item Post-bronchodilator value is not below 50\% of pre value

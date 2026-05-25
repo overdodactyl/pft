@@ -48,3 +48,30 @@ test_that("pft_validate handles NA gracefully (no false positives)", {
   out <- pft_validate(d)
   expect_true(out$qc_pass)
 })
+
+test_that("pft_validate flags non-positive measured / pre / post values", {
+  # Zero or negative volumes are biologically impossible and would
+  # silently produce NaN via the LMS power transform; pft_validate
+  # surfaces them before they reach the reference functions.
+  d <- data.frame(
+    sex = "M", age = 30, height = 170,
+    fev1_measured = c(3.0, 0.0, -0.1, NA_real_),
+    fvc_measured  = c(4.0, 4.0, 4.0, 4.0)
+  )
+  out <- pft_validate(d)
+  expect_equal(out$qc_pass, c(TRUE, FALSE, FALSE, TRUE))
+  expect_match(out$qc_issues[2], "fev1_measured <= 0")
+  expect_match(out$qc_issues[3], "fev1_measured <= 0")
+})
+
+test_that("pft_validate flags non-positive pre/post values", {
+  d <- data.frame(
+    sex = "M", age = 30, height = 170,
+    fev1_pre  = c(2.5, 0.0, 2.5),
+    fev1_post = c(3.0, 3.0, 0.0)
+  )
+  out <- pft_validate(d)
+  expect_equal(out$qc_pass, c(TRUE, FALSE, FALSE))
+  expect_match(out$qc_issues[2], "fev1_pre <= 0")
+  expect_match(out$qc_issues[3], "fev1_post <= 0")
+})
