@@ -6,7 +6,7 @@
 #' including DLCO (or TLCO), KCO, and VA.
 #'
 #' @param data A data frame containing columns for sex ("M","F"),
-#'   age (in years, in the range 5-90) and height (in centimeters).
+#'   age (in years, in the range 4-85, per GLI 2017) and height (in centimeters).
 #'   If `data` also contains a `<measure>_measured` column for any of
 #'   the active measures (`tlco`, `kco_si`, `va` under SI units;
 #'   `dlco`, `kco_tr`, `va` under traditional), the measured value is
