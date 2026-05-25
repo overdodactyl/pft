@@ -14,8 +14,8 @@ authors:
   - given-names: Jairo
     family-names: Pena
     role: [aut]
-repository-code: "https://github.com/YOUR-ORG/pft"
-url: "https://YOUR-ORG.github.io/pft/"
+repository-code: "https://github.com/overdodactyl/pft"
+url: "https://overdodactyl.github.io/pft/"
 license: MIT
 keywords:
   - pulmonary-function-test
@@ -36,5 +36,5 @@ preferred-citation:
       family-names: Quicksall
     - given-names: Jairo
       family-names: Pena
-  url: "https://github.com/YOUR-ORG/pft"
+  url: "https://github.com/overdodactyl/pft"
   notes: "R package version 0.1.0"

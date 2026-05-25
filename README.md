@@ -1,9 +1,9 @@
-# pft <a href="https://YOUR-ORG.github.io/pft/"><img src="man/figures/logo.png" align="right" height="120" alt="pft website" /></a>
+# pft <a href="https://overdodactyl.github.io/pft/"><img src="man/figures/logo.png" align="right" height="120" alt="pft website" /></a>
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/YOUR-ORG/pft/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/YOUR-ORG/pft/actions/workflows/R-CMD-check.yaml)
-[![Codecov test coverage](https://codecov.io/gh/YOUR-ORG/pft/graph/badge.svg)](https://app.codecov.io/gh/YOUR-ORG/pft)
-[![pkgdown](https://github.com/YOUR-ORG/pft/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/YOUR-ORG/pft/actions/workflows/pkgdown.yaml)
+[![R-CMD-check](https://github.com/overdodactyl/pft/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/overdodactyl/pft/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/overdodactyl/pft/graph/badge.svg)](https://app.codecov.io/gh/overdodactyl/pft)
+[![pkgdown](https://github.com/overdodactyl/pft/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/overdodactyl/pft/actions/workflows/pkgdown.yaml)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
@@ -21,7 +21,7 @@ and interpretive pattern classifications for pulmonary function tests in R.
 
 ```r
 # install.packages("remotes")
-remotes::install_github("YOUR-ORG/pft")
+remotes::install_github("overdodactyl/pft")
 ```
 
 ## What it does

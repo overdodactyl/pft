@@ -153,9 +153,8 @@ for the package alongside the source reference standards.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/YOUR-ORG/pft}
-  \item \url{https://YOUR-ORG.github.io/pft/}
-  \item Report bugs at \url{https://github.com/YOUR-ORG/pft/issues}
+  \item \url{https://github.com/overdodactyl/pft}
+  \item Report bugs at \url{https://github.com/overdodactyl/pft/issues}
 }
 
 }
