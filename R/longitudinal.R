@@ -342,6 +342,157 @@ decline_mixed <- function(df, min_points) {
 }
 
 
+#' Group-stratified longitudinal decline-rate fitting
+#'
+#' Fits a single linear mixed-effects model (`value ~ time * group +
+#' (time | patient_id)`) and returns the per-group fixed-effect slope
+#' with standard error and 95 % CI. The natural cohort-level counterpart
+#' to [pft_decline()], which fits *per-patient* slopes: this one answers
+#' "how fast does each group decline on average?" rather than "how fast
+#' does each patient decline?".
+#'
+#' Use [pft_decline_grouped()] for cohort-level questions like "is
+#' decline faster in current smokers than ex-smokers?", "do CF patients
+#' on the new therapy show a different FEV1 trajectory?", or "what is
+#' the per-disease decline rate in our IPF cohort vs the COPD cohort?".
+#'
+#' Requires the suggested `lme4` package. The model is parameterised
+#' without an intercept (`0 + group + time:group`) so each
+#' `time:group<level>` coefficient is the slope of that group directly,
+#' with its own standard error from the model's variance-covariance
+#' matrix.
+#'
+#' @inheritParams pft_decline
+#' @param group Column giving the grouping factor (e.g. disease,
+#'   smoking status, treatment arm). Bare name, string, or rlang
+#'   injection.
+#'
+#' @return A tibble with one row per group level, columns
+#'   `group`, `n_patients`, `n_observations`, `slope`, `slope_se`,
+#'   `slope_ci_lower`, `slope_ci_upper`.
+#'
+#' @seealso [pft_decline()] for per-patient slopes; [pft_change()] for
+#'   the two-point conditional change z-score.
+#'
+#' @examples
+#' \dontrun{
+#' set.seed(1)
+#' # 30 patients across 3 disease groups, 5 visits each. Group "C"
+#' # declines faster than "A" or "B".
+#' n_patients <- 30
+#' n_visits   <- 5
+#' patients <- data.frame(
+#'   patient_id = rep(seq_len(n_patients), each = n_visits),
+#'   year       = rep(0:(n_visits - 1), times = n_patients),
+#'   group      = rep(rep(c("A", "B", "C"), each = n_patients / 3),
+#'                    each = n_visits)
+#' )
+#' slope_per_group <- c(A = -0.05, B = -0.10, C = -0.30)
+#' patients$fev1_zscore <-
+#'   slope_per_group[patients$group] * patients$year +
+#'   stats::rnorm(nrow(patients), sd = 0.2)
+#' pft_decline_grouped(patients, by = patient_id,
+#'                     measure = "fev1_zscore",
+#'                     time = year, group = group)
+#' }
+#'
+#' @export
+pft_decline_grouped <- function(data, by, measure, time, group,
+                                  min_points = 3) {
+  if (!requireNamespace("lme4", quietly = TRUE)) {
+    stop("pft_decline_grouped() requires the lme4 package. ",
+         "Install with install.packages(\"lme4\").", call. = FALSE)
+  }
+
+  by_q      <- rlang::enquo(by)
+  time_q    <- rlang::enquo(time)
+  measure_q <- rlang::enquo(measure)
+  group_q   <- rlang::enquo(group)
+  by_name      <- resolve_column_name(by_q,      "by")
+  time_name    <- resolve_column_name(time_q,    "time")
+  measure_name <- resolve_column_name(measure_q, "measure")
+  group_name   <- resolve_column_name(group_q,   "group")
+
+  for (nm in c(by_name, time_name, measure_name, group_name)) {
+    if (!nm %in% colnames(data)) {
+      stop(sprintf("Column `%s` not found in `data`.", nm), call. = FALSE)
+    }
+  }
+
+  raw_time <- data[[time_name]]
+  if (inherits(raw_time, "Date") || inherits(raw_time, "POSIXt")) {
+    t_num <- as.numeric(difftime(raw_time, min(raw_time, na.rm = TRUE),
+                                   units = "days")) / 365.25
+  } else {
+    t_num <- as.numeric(raw_time)
+  }
+
+  df <- data.frame(
+    patient_id = data[[by_name]],
+    time       = t_num,
+    value      = as.numeric(data[[measure_name]]),
+    group      = as.factor(data[[group_name]])
+  )
+  ok <- !is.na(df$patient_id) & !is.na(df$time) &
+        !is.na(df$value)       & !is.na(df$group)
+  df <- df[ok, , drop = FALSE]
+
+  # Filter to patients with at least min_points observations (mixed
+  # model can't fit per-patient random slopes for singletons).
+  pn   <- table(df$patient_id)
+  keep <- names(pn[pn >= min_points])
+  df   <- df[as.character(df$patient_id) %in% keep, , drop = FALSE]
+  if (nrow(df) == 0 || length(keep) < 2) {
+    stop("pft_decline_grouped() requires at least 2 patients with ",
+         "min_points observations each.", call. = FALSE)
+  }
+  df$patient_id <- factor(df$patient_id)
+
+  # No-intercept parameterisation: each time:group<level> coefficient
+  # is the slope for that group directly.
+  m <- lme4::lmer(value ~ 0 + group + time:group + (time | patient_id),
+                   data = df)
+  fixef_ <- lme4::fixef(m)
+  vcov_  <- stats::vcov(m)
+
+  # lme4 names the interaction term consistently as "group<g>:time"
+  # (the first factor in the formula leads). Build both candidate
+  # names and try in order, since formula ordering is implementation-
+  # defined.
+  group_levels <- levels(df$group)
+  rows <- lapply(group_levels, function(g) {
+    candidates <- c(paste0("group", g, ":time"),
+                    paste0("time:group", g))
+    coef_name <- candidates[candidates %in% names(fixef_)][1]
+    n_pat <- length(unique(df$patient_id[df$group == g]))
+    n_obs <- sum(df$group == g)
+    if (is.na(coef_name)) {
+      return(tibble::tibble(
+        group          = g,
+        n_patients     = n_pat,
+        n_observations = n_obs,
+        slope          = NA_real_,
+        slope_se       = NA_real_,
+        slope_ci_lower = NA_real_,
+        slope_ci_upper = NA_real_
+      ))
+    }
+    s  <- unname(fixef_[coef_name])
+    se <- sqrt(vcov_[coef_name, coef_name])
+    tibble::tibble(
+      group          = g,
+      n_patients     = n_pat,
+      n_observations = n_obs,
+      slope          = s,
+      slope_se       = se,
+      slope_ci_lower = s - 1.96 * se,
+      slope_ci_upper = s + 1.96 * se
+    )
+  })
+  do.call(rbind, rows)
+}
+
+
 empty_decline_tbl <- function(flag_threshold,
                                 patient_id_proto = character()) {
   # Preserve the input patient_id column's class so callers binding
