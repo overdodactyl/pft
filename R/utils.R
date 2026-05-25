@@ -17,9 +17,14 @@
 #               (e.g. "_2022" for GLI Global outputs).
 #
 # z-score and percent predicted use the LMS formulas:
-#   z         = ((measured / M)^L - 1) / (L * S)
+#   z         = ((measured / M)^L - 1) / (L * S)   when L != 0
+#   z         = log(measured / M) / S              when L == 0 (log-normal)
 #   pctpred   = (measured / M) * 100
-# Either is NA wherever measured, M, S, or L is NA.
+# The L == 0 branch is the analytical limit as L -> 0 (Cole 1988); it
+# avoids a 0/0 division for any caller passing custom log-normal LMS
+# coefficients. GLI splines shipped with this package are not at L = 0,
+# so the branch is defensive rather than load-bearing for built-in
+# references. Either output is NA wherever measured, M, S, or L is NA.
 bind_lms_outputs <- function(data, M, S, L, lower, upper, measures,
                              suffix = "") {
   results <- data
@@ -36,10 +41,13 @@ bind_lms_outputs <- function(data, M, S, L, lower, upper, measures,
     measured_col <- paste0(measure, "_measured")
     if (measured_col %in% names(data)) {
       measured <- data[[measured_col]]
-      results[[paste0(measure, "_zscore",  suffix)]] <-
-        ((measured / m_vec)^l_vec - 1) / (l_vec * s_vec)
-      results[[paste0(measure, "_pctpred", suffix)]] <-
-        (measured / m_vec) * 100
+      ratio    <- measured / m_vec
+      results[[paste0(measure, "_zscore",  suffix)]] <- ifelse(
+        abs(l_vec) < 1e-5,
+        log(ratio) / s_vec,
+        (ratio^l_vec - 1) / (l_vec * s_vec)
+      )
+      results[[paste0(measure, "_pctpred", suffix)]] <- ratio * 100
     }
   }
   tibble::as_tibble(results)
