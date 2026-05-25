@@ -8,15 +8,10 @@ dockerimage
 docs/
 
 # papers/ holds source PDFs and supplements (copyrighted publisher
-# content -- never commit), alongside per-paper verification.md notes
-# that document our line-by-line audit of each paper against the
-# package code. Exclude the publisher content; keep the verification
-# notes under version control.
-papers/**/*.pdf
-papers/**/*.xls
-papers/**/*.xlsx
-papers/**/*.xlsm
-papers/**/*.csv
+# content) and per-paper verification.md notes (local audit
+# scratchpads). The whole directory is local-only; nothing under
+# papers/ is tracked.
+papers/
 
 # Scratch outputs from verification scripts under notes/. The .R
 # scripts are version-controlled (reproducible); their .out dumps are
