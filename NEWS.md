@@ -299,6 +299,36 @@ Pure post-processing over existing outputs; no new input data is
 required.
 
 Test count: 1195 -> 1210 (+15).
+## pft_normalize_units() — auto-detect inches / millilitres on input
+
+Catches the two most common clinic / lab data-import bugs that
+yield silently wrong reference values: height in inches (instead
+of centimetres) and measured volumes in millilitres (instead of
+litres). When detected, the offending columns are converted in
+place and a single consolidated warning is emitted so the user
+can audit.
+
+Heuristics (conservative -- only trigger on unambiguous input):
+
+* `height`: `max(height, na.rm = TRUE) < 100` -> treat as inches,
+  multiply by 2.54.
+* Any `<measure>_measured` volume column (fev1, fvc, fef2575,
+  fef75, frc, tlc, rv, erv, ic, vc): `max > 15` -> treat as mL,
+  divide by 1000.
+
+Standalone helper -- intended to be piped before the main pipeline:
+
+    df |> pft_normalize_units() |> pft_interpret()
+
+Both thresholds are user-overridable via `height_inches_max` and
+`volume_ml_min`. Pass `height = NULL` or `volume_cols =
+character(0)` to skip either check.
+
+DLCO / TLCO are not auto-corrected: their unit landscape (SI vs
+traditional, with values in similar magnitudes) doesn't admit a
+safe heuristic.
+
+Test count: 1195 -> 1213 (+18).
 
 ## New interpretation primitives (audit follow-up)
 
