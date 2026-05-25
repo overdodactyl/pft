@@ -1,0 +1,191 @@
+---
+title: "Diffusion capacity (DLCO / TLCO): reference, Hb correction, interpretation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Diffusion capacity (DLCO / TLCO): reference, Hb correction, interpretation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(pft)
+```
+
+Diffusion measurements (DLCO in traditional units; TLCO in SI) are
+ordered to assess gas-exchange capacity at the alveolar-capillary
+membrane. They are the most informative add-on to spirometry and
+volumes when the differential includes interstitial lung disease,
+pulmonary vascular disease, emphysematous parenchymal loss, or
+anemia. This vignette covers what `pft` computes for the diffusion
+module: reference values, hemoglobin correction, the six clinical
+sub-pattern categories, and the alveolar-volume distinction between
+parenchymal and extra-parenchymal restriction.
+
+# 1. Reference values
+
+`pft_diffusion()` implements the GLI 2017 standard (Stanojevic et al.
+ERJ 2017, with the 2020 author correction applied) for adults and
+children aged 4-85 years. By default it emits **traditional units**
+(DLCO, KCO, VA in mL/min/mmHg, mL/min/mmHg/L, and L respectively);
+`SI.units = TRUE` switches to SI units (TLCO and KCO in mmol/min/kPa
+and mmol/min/kPa/L). VA is the same column either way.
+
+```{r}
+patient <- data.frame(
+  sex = "M", age = 45, height = 178,
+  dlco_measured   = 22.0,
+  va_measured     = 5.8,
+  kco_tr_measured = 3.79
+)
+out <- pft_diffusion(patient)
+out[, grep("dlco|va|kco", colnames(out), value = TRUE)]
+```
+
+The output carries the same per-measure `_pred` / `_lln` / `_uln` /
+`_zscore` / `_pctpred` shape as `pft_spirometry()` and
+`pft_volumes()`.
+
+# 2. Hemoglobin correction
+
+DLCO measured against the standard reference Hb may misrepresent
+patients who are anemic (DLCO under-reads) or polycythemic (DLCO
+over-reads). `pft_dlco_hb_correct()` applies the Cotes 1972 formula
+to express the measured DLCO at the standard reference Hb:
+
+\[
+\text{DLCO}_\text{adj} =
+  \text{DLCO} \cdot \frac{1.7 \cdot \text{Hb}_\text{ref}}{\text{Hb} + 0.7 \cdot \text{Hb}_\text{ref}}.
+\]
+
+The reference Hb is age- and sex-dependent: 146 g/L for males aged
+>= 15, 134 g/L for females and for children < 15 of either sex
+(Cotes 1972 / Stanojevic 2017 Table 5).
+
+```{r}
+# Anemic adult male: corrected DLCO is higher than measured.
+pft_dlco_hb_correct(dlco = 20.0, hemoglobin = 110, sex = "M", age = 45)
+
+# Polycythemic adult male: corrected is lower than measured.
+pft_dlco_hb_correct(dlco = 25.0, hemoglobin = 180, sex = "M", age = 45)
+```
+
+The function also accepts Hb in g/dL (auto-detected when values are <
+30) and converts internally. **Apply the correction before
+computing z-scores** when comparing across patients whose Hb varies;
+the GLI 2017 reference values assume Hb is at the sex-/age-specific
+standard.
+
+# 3. Clinical sub-pattern (Hughes & Pride 2012)
+
+`pft_diffusion_interpret()` classifies a diffusion result into one of
+six clinical categories per the Hughes & Pride 2012 framework
+(adopted by the Stanojevic 2017 task force). The classifier uses
+z-scores only, so it works identically on traditional and SI
+columns:
+
+```{r}
+mixed_cohort <- data.frame(
+  dlco_zscore   = c(-0.5, -2.0, -2.5, -2.5, -2.0,  0.0),
+  va_zscore     = c(-0.5, -0.5, -2.0, -2.5, -0.5,  0.0),
+  kco_tr_zscore = c(-0.5, -2.0,  0.0, -2.5,  0.5,  2.0)
+)
+pft_diffusion_interpret(mixed_cohort)
+```
+
+The decision tree (Stanojevic 2017 / Hughes & Pride 2012):
+
+| Category               | DLCO | VA | KCO | Typical context |
+|------------------------|------|----|----|------------------|
+| **Normal**             | OK   | OK | OK | -- |
+| **Parenchymal**        | low  | OK | low | ILD, emphysema, anemia, COHb |
+| **Volume loss**        | low  | low | OK / high | Chest wall, neuromuscular, post-lobectomy, atelectasis |
+| **Mixed**              | low  | low | low | Combined volume loss + gas-exchange |
+| **Vascular (suggested)** | low | OK | low or high | PE, PAH (capillary bed impaired but alveolar volume preserved) |
+| **Elevated KCO**       | OK   | -- | high | Hyperventilation, polycythemia, recovery from anemia |
+| **Other**              | other combinations | | | -- |
+
+In `pft_interpret()` the classifier runs automatically whenever the
+diffusion z-score columns are present, so the
+`diffusion_category` column is attached for free in the standard
+workflow:
+
+```{r}
+patient2 <- data.frame(
+  sex = "F", age = 60, height = 165, race = "Caucasian",
+  fev1_measured    = 1.6, fvc_measured    = 1.9,
+  fev1fvc_measured = 0.84, tlc_measured   = 4.0,
+  dlco_measured   = 10.0, va_measured    = 3.5,
+  kco_tr_measured = 2.86
+)
+r <- pft_interpret(patient2)
+r[, c("ats_classification", "diffusion_category")]
+```
+
+# 4. VA: distinguishing parenchymal from extra-parenchymal restriction
+
+Alveolar volume (VA) carries diagnostic weight on its own. In
+restriction, VA tracks total alveolar gas exchange capacity:
+
+* **Low VA, low KCO** -> parenchymal restriction (the alveoli that
+  *are* working are also impaired): suspect interstitial lung
+  disease, advanced fibrosis, or a chronic process that has
+  degraded both volume and gas exchange.
+* **Low VA, normal-or-high KCO** -> extra-parenchymal restriction
+  (fewer alveoli, but each functions normally per unit volume):
+  suspect chest-wall or neuromuscular causes, post-surgical loss of
+  lung tissue, or atelectasis.
+
+The Hughes & Pride classifier encodes this distinction: low-DLCO +
+low-VA + low-KCO is **Mixed**, low-DLCO + low-VA + normal-KCO is
+**Volume loss**.
+
+# 5. Cohort-level diffusion summaries
+
+`pft_cohort_summary()` includes a `diffusion` component when the
+input data frame carries a `diffusion_category` column (e.g. a
+`pft_interpret()` result):
+
+```{r}
+cohort <- data.frame(
+  sex    = c("M","F","M","F","M","F"),
+  age    = c(45,60,30,55,70,28),
+  height = c(178,165,175,160,170,180),
+  race   = "Caucasian",
+  fev1_measured    = c(2.5, 1.8, 4.0, 1.5, 2.2, 3.8),
+  fvc_measured     = c(3.8, 2.4, 5.2, 2.5, 3.5, 5.0),
+  tlc_measured     = c(6.0, 4.5, 6.8, 4.0, 6.5, 7.0),
+  dlco_measured    = c(20.0, 12.5, 28.0, 10.0, 18.0, 25.0),
+  va_measured      = c(5.8, 4.0, 6.5, 3.5, 5.5, 6.0),
+  kco_tr_measured  = c(3.5, 3.2, 4.3, 2.9, 3.3, 4.0)
+)
+r <- pft_interpret(cohort)
+s <- pft_cohort_summary(r, by = "sex")
+s$diffusion
+```
+
+# When NOT to order a diffusion test
+
+Diffusion measurement adds time and cost to a PFT session. Typical
+indications per the standard:
+
+* Suspected interstitial lung disease (any pattern with restriction).
+* Suspected emphysema or chronic parenchymal damage (obstructed
+  pattern with no clear hyperinflation).
+* Pulmonary vascular disease evaluation.
+* Pre-operative risk stratification for lung resection.
+* Drug-toxicity monitoring (bleomycin, amiodarone, methotrexate).
+
+Diffusion is *not* generally recommended for routine spirometry
+follow-up of stable COPD or asthma; the marginal information
+typically isn't worth the test burden. The standard's recommendation
+is "order when the result would change management".
+
+# See also
+
+* `vignette("interpretation-guide")` -- pattern decision tree and
+  severity bands.
+* `vignette("longitudinal-analysis")` -- serial DLCO change and
+  decline.
+* `?pft_diffusion`, `?pft_diffusion_interpret`,
+  `?pft_dlco_hb_correct` for the function references.
