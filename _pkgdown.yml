@@ -71,6 +71,7 @@ reference:
     contents:
       - pft_interpret
       - pft_compare
+      - summary.pft_compare
       - pft_validate
       - pft_normalize_units
       - pft_plot
