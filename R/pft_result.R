@@ -145,11 +145,10 @@ summary.pft_result <- function(object, ...) print(object, ...)
 plot.pft_result <- function(x, ...) pft_plot(x)
 
 
-# Tidiers -------------------------------------------------------------------
-# Long-form pivot of a pft_result (or any compatible data frame) and a
-# per-row summary suitable for `broom::tidy()` / `broom::glance()`
-# dispatch. Both functions also work standalone (they do not require the
-# `broom` package).
+# Tidier --------------------------------------------------------------------
+# Long-form pivot of a pft_result (or any compatible data frame),
+# suitable for `broom::tidy()` dispatch. Works standalone (no `broom`
+# dependency).
 
 #' Pivot a `pft_result` to long form
 #'
@@ -177,7 +176,7 @@ plot.pft_result <- function(x, ...) pft_plot(x)
 #'   `severity`. Missing statistics fill with `NA` of the appropriate
 #'   type.
 #'
-#' @seealso [pft_glance()] for per-patient summaries; [pft_interpret()]
+#' @seealso [pft_interpret()]
 #'   to produce the wide-form input.
 #'
 #' @examples
@@ -254,75 +253,9 @@ pft_long <- function(x, ...) {
 }
 
 
-#' Per-patient summary of a `pft_result`
-#'
-#' Returns one row per patient with the highest-level interpretation
-#' columns (`ats_classification`, `ats_pattern_combination`, `prism`,
-#' `volume_subpattern`) when present, plus three derived per-patient
-#' summary statistics computed across all z-score columns in `x`:
-#' `worst_zscore` (the z-score with greatest absolute value),
-#' `n_below_lln` (count of z-scores below -1.645), and `n_above_uln`
-#' (count above +1.645). This is the natural shape for `broom`-style
-#' "one row of metadata per fit" workflows and for cohort-level joins.
-#'
-#' @param x A data frame; typically a `pft_result` from [pft_interpret()].
-#' @param ... Currently unused; reserved for forward compatibility.
-#'
-#' @return A tibble with one row per row of `x`. Always contains
-#'   `.patient` (row position); other columns are added only when
-#'   present in `x`.
-#'
-#' @seealso [pft_long()] for the per-measure long-form pivot.
-#'
-#' @examples
-#' cohort <- data.frame(
-#'   sex = c("M","F","M"), age = c(45,60,30), height = c(178,165,175),
-#'   race = "Caucasian",
-#'   fev1_measured = c(2.5, 1.8, 4.0),
-#'   fvc_measured  = c(3.8, 2.4, 5.2),
-#'   fev1fvc_measured = c(0.66, 0.75, 0.77),
-#'   tlc_measured  = c(6.0, 4.5, 6.8)
-#' )
-#' pft_glance(pft_interpret(cohort))
-#'
-#' @export
-pft_glance <- function(x, ...) {
-  if (!is.data.frame(x)) {
-    stop("`x` must be a data frame.", call. = FALSE)
-  }
-
-  out <- tibble::tibble(.patient = seq_len(nrow(x)))
-  if (nrow(x) == 0) return(out)
-
-  cols <- colnames(x)
-  for (top in c("ats_classification", "ats_pattern_combination",
-                "prism", "volume_subpattern")) {
-    if (top %in% cols) out[[top]] <- x[[top]]
-  }
-
-  zcols <- grep("_zscore(?:_[0-9]+)?$", cols, value = TRUE, perl = TRUE)
-  if (length(zcols) > 0) {
-    zmat <- as.matrix(x[, zcols, drop = FALSE])
-    storage.mode(zmat) <- "double"
-    out$worst_zscore <- vapply(seq_len(nrow(zmat)), function(i) {
-      r <- zmat[i, ]
-      r <- r[!is.na(r)]
-      if (length(r) == 0) NA_real_ else r[which.max(abs(r))]
-    }, numeric(1))
-    out$n_below_lln <- rowSums(zmat < -1.645, na.rm = TRUE)
-    out$n_above_uln <- rowSums(zmat >  1.645, na.rm = TRUE)
-  }
-  out
-}
-
-
-# broom S3 methods. These dispatch only when broom is installed; the
-# underlying pft_long() / pft_glance() are always available regardless.
-# Roxygen emits S3method(broom::tidy, pft_result) and
-# S3method(broom::glance, pft_result) into NAMESPACE.
+# broom S3 method. Dispatches only when broom is installed; the
+# underlying pft_long() is always available regardless. Roxygen emits
+# S3method(broom::tidy, pft_result) into NAMESPACE.
 
 #' @exportS3Method broom::tidy pft_result
 tidy.pft_result <- function(x, ...) pft_long(x, ...)
-
-#' @exportS3Method broom::glance pft_result
-glance.pft_result <- function(x, ...) pft_glance(x, ...)

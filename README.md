@@ -64,7 +64,7 @@ Each reference function emits `*_pred`, `*_lln`, `*_uln`. If a `<measure>_measur
 | `pft_quality()` | Spirometry quality grade (A-F) from a set of maneuvers | Graham 2019 |
 | `pft_gold()` | COPD severity (GOLD 1-4) from FEV1 % predicted | GOLD reports |
 | `pft_plot()` | Single-patient z-score lollipop with severity bands | — |
-| `pft_long()` / `pft_glance()` | Long-form pivot + per-patient summary; `broom::tidy`/`glance` dispatch | — |
+| `pft_long()` | Wide → long pivot; `broom::tidy` dispatches to it | — |
 
 All functions take a data frame and return a data frame, so they
 compose with `dplyr` pipelines.
@@ -138,7 +138,6 @@ pft_plot(result[1, ])             # per-patient z-score figure
 ```r
 result <- pft_interpret(cohort)
 result |> pft_long()              # one row per (patient, measure)
-result |> pft_glance()            # one row per patient
 ```
 
 ## Reference equations

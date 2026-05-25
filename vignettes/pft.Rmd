@@ -202,22 +202,19 @@ interpreted[, c("sex", "age",
                 "ats_classification", "prism")]
 ```
 
-# 11. Long-form tidiers for downstream analysis
+# 11. Long-form tidier for downstream analysis
 
 `pft_long()` pivots a wide `pft_result` into one row per
-`(patient, measure)`, with the natural shape for `dplyr` /
-`ggplot2` workflows. `pft_glance()` returns a per-patient summary
-(top-level interpretation columns plus derived stats like
-`worst_zscore`, `n_below_lln`).
+`(patient, measure)`, the natural shape for `dplyr` / `ggplot2`
+workflows.
 
 ```{r}
 pft_long(interpreted)[1:6, ]
-pft_glance(interpreted)
 ```
 
-The S3 methods `tidy.pft_result()` and `glance.pft_result()`
-dispatch to these when `broom` is installed, so
-`broom::tidy(interpreted)` works identically to `pft_long()`.
+The S3 method `tidy.pft_result()` dispatches to it when `broom` is
+installed, so `broom::tidy(interpreted)` is identical to
+`pft_long(interpreted)`.
 
 # 12. Diffusion clinical category
 

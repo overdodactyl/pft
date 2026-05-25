@@ -1,9 +1,7 @@
-# Tests for pft_long(), pft_glance(), and the broom::tidy() /
-# broom::glance() S3 methods on pft_result. Verifies the wide-to-long
-# pivot is shape-correct, year-suffix-aware, and tolerant of missing
-# statistics; that pft_glance() carries the right per-patient
-# interpretation columns and derived summaries; and that the broom
-# generics dispatch correctly when broom is available.
+# Tests for pft_long() and the broom::tidy() S3 method on pft_result.
+# Verifies the wide-to-long pivot is shape-correct, year-suffix-aware,
+# tolerant of missing statistics, and that broom::tidy() dispatches
+# correctly when broom is available.
 
 cohort <- data.frame(
   sex    = c("M", "F", "M"),
@@ -88,62 +86,9 @@ test_that("pft_long rejects non-data-frame input", {
 })
 
 
-# pft_glance() -------------------------------------------------------------
-
-test_that("pft_glance returns one row per patient with .patient", {
-  g <- pft_glance(result)
-  expect_equal(nrow(g), nrow(cohort))
-  expect_true(".patient" %in% colnames(g))
-  expect_equal(g$.patient, 1:3)
-  expect_s3_class(g, "tbl_df")
-})
-
-test_that("pft_glance carries top-level interpretation columns", {
-  g <- pft_glance(result)
-  expect_true("ats_classification" %in% colnames(g))
-  expect_true("prism" %in% colnames(g))
-})
-
-test_that("pft_glance derives worst_zscore / n_below_lln / n_above_uln", {
-  g <- pft_glance(result)
-  expect_true("worst_zscore" %in% colnames(g))
-  expect_true("n_below_lln" %in% colnames(g))
-  expect_true("n_above_uln" %in% colnames(g))
-  # |worst_zscore| should be the maximum absolute z across the patient.
-  long <- pft_long(result)
-  for (i in seq_len(nrow(g))) {
-    zs <- long$zscore[long$.patient == i]
-    zs <- zs[!is.na(zs)]
-    if (length(zs) > 0) {
-      expect_equal(abs(g$worst_zscore[i]), max(abs(zs)))
-    }
-  }
-})
-
-test_that("pft_glance is robust to missing high-level columns", {
-  d <- data.frame(sex = "M", age = 45, height = 178, race = "Caucasian")
-  g <- pft_glance(pft_interpret(d))
-  expect_equal(nrow(g), 1)
-  expect_true(".patient" %in% colnames(g))
-  # No measured -> no z-scores -> derived summary cols absent.
-  expect_false("worst_zscore" %in% colnames(g))
-})
-
-test_that("pft_glance on an empty data frame returns a zero-row tibble", {
-  g <- pft_glance(result[FALSE, , drop = FALSE])
-  expect_equal(nrow(g), 0)
-  expect_true(".patient" %in% colnames(g))
-})
-
-
 # broom dispatch ------------------------------------------------------------
 
 test_that("broom::tidy dispatches to pft_long", {
   skip_if_not_installed("broom")
   expect_identical(broom::tidy(result), pft_long(result))
-})
-
-test_that("broom::glance dispatches to pft_glance", {
-  skip_if_not_installed("broom")
-  expect_identical(broom::glance(result), pft_glance(result))
 })

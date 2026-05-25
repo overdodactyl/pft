@@ -36,13 +36,18 @@
   and the rest (positive-value, FEV1 ≤ FVC) would surface naturally
   as `NaN` z-scores from the LMS power transform. Callers can write
   these checks inline against their cohort if they still want them.
+* `pft_glance()` and the `broom::glance()` S3 method on `pft_result`
+  have been removed. The function returned four passthrough columns
+  plus three trivial row-stats (`worst_zscore`, `n_below_lln`,
+  `n_above_uln`), all of which are easier computed inline from a
+  `pft_long()` result. `pft_long()` and the `broom::tidy()` S3
+  method are kept.
 
 ## New features
 
-* `pft_long()` and `pft_glance()` pivot a `pft_result` to long form
-  and per-patient summary. `tidy.pft_result()` /
-  `glance.pft_result()` S3 methods dispatch to them when `broom` is
-  installed.
+* `pft_long()` pivots a `pft_result` to long form (one row per
+  `(patient, measure)`). The `tidy.pft_result()` S3 method
+  dispatches to it when `broom` is installed.
 * `pft_diffusion_interpret(data)` assigns a Hughes & Pride 2012
   clinical category (Normal / Parenchymal / Volume loss / Mixed /
   Vascular / Elevated KCO / Other) from DLCO, VA, KCO z-scores. Run

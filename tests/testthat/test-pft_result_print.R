@@ -109,13 +109,6 @@ test_that("plot.pft_result returns a ggplot object", {
 })
 
 
-# pft_glance defensive branch ----------------------------------------------
-
-test_that("pft_glance rejects non-data-frame input", {
-  expect_error(pft_glance(list(a = 1)), "must be a data frame")
-})
-
-
 # print_pft_row branches that depend on suffix / BDR -----------------------
 
 test_that("print_pft_row renders the _2022 suffix branch when only 2022 stats exist", {

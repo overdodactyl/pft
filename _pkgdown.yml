@@ -67,13 +67,11 @@ reference:
 
   - title: Tidiers
     desc: >
-      Long-form pivot and per-patient summary helpers for downstream
-      dplyr / ggplot2 / tidymodels workflows. The `broom::tidy()` and
-      `broom::glance()` generics dispatch to these when `broom` is
-      installed.
+      Long-form pivot helper for downstream dplyr / ggplot2 /
+      tidymodels workflows. The `broom::tidy()` generic dispatches to
+      this when `broom` is installed.
     contents:
       - pft_long
-      - pft_glance
 
   - title: Example data
     contents:
