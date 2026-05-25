@@ -93,24 +93,6 @@ Reading row by row:
 4. FEV1/FVC normal, FVC < LLN, TLC normal -> **Non-specific**.
 5. Everything >= LLN -> **Normal**.
 
-# From label to clinical action
-
-`pft_clinical_guidance()` maps the pattern + severity columns into a
-short narrative string suggesting the typical next step per the
-2022 standard. The text is conservative; it describes the standard's
-recommended work-up rather than making a diagnosis.
-
-```{r}
-result <- pft_clinical_guidance(case)
-cbind(case[, "fev1_lln"], pft_classify(case)$ats_classification,
-      result$guidance)
-```
-
-For a real workflow this is one column in the output of
-`pft_interpret()`; the wrapper `pft_full_report()` chains validation,
-interpretation, plotting, and the rendered HTML report into a single
-call.
-
 # When to use 2022 vs 2005
 
 The two standards differ in three ways:
@@ -152,7 +134,6 @@ copd <- data.frame(
 r <- pft_interpret(copd)
 r[, c("ats_classification", "fev1_severity", "fev1_zscore",
        "fev1_pctpred")]
-pft_clinical_guidance(r)$guidance
 ```
 
 The pattern is **Obstructed** with **moderate** severity. GOLD

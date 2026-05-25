@@ -45,7 +45,6 @@ single-patient and cohort figures.
 | `pft_volumes()` | FRC, TLC, RV, RV/TLC, ERV, IC, VC | GLI 2021 static lung volumes (Hall) |
 | `pft_diffusion()` | TLCO/DLCO, KCO, VA (SI or traditional units) | GLI 2017 TLCO (Stanojevic, corrected 2020) |
 | `pft_required_columns()` | Documents input columns each step expects | — |
-| `pft_schema()` | Enumerates every output column the pipeline can produce | — |
 
 Each reference function emits `*_pred`, `*_lln`, `*_uln`. If a `<measure>_measured` column is also present, `*_zscore` and `*_pctpred` are appended automatically.
 
@@ -58,22 +57,17 @@ Each reference function emits `*_pred`, `*_lln`, `*_uln`. If a `<measure>_measur
 | `pft_classify()` | Normal / Non-specific / Obstructed / Restricted / Mixed | Stanojevic 2022 Fig 8, Tables 5/8 |
 | `pft_volume_subpattern()` | Six lung-volume sub-patterns (Hyperinflation, Simple/Complex restriction, etc.) | Stanojevic 2022 Fig 10 |
 | `pft_severity()` | normal / mild / moderate / severe per measure z-score | Stanojevic 2022 |
-| `pft_pattern_severity()` | Composite "Moderate Obstructed" / "Severe Mixed" label | Stanojevic 2022 |
 | `pft_diffusion_interpret()` | Parenchymal / Volume loss / Vascular / Mixed / Elevated KCO category | Hughes & Pride 2012 |
 | `pft_bdr()` | >10% of predicted change in FEV1 or FVC | Stanojevic 2022 (BDR section) |
 | `pft_prism()` | Preserved Ratio Impaired Spirometry flag | Stanojevic 2022 |
 | `pft_change()` | Conditional change z-score for two-point serial measurements | Stanojevic 2022 |
-| `pft_decline()` | Per-patient slope (OLS or `lme4` mixed-effects) for 3+ timepoints | — |
 | `pft_fev1q()` | FEV1Q adult-mortality index | Stanojevic 2022 Box 3 |
-| `pft_lung_age()` | "Equivalent age" via algebraic GLI inversion (patient counseling) | — |
 | `pft_dlco_hb_correct()` | Hemoglobin correction for DLCO/TLCO | Cotes 1972 / Stanojevic 2017 |
 | `pft_quality()` | Spirometry quality grade (A-F) from a set of maneuvers | Graham 2019 |
 | `pft_gold()` | COPD severity (GOLD 1-4) from FEV1 % predicted | GOLD reports |
 | `pft_cohort_summary()` | Population-level z-score / pattern / PRISm summary; stratified via `by =`; reclassification confusion matrix | — |
 | `pft_validate()` | QC checks on PFT inputs (FEV1 > FVC, out-of-range demographics, etc.) | — |
-| `pft_normalize_units()` | Auto-detect inches/cm and mL/L on input | — |
 | `pft_plot()` | Clinical-style figures: `lollipop` (default), `histogram`, `trajectory`, `bdr`, `compare` | — |
-| `pft_report()` | One-call HTML clinical report for a patient or cohort | — |
 | `pft_long()` / `pft_glance()` | Long-form pivot + per-patient summary; `broom::tidy`/`glance` dispatch | — |
 
 All functions take a data frame and return a data frame, so they
@@ -124,8 +118,7 @@ pft_classify(patient)
 
 ### End-to-end pipeline
 
-For the canonical "validate → interpret → visualise → report" workflow on a
-cohort:
+For the canonical "validate → interpret → visualise" workflow on a cohort:
 
 ```r
 cohort <- data.frame(
@@ -144,7 +137,6 @@ cohort |>
   result
 
 pft_plot(result, type = "lollipop")   # per-patient z-score figure
-pft_report(result, file = "cohort.html")   # one-call HTML report
 ```
 
 ## Common workflows
@@ -174,31 +166,6 @@ result <- pft_interpret(cohort)
 result |> pft_long()              # one row per (patient, measure)
 result |> pft_glance()            # one row per patient
 pft_cohort_summary(result, by = "sex")   # stratified summary
-```
-
-### Longitudinal trajectories
-
-```r
-serial <- data.frame(
-  patient_id = rep(1:3, each = 5),
-  year       = rep(2018:2022, 3),
-  fev1_zscore = c(-0.5, -0.4, -0.6, -0.5, -0.5,    # P1: stable
-                  -0.5, -0.9, -1.3, -1.7, -2.1,    # P2: declining
-                   0.2, -0.65, -1.5, -2.3, -3.2)   # P3: rapid decline
-)
-pft_decline(serial, by = patient_id, measure = "fev1_zscore",
-            time = year, flag_threshold = 0.25)
-```
-
-### Data import safety
-
-```r
-# Height accidentally in inches, FEV1 in mL?
-df <- data.frame(sex = "M", age = 45, height = 70, race = "Caucasian",
-                 fev1_measured = 2500)
-df |> pft_normalize_units() |> pft_interpret()
-# warns: `height` looked like inches (max 70.0); converted to cm (x 2.54).
-# warns: `fev1_measured` looked like mL (max 2500); converted to L (/ 1000).
 ```
 
 ## Reference equations

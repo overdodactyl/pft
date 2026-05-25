@@ -1,8 +1,8 @@
 ---
-title: "Longitudinal PFT analysis: change, decline, FEV1Q"
+title: "Longitudinal PFT analysis: change and FEV1Q"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Longitudinal PFT analysis: change, decline, FEV1Q}
+  %\VignetteIndexEntry{Longitudinal PFT analysis: change and FEV1Q}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -20,14 +20,20 @@ set.seed(7)
 
 Most clinical PFT decisions rest on serial measurements rather than
 a single result; what matters is whether the patient is stable,
-declining, or recovering. `pft` provides four tools for this:
+declining, or recovering. `pft` provides two PFT-specific tools
+that operate on serial measurements:
 
 | Tool | Use case | Inputs |
 |------|----------|--------|
 | `pft_change()` | Two-point conditional change z-score (Stanojevic 2022 Box 2) | Two FEV1 z-scores + age + elapsed time |
-| `pft_decline()` | Per-patient slope fit from 3+ time points | Long-form data: patient ID, measure, time |
-| `pft_decline_grouped()` | Cohort-level slope per group (disease, smoking status) | Same + a grouping covariate |
 | `pft_fev1q()` | Adult mortality index, alternative to CCS in adults | FEV1 (litres) + sex |
+
+For multi-point trajectory fitting (slopes, mixed-effects models,
+disease-specific decline thresholds), use the right tool for the
+job directly — `stats::lm()`, `lme4::lmer()`, or any of the
+general-purpose longitudinal-modelling packages. Those decisions
+depend on cohort design, covariates, and nesting structure in ways
+that don't generalise into a one-size-fits-all PFT wrapper.
 
 # 1. Two-point conditional change score: `pft_change()`
 
@@ -60,102 +66,9 @@ pft_change(z1 = -0.78, z2 = -1.60, age_t1 = 14, time_years = 4)
 cohort; the standard notes it has "yet to be validated, extended to
 adults" but allows it as "a reasonable tool to facilitate
 interpretation". For adults the standard recommends FEV1Q instead
-(Box 3); see section 4 below.
+(Box 3); see section 2 below.
 
-# 2. Per-patient slope: `pft_decline()`
-
-With three or more serial measurements, fit a slope. `pft_decline()`
-takes long-form data (one row per (patient, timepoint)) and returns
-one row per patient with the slope, standard error, 95 % CI, and the
-observation count it was fit on.
-
-```{r}
-serial <- data.frame(
-  patient_id = rep(1:3, each = 5),
-  year       = rep(2018:2022, times = 3),
-  fev1_zscore = c(
-    -0.5, -0.4, -0.6, -0.5, -0.5,     # stable
-    -0.5, -0.8, -1.2, -1.7, -2.1,     # declining
-     0.2, -0.5, -1.4, -2.3, -3.2      # rapid decline
-  )
-)
-pft_decline(serial, by = patient_id, measure = "fev1_zscore",
-            time = year, flag_threshold = 0.25)
-```
-
-`flag_threshold` sets a clinically-meaningful cut-off. The unit is
-"change in `measure` per unit of `time`" -- here, z-score per year.
-The package deliberately does not bundle disease-specific thresholds
-because they vary: CF Foundation uses 10 % FEV1/year, ISHLT 10 %
-sustained FEV1 drop for BOS, OMERACT/ATS 5 % FVC over 6 months for
-IPF, and so on. Pick the threshold appropriate to your clinical
-context.
-
-## OLS vs mixed-effects
-
-`pft_decline(model = "ols")` (default) fits a per-patient `lm()`.
-`pft_decline(model = "mixed")` fits a single `lme4::lmer()` with
-random intercepts and slopes per patient. Mixed-effects partial-pools
-toward the cohort-wide slope, which stabilises estimates for
-patients with few observations at the cost of pulling outliers
-toward the mean:
-
-```{r, eval = requireNamespace("lme4", quietly = TRUE)}
-pft_decline(serial, by = patient_id, measure = "fev1_zscore",
-            time = year, model = "mixed")
-```
-
-Use OLS for per-patient inference (the SEs and CIs are valid for the
-individual patient). Use mixed when individual fits are too noisy and
-a cohort-anchored estimate is more useful than a per-patient one.
-
-## Date / POSIXct support
-
-`time` can be a numeric column, a Date column, or POSIXct. Date /
-POSIXct are converted internally to years since the earliest
-observed time. The same input is accepted by `pft_plot(type =
-"trajectory")`:
-
-```{r}
-serial$visit_date <- as.Date(rep(c("2018-06-15","2019-07-20",
-                                    "2020-09-01","2021-10-12",
-                                    "2022-11-30"), 3))
-pft_decline(serial, by = patient_id, measure = "fev1_zscore",
-            time = visit_date)
-```
-
-# 3. Group-stratified decline: `pft_decline_grouped()`
-
-When you want to know the *cohort-level* decline per group rather
-than each patient's individual rate, `pft_decline_grouped()` fits a
-single mixed-effects model with a `time:group` interaction and
-returns one row per group level:
-
-```{r, eval = requireNamespace("lme4", quietly = TRUE)}
-n_patients <- 30
-n_visits   <- 5
-groups     <- c("never", "ex", "current")
-slope_per_group <- c(never = -0.05, ex = -0.10, current = -0.30)
-
-patient_group <- rep(groups, each = n_patients / length(groups))
-cohort <- data.frame(
-  patient_id = rep(seq_len(n_patients), each = n_visits),
-  year       = rep(0:(n_visits - 1), times = n_patients),
-  smoking    = rep(patient_group, each = n_visits)
-)
-cohort$fev1_zscore <- slope_per_group[cohort$smoking] * cohort$year +
-                       rnorm(nrow(cohort), sd = 0.2)
-
-pft_decline_grouped(cohort,
-                     by = patient_id, measure = "fev1_zscore",
-                     time = year, group = smoking)
-```
-
-This answers "is decline faster in current smokers?" with a single
-model rather than averaging per-patient slopes. The SE / CI come
-from the model's variance-covariance matrix.
-
-# 4. Adult FEV1Q: `pft_fev1q()`
+# 2. Adult FEV1Q: `pft_fev1q()`
 
 For *adults*, the 2022 standard recommends FEV1Q over the conditional
 change score: the ratio of FEV1 to a sex-specific 1st-percentile
@@ -175,7 +88,7 @@ years in smokers and the elderly). The function refuses age < 18 by
 returning `NA_real_` per the paper's "not appropriate for children
 and adolescents" caveat.
 
-# 5. Plotting trajectories
+# 3. Plotting trajectories
 
 `pft_plot(type = "trajectory")` overlays z-scores over time with the
 2022 severity bands behind. It works on long-form data with a
@@ -183,6 +96,13 @@ and adolescents" caveat.
 `patient_id` column for faceting:
 
 ```{r}
+serial <- data.frame(
+  patient_id  = rep(1:2, each = 4),
+  visit_date  = rep(as.Date(c("2020-01-15","2021-03-10",
+                               "2022-05-20","2023-07-30")), 2),
+  fev1_zscore = c(-0.5, -0.8, -1.2, -1.6,
+                   0.2,  0.0, -0.3, -0.5)
+)
 pft_plot(serial, type = "trajectory",
          time = visit_date, patient_id = patient_id)
 ```
@@ -193,5 +113,4 @@ pft_plot(serial, type = "trajectory",
   decision tree, 2022 vs 2005.
 * `vignette("diffusion-capacity")` -- DLCO interpretation and
   Hb correction.
-* `?pft_change`, `?pft_decline`, `?pft_decline_grouped`,
-  `?pft_fev1q` for the function references.
+* `?pft_change`, `?pft_fev1q` for the function references.

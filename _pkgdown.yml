@@ -24,7 +24,6 @@ reference:
       - pft_volumes
       - pft_diffusion
       - pft_required_columns
-      - pft_schema
 
   - title: Interpretation primitives
     desc: >
@@ -34,17 +33,12 @@ reference:
       - pft_classify
       - pft_volume_subpattern
       - pft_severity
-      - pft_pattern_severity
       - pft_bdr
       - pft_prism
       - pft_change
-      - pft_decline
-      - pft_decline_grouped
       - pft_fev1q
-      - pft_lung_age
       - pft_dlco_hb_correct
       - pft_diffusion_interpret
-      - pft_clinical_guidance
 
   - title: Predecessor 2005 standard
     desc: >
@@ -65,20 +59,16 @@ reference:
       - pft_gold
       - pft_cohort_summary
 
-  - title: Workflow and reporting
+  - title: Workflow and visualisation
     desc: >
-      End-to-end interpretation in a single call, input QC and unit
-      normalisation, clinical-style visualisation, and HTML report
-      rendering.
+      End-to-end interpretation in a single call, input QC, and
+      clinical-style visualisation.
     contents:
       - pft_interpret
       - pft_compare
       - summary.pft_compare
       - pft_validate
-      - pft_normalize_units
       - pft_plot
-      - pft_report
-      - pft_full_report
 
   - title: Tidiers
     desc: >

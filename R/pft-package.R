@@ -9,8 +9,7 @@
 #' bronchodilator response per the 2022 criterion, PRISm screening,
 #' conditional change scores for serial measurements, GOLD COPD
 #' severity grading, Graham 2019 spirometry quality grades, cohort
-#' summaries, input QC, ggplot2-based visualisation, and rmarkdown
-#' clinical reports.
+#' summaries, input QC, and ggplot2-based visualisation.
 #'
 #' @section Input data format:
 #' Every reference function (`pft_spirometry()`, `pft_volumes()`,

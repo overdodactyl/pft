@@ -15,9 +15,6 @@
   and per-patient summary. `tidy.pft_result()` /
   `glance.pft_result()` S3 methods dispatch to them when `broom` is
   installed.
-* `pft_schema(year, SI.units, standard)` enumerates every output
-  column the pipeline can produce for a given configuration — the
-  symmetric counterpart to `pft_required_columns()`.
 * `pft_diffusion_interpret(data)` assigns a Hughes & Pride 2012
   clinical category (Normal / Parenchymal / Volume loss / Mixed /
   Vascular / Elevated KCO / Other) from DLCO, VA, KCO z-scores. Run
@@ -28,30 +25,12 @@
   Large lungs / Hyperinflation / Simple restriction / Complex
   restriction / Mixed disorder). Auto-run by `pft_interpret()` when
   the requisite ratio columns are present.
-* `pft_pattern_severity(data)` composes `ats_classification` with
-  per-measure severity into a single label like `"Moderate
-  Obstructed"` or `"Severe Mixed"`.
-* `pft_decline(data, by, measure, time)` fits per-patient slopes
-  for cohorts with 3+ serial measurements. `model = "ols"` (default)
-  fits per-patient `lm()`; `model = "mixed"` fits a single
-  `lme4::lmer()` with random intercept + slope per patient. `time`
-  accepts numeric, Date, or POSIXct columns.
-  `pft_decline_grouped()` fits a cohort-level slope per group via a
-  `time:group` interaction.
 * `pft_fev1q(fev1, sex, age)` implements the FEV1Q adult mortality
   index from Stanojevic 2022 Box 3.
-* `pft_lung_age(data, measure)` solves for the age at which the
-  patient's measured FEV1 (or FVC) would equal the GLI predicted
-  value, via numeric inversion of `pft_spirometry()`.
 * `pft_dlco_hb_correct(dlco, hemoglobin, sex, age)` applies the
   Cotes 1972 / Stanojevic 2017 hemoglobin correction. Reference Hb
   is 146 g/L (males ≥ 15) or 134 g/L (females, males < 15). Hb input
   in g/L by default; g/dL auto-converted with a warning.
-* `pft_normalize_units()` auto-detects height-in-inches
-  (`max(height) < 100`) and volume-in-millilitres
-  (`max(<measure>_measured) > 15`), converts in place, and emits a
-  single consolidated warning. Thresholds overridable via
-  `height_inches_max` and `volume_ml_min`.
 * `pft_plot()` gains four new modes — `histogram` (cohort z-score
   distribution by measure), `trajectory` (longitudinal z-score over
   time, accepts numeric / Date / POSIXct), `bdr` (pre/post arrows),
@@ -83,7 +62,7 @@
 
 * Minimum R version bumped from 2.10 to 4.0 to match the actual
   transitive dependency floor (`rlang`, `tibble`).
-* Test count: 1195 → 1424 (+229; +1 skipped `lme4` test).
+* Test count: 1195 → 1424 (+229).
 
 ---
 
@@ -182,11 +161,6 @@ extraction is documented in
   a `pft_interpret()` result over many patients: per-measure z-score
   quantiles and percent-below-LLN, ATS pattern frequencies, and PRISm
   prevalence.
-* `pft_report(result)` renders a self-contained HTML clinical report
-  from a `pft_interpret()` result -- demographic header, per-measure
-  table (predicted / measured / z / severity), interpretive pattern,
-  PRISm and BDR status, and the `pft_plot()` z-score figure. Useful
-  for cohort papers and clinical handoffs.
 
 ## New interpretation primitives
 

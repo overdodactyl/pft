@@ -6,7 +6,7 @@
 \usage{
 pft_plot(
   data,
-  type = c("lollipop", "histogram", "trajectory", "bdr", "compare", "flow_volume"),
+  type = c("lollipop", "histogram", "trajectory", "bdr", "compare"),
   time = NULL,
   patient_id = NULL
 )
@@ -37,8 +37,8 @@ A \code{ggplot} object.
 \code{type = "lollipop"} mode draws a single-patient z-score figure (one
 row per measure, points at the patient's z-score, shaded reference
 bands for Stanojevic 2022 severity). Other modes cover cohorts,
-longitudinal series, bronchodilator response, equation comparison,
-and flow-volume envelopes:
+longitudinal series, bronchodilator response, and equation
+comparison:
 \itemize{
 \item \code{"lollipop"} -- single-patient z-score figure (default). Errors if
 \code{nrow(data) != 1}.
@@ -56,15 +56,6 @@ measure with both \verb{<measure>_zscore} and \verb{<measure>_zscore_2022}
 columns (the output shape of \code{\link[=pft_compare]{pft_compare()}}), draws a segment
 from the 2012 z-score to the 2022 z-score, coloured by whether
 the row crossed the LLN.
-\item \code{"flow_volume"} -- stylised single-patient flow-volume envelope.
-Requires \code{fvc_measured}, \code{fef2575_measured}, and \code{fef75_measured}
-columns; if \code{fvc_pred} / \code{fef2575_pred} / \code{fef75_pred} are also
-present, the predicted envelope is overlaid as a dashed line for
-reference. Errors if \code{nrow(data) != 1}. Note: this is a stylised
-envelope (4 anchor points), not the full continuous flow-volume
-loop -- the package's input contract supports only mid- and
-end-expiratory flows (FEF25-75 and FEF75), not PEF / FEF25 / FEF50
-individually.
 }
 
 Requires the \code{ggplot2} package (a Suggested dependency).
@@ -102,20 +93,9 @@ serial <- data.frame(
 )
 pft_plot(serial, type = "trajectory",
          time = visit_date, patient_id = patient_id)
-
-# Stylised flow-volume envelope (single patient).
-fv_patient <- data.frame(
-  fvc_measured     = 4.0,
-  fef2575_measured = 3.5,
-  fef75_measured   = 1.2,
-  fvc_pred         = 4.5,
-  fef2575_pred     = 4.0,
-  fef75_pred       = 1.5
-)
-pft_plot(fv_patient, type = "flow_volume")
 \dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=pft_interpret]{pft_interpret()}} and \code{\link[=pft_compare]{pft_compare()}} for the input data
-shape; \code{\link[=pft_report]{pft_report()}} to embed the plot into a clinical report.
+shape.
 }

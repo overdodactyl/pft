@@ -113,7 +113,6 @@ pft_interpret <- function(data, year = 2012, SI.units = FALSE,
   data <- interpret_volume_subpattern(data)
   data <- interpret_diffusion(data)
   data <- interpret_prism(data)
-  data <- interpret_pattern_severity(data)
   data <- interpret_bdr(data, standard, year)
 
   new_pft_result(data)
@@ -265,17 +264,6 @@ interpret_prism <- function(data) {
   )
   data$prism <- pft_prism(prism_data)$prism
   data
-}
-
-# Stage 4.5: combined pattern + per-measure severity label (Stanojevic
-# 2022 practical reporting convention).
-interpret_pattern_severity <- function(data) {
-  has_pattern  <- "ats_classification" %in% colnames(data)
-  has_severity <- any(c("fev1_severity", "fev1_severity_2022",
-                        "fvc_severity",  "fvc_severity_2022")
-                       %in% colnames(data))
-  if (!(has_pattern && has_severity)) return(data)
-  pft_pattern_severity(data)
 }
 
 # Stage 5: bronchodilator response, per spirometry measure. 2022
