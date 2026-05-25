@@ -103,6 +103,36 @@ produced a label.
 
 Test count: 1195 -> 1249 (+54).
 
+## pft_plot() gains four new visualisation modes
+
+`pft_plot(type = c("lollipop", "histogram", "trajectory", "bdr",
+"compare"))` now covers the full clinical-visualisation surface:
+
+* `"lollipop"` (default) — the existing single-patient z-score figure;
+  unchanged behaviour for previous callers.
+* `"histogram"` — cohort z-score distribution by measure. Faceted
+  histogram of z-scores for every patient in `data`, one panel per
+  measure, with severity bands as background shading.
+* `"trajectory"` — longitudinal z-score over time, one line per
+  measure. Requires a `time` column (numeric or Date). Optional
+  `patient_id` column for cohorts.
+* `"bdr"` — pre/post bronchodilator response. Paired arrows from
+  `<measure>_pre` to `<measure>_post` for fev1 / fvc / fev1fvc,
+  with rows colour-coded by the Stanojevic 2022 +10 % of predicted
+  significance threshold.
+* `"compare"` — equation reclassification. For each spirometry
+  measure with both `<measure>_zscore` and `<measure>_zscore_2022`
+  columns (the output shape of `pft_compare()`), draws a segment
+  from the 2012 z-score to the 2022 z-score, coloured by whether
+  the row crossed the LLN.
+
+Backward compatibility: `pft_plot(result)` with no `type` argument
+continues to produce the single-patient lollipop and continues to
+error on multi-row input. Callers that were using the lollipop need
+no changes.
+
+Test count: 1195 -> 1208 (+13).
+
 ## New interpretation primitives (audit follow-up)
 
 The just-completed source-paper verification audit documented

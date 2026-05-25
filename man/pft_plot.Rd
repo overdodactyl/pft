@@ -2,38 +2,86 @@
 % Please edit documentation in R/plot.R
 \name{pft_plot}
 \alias{pft_plot}
-\title{Clinical-style z-score plot for a PFT result}
+\title{Clinical visualisations for PFT results}
 \usage{
-pft_plot(data)
+pft_plot(
+  data,
+  type = c("lollipop", "histogram", "trajectory", "bdr", "compare"),
+  time = NULL,
+  patient_id = NULL
+)
 }
 \arguments{
-\item{data}{A one-row data frame produced by \code{\link[=pft_interpret]{pft_interpret()}} or by
-the reference functions with measured values supplied. Columns
-matching \verb{<measure>_zscore} are detected automatically.}
+\item{data}{A data frame produced by \code{\link[=pft_interpret]{pft_interpret()}},
+\code{\link[=pft_compare]{pft_compare()}}, or any of the reference functions with
+measured values supplied. Shape requirements depend on \code{type} --
+see the per-mode notes above.}
+
+\item{type}{One of \code{"lollipop"} (default), \code{"histogram"},
+\code{"trajectory"}, \code{"bdr"}, \code{"compare"}.}
+
+\item{time}{For \code{type = "trajectory"}: the column name (bare or
+string) giving the time axis. Required for trajectory mode;
+ignored otherwise.}
+
+\item{patient_id}{For \code{type = "trajectory"}: optional column name
+giving the patient identifier when \code{data} contains more than one
+patient. If omitted, all rows are assumed to be from the same
+patient.}
 }
 \value{
 A \code{ggplot} object.
 }
 \description{
-Produces a "z-score lollipop" figure summarising a single patient's
-PFT results: one row per measure, points showing each measure's
-z-score, and shaded reference bands for the Stanojevic 2022 severity
-grading (normal / mild / moderate / severe). This is the canonical
-visual representation recommended for clinician-facing PFT reports.
+\code{pft_plot()} produces clinical-style visualisations of PFT results.
+The default \code{type = "lollipop"} mode is the canonical single-patient
+z-score figure (one row per measure, points at the patient's z-score,
+shaded reference bands for Stanojevic 2022 severity). Four additional
+modes cover the cohort, longitudinal, bronchodilator-response, and
+equation-comparison visualisations that come up routinely in
+clinic-style reporting:
+\itemize{
+\item \code{"lollipop"} -- single-patient z-score figure (default). Errors if
+\code{nrow(data) != 1}.
+\item \code{"histogram"} -- cohort z-score distribution by measure. Faceted
+histogram of z-scores for every patient in \code{data}, one panel per
+measure, with severity bands.
+\item \code{"trajectory"} -- longitudinal z-score over time, one line per
+measure. Requires a \code{time} column (numeric or Date).
+\item \code{"bdr"} -- pre/post bronchodilator response. Paired arrows from
+\verb{<measure>_pre} to \verb{<measure>_post} for each spirometry measure
+with a \verb{_pre} / \verb{_post} pair, with the Stanojevic 2022 +10 \% of
+predicted significance threshold overlaid.
+\item \code{"compare"} -- equation reclassification. For each spirometry
+measure with both \verb{<measure>_zscore} and \verb{<measure>_zscore_2022}
+columns (the output shape of \code{\link[=pft_compare]{pft_compare()}}), draws a segment
+from the 2012 z-score to the 2022 z-score, coloured by whether
+the row crossed the LLN.
+}
 
 Requires the \code{ggplot2} package (a Suggested dependency).
 }
 \examples{
 \dontrun{
-patient <- data.frame(
-  sex = "M", age = 45, height = 178, race = "Caucasian",
-  fev1_measured = 2.5, fvc_measured = 3.8
+# Single-patient lollipop (default).
+p <- data.frame(sex = "M", age = 45, height = 178, race = "Caucasian",
+                fev1_measured = 2.5, fvc_measured = 3.8)
+pft_plot(pft_interpret(p))
+
+# Cohort histogram (z-score distribution by measure).
+cohort <- data.frame(
+  sex = c("M","F","M","F","M"),
+  age = c(45, 60, 30, 55, 70),
+  height = c(178, 165, 175, 160, 170),
+  race = "Caucasian",
+  fev1_measured = c(2.5, 1.8, 4.0, 1.5, 2.2),
+  fvc_measured  = c(3.8, 2.4, 5.2, 2.5, 3.5)
 )
-pft_plot(pft_interpret(patient))
+pft_plot(pft_interpret(cohort), type = "histogram")
 }
 
 }
 \seealso{
-\code{\link[=pft_interpret]{pft_interpret()}} to produce the input data; \code{\link[=pft_report]{pft_report()}}
-to embed this figure into a clinical PDF/HTML report.
+\code{\link[=pft_interpret]{pft_interpret()}} and \code{\link[=pft_compare]{pft_compare()}} for the input data
+shape; \code{\link[=pft_report]{pft_report()}} to embed the plot into a clinical report.
 }

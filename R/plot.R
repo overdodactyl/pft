@@ -1,47 +1,128 @@
-#' @title Clinical-style z-score plot for a PFT result
+#' @title Clinical visualisations for PFT results
 #'
 #' @description
-#' Produces a "z-score lollipop" figure summarising a single patient's
-#' PFT results: one row per measure, points showing each measure's
-#' z-score, and shaded reference bands for the Stanojevic 2022 severity
-#' grading (normal / mild / moderate / severe). This is the canonical
-#' visual representation recommended for clinician-facing PFT reports.
+#' `pft_plot()` produces clinical-style visualisations of PFT results.
+#' The default `type = "lollipop"` mode is the canonical single-patient
+#' z-score figure (one row per measure, points at the patient's z-score,
+#' shaded reference bands for Stanojevic 2022 severity). Four additional
+#' modes cover the cohort, longitudinal, bronchodilator-response, and
+#' equation-comparison visualisations that come up routinely in
+#' clinic-style reporting:
+#'
+#' * `"lollipop"` -- single-patient z-score figure (default). Errors if
+#'   `nrow(data) != 1`.
+#' * `"histogram"` -- cohort z-score distribution by measure. Faceted
+#'   histogram of z-scores for every patient in `data`, one panel per
+#'   measure, with severity bands.
+#' * `"trajectory"` -- longitudinal z-score over time, one line per
+#'   measure. Requires a `time` column (numeric or Date).
+#' * `"bdr"` -- pre/post bronchodilator response. Paired arrows from
+#'   `<measure>_pre` to `<measure>_post` for each spirometry measure
+#'   with a `_pre` / `_post` pair, with the Stanojevic 2022 +10 % of
+#'   predicted significance threshold overlaid.
+#' * `"compare"` -- equation reclassification. For each spirometry
+#'   measure with both `<measure>_zscore` and `<measure>_zscore_2022`
+#'   columns (the output shape of [pft_compare()]), draws a segment
+#'   from the 2012 z-score to the 2022 z-score, coloured by whether
+#'   the row crossed the LLN.
 #'
 #' Requires the `ggplot2` package (a Suggested dependency).
 #'
-#' @param data A one-row data frame produced by [pft_interpret()] or by
-#'   the reference functions with measured values supplied. Columns
-#'   matching `<measure>_zscore` are detected automatically.
+#' @param data A data frame produced by [pft_interpret()],
+#'   [pft_compare()], or any of the reference functions with
+#'   measured values supplied. Shape requirements depend on `type` --
+#'   see the per-mode notes above.
+#' @param type One of `"lollipop"` (default), `"histogram"`,
+#'   `"trajectory"`, `"bdr"`, `"compare"`.
+#' @param time For `type = "trajectory"`: the column name (bare or
+#'   string) giving the time axis. Required for trajectory mode;
+#'   ignored otherwise.
+#' @param patient_id For `type = "trajectory"`: optional column name
+#'   giving the patient identifier when `data` contains more than one
+#'   patient. If omitted, all rows are assumed to be from the same
+#'   patient.
 #'
 #' @return A `ggplot` object.
 #'
-#' @seealso [pft_interpret()] to produce the input data; [pft_report()]
-#'   to embed this figure into a clinical PDF/HTML report.
+#' @seealso [pft_interpret()] and [pft_compare()] for the input data
+#'   shape; [pft_report()] to embed the plot into a clinical report.
 #'
 #' @examples
 #' \dontrun{
-#' patient <- data.frame(
-#'   sex = "M", age = 45, height = 178, race = "Caucasian",
-#'   fev1_measured = 2.5, fvc_measured = 3.8
+#' # Single-patient lollipop (default).
+#' p <- data.frame(sex = "M", age = 45, height = 178, race = "Caucasian",
+#'                 fev1_measured = 2.5, fvc_measured = 3.8)
+#' pft_plot(pft_interpret(p))
+#'
+#' # Cohort histogram (z-score distribution by measure).
+#' cohort <- data.frame(
+#'   sex = c("M","F","M","F","M"),
+#'   age = c(45, 60, 30, 55, 70),
+#'   height = c(178, 165, 175, 160, 170),
+#'   race = "Caucasian",
+#'   fev1_measured = c(2.5, 1.8, 4.0, 1.5, 2.2),
+#'   fvc_measured  = c(3.8, 2.4, 5.2, 2.5, 3.5)
 #' )
-#' pft_plot(pft_interpret(patient))
+#' pft_plot(pft_interpret(cohort), type = "histogram")
 #' }
 #'
 #' @export
-pft_plot <- function(data) {
+pft_plot <- function(data,
+                      type = c("lollipop", "histogram",
+                                 "trajectory", "bdr", "compare"),
+                      time = NULL,
+                      patient_id = NULL) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("pft_plot() requires the ggplot2 package. Install with ",
-         "install.packages(\"ggplot2\").")
+         "install.packages(\"ggplot2\").", call. = FALSE)
   }
+  type <- match.arg(type)
+
+  time_q       <- rlang::enquo(time)
+  patient_id_q <- rlang::enquo(patient_id)
+
+  switch(
+    type,
+    lollipop   = pft_plot_lollipop(data),
+    histogram  = pft_plot_histogram(data),
+    trajectory = pft_plot_trajectory(data, time_q, patient_id_q),
+    bdr        = pft_plot_bdr(data),
+    compare    = pft_plot_compare(data)
+  )
+}
+
+
+# Internal: severity-band data frame used by every mode that draws z-scores.
+severity_bands <- function() {
+  data.frame(
+    ymin = c(-Inf, -4,   -2.5,   -1.645, 1.645),
+    ymax = c(-4,   -2.5, -1.645,  1.645, Inf),
+    sev  = c("severe", "moderate", "mild", "normal", "elevated"),
+    fill = c("#d73027", "#fc8d59", "#fee090", "#e0e0e0", "#abd9e9"),
+    stringsAsFactors = FALSE
+  )
+}
+
+
+# Mode: single-patient lollipop (existing canonical figure). -----------------
+pft_plot_lollipop <- function(data) {
   if (nrow(data) != 1) {
-    stop("pft_plot() expects a single-patient data frame (nrow == 1). ",
-         "For multi-patient summaries, call pft_plot() per row.")
+    stop("pft_plot(type = \"lollipop\") expects a single-patient data ",
+         "frame (nrow == 1). For multi-patient summaries use ",
+         "type = \"histogram\" or call pft_plot() per row.", call. = FALSE)
   }
 
-  zcols <- grep("_zscore", colnames(data), value = TRUE)
+  zcols <- grep("_zscore(?:_[0-9]+)?$", colnames(data),
+                value = TRUE, perl = TRUE)
+  # Prefer the unsuffixed columns when both are present (single-patient
+  # lollipop should pick one standard, not mix).
+  if (any(grepl("_zscore$", zcols)) && any(grepl("_zscore_[0-9]+$", zcols))) {
+    zcols <- zcols[grepl("_zscore$", zcols)]
+  }
   if (length(zcols) == 0) {
     stop("No z-score columns found in `data`. Did you forget to supply ",
-         "`<measure>_measured` columns before calling pft_interpret()?")
+         "`<measure>_measured` columns before calling pft_interpret()?",
+         call. = FALSE)
   }
 
   plot_df <- data.frame(
@@ -52,14 +133,7 @@ pft_plot <- function(data) {
   plot_df <- plot_df[order(plot_df$zscore), ]
   plot_df$measure <- factor(plot_df$measure, levels = plot_df$measure)
 
-  # Severity-band shading per Stanojevic 2022.
-  bands <- data.frame(
-    ymin = c(-Inf, -4,   -2.5,   -1.645, 1.645),
-    ymax = c(-4,   -2.5, -1.645,  1.645, Inf),
-    sev  = c("severe", "moderate", "mild", "normal", "elevated"),
-    fill = c("#d73027", "#fc8d59", "#fee090", "#e0e0e0", "#abd9e9")
-  )
-
+  bands <- severity_bands()
   ggplot2::ggplot(plot_df, ggplot2::aes(x = measure, y = zscore)) +
     ggplot2::geom_rect(
       data = bands,
@@ -67,7 +141,8 @@ pft_plot <- function(data) {
       xmin = -Inf, xmax = Inf, alpha = 0.4, inherit.aes = FALSE
     ) +
     ggplot2::scale_fill_identity() +
-    ggplot2::geom_hline(yintercept = 0, linetype = "dashed", colour = "gray40") +
+    ggplot2::geom_hline(yintercept = 0, linetype = "dashed",
+                         colour = "gray40") +
     ggplot2::geom_segment(
       ggplot2::aes(xend = measure, yend = 0), colour = "black"
     ) +
@@ -77,6 +152,245 @@ pft_plot <- function(data) {
       x = NULL, y = "z-score",
       title = "Pulmonary function test result",
       subtitle = "Shaded bands: Stanojevic 2022 severity grades"
+    ) +
+    ggplot2::theme_minimal(base_size = 12)
+}
+
+
+# Mode: cohort histogram of z-scores by measure. ----------------------------
+pft_plot_histogram <- function(data) {
+  zcols <- grep("_zscore(?:_[0-9]+)?$", colnames(data),
+                value = TRUE, perl = TRUE)
+  if (length(zcols) == 0) {
+    stop("No z-score columns found in `data`. Did you forget to supply ",
+         "`<measure>_measured` columns before calling pft_interpret()?",
+         call. = FALSE)
+  }
+
+  # Stack the z-score columns into long form (one row per patient x measure).
+  parts <- lapply(zcols, function(col) {
+    data.frame(
+      measure = sub("_zscore.*", "", col),
+      zscore  = data[[col]],
+      stringsAsFactors = FALSE
+    )
+  })
+  plot_df <- do.call(rbind, parts)
+  plot_df <- plot_df[!is.na(plot_df$zscore), ]
+
+  bands <- severity_bands()
+  ggplot2::ggplot(plot_df, ggplot2::aes(x = zscore)) +
+    ggplot2::geom_rect(
+      data = bands,
+      ggplot2::aes(xmin = ymin, xmax = ymax, fill = fill),
+      ymin = -Inf, ymax = Inf, alpha = 0.3, inherit.aes = FALSE
+    ) +
+    ggplot2::scale_fill_identity() +
+    ggplot2::geom_histogram(binwidth = 0.25, colour = "black",
+                              fill = "gray30") +
+    ggplot2::geom_vline(xintercept = 0, linetype = "dashed",
+                          colour = "gray40") +
+    ggplot2::facet_wrap(~ measure, scales = "free_y") +
+    ggplot2::coord_cartesian(xlim = c(-6, 6)) +
+    ggplot2::labs(
+      x = "z-score", y = "Patients",
+      title = "Cohort z-score distribution",
+      subtitle = "Shaded bands: Stanojevic 2022 severity grades"
+    ) +
+    ggplot2::theme_minimal(base_size = 12)
+}
+
+
+# Mode: longitudinal z-score trajectory. ------------------------------------
+pft_plot_trajectory <- function(data, time_q, patient_id_q) {
+  if (rlang::quo_is_null(time_q)) {
+    stop("pft_plot(type = \"trajectory\") requires a `time` column. ",
+         "Pass it as `time = visit_date` or similar.", call. = FALSE)
+  }
+  time_name <- rlang::as_name(time_q)
+  if (!(time_name %in% colnames(data))) {
+    stop(sprintf("Column `%s` not found in `data`.", time_name),
+         call. = FALSE)
+  }
+
+  has_pid <- !rlang::quo_is_null(patient_id_q)
+  pid_name <- if (has_pid) rlang::as_name(patient_id_q) else NULL
+
+  zcols <- grep("_zscore(?:_[0-9]+)?$", colnames(data),
+                value = TRUE, perl = TRUE)
+  if (length(zcols) == 0) {
+    stop("No z-score columns found in `data`.", call. = FALSE)
+  }
+
+  parts <- lapply(zcols, function(col) {
+    df <- data.frame(
+      measure = sub("_zscore.*", "", col),
+      time    = data[[time_name]],
+      zscore  = data[[col]],
+      stringsAsFactors = FALSE
+    )
+    if (has_pid) df$patient_id <- data[[pid_name]]
+    df
+  })
+  plot_df <- do.call(rbind, parts)
+  plot_df <- plot_df[!is.na(plot_df$zscore), ]
+
+  bands <- severity_bands()
+  p <- ggplot2::ggplot(plot_df,
+                        ggplot2::aes(x = time, y = zscore,
+                                      colour = measure, group = measure)) +
+    ggplot2::geom_rect(
+      data = bands,
+      ggplot2::aes(ymin = ymin, ymax = ymax, fill = fill),
+      xmin = -Inf, xmax = Inf, alpha = 0.25, inherit.aes = FALSE
+    ) +
+    ggplot2::scale_fill_identity() +
+    ggplot2::geom_hline(yintercept = 0, linetype = "dashed",
+                         colour = "gray40") +
+    ggplot2::geom_line(linewidth = 0.6) +
+    ggplot2::geom_point(size = 2) +
+    ggplot2::coord_cartesian(ylim = c(-6, 6)) +
+    ggplot2::labs(
+      x = time_name, y = "z-score", colour = "Measure",
+      title = "PFT trajectory",
+      subtitle = "Shaded bands: Stanojevic 2022 severity grades"
+    ) +
+    ggplot2::theme_minimal(base_size = 12)
+
+  if (has_pid) {
+    p <- p + ggplot2::aes(group = interaction(measure, patient_id)) +
+      ggplot2::facet_wrap(~ patient_id)
+  }
+  p
+}
+
+
+# Mode: pre/post BDR paired arrows. -----------------------------------------
+pft_plot_bdr <- function(data) {
+  measures <- c("fev1", "fvc", "fev1fvc")
+  rows <- list()
+  for (i in seq_len(nrow(data))) {
+    for (m in measures) {
+      pre  <- paste0(m, "_pre")
+      post <- paste0(m, "_post")
+      pred <- paste0(m, "_pred")
+      pred22 <- paste0(m, "_pred_2022")
+      if (pre %in% colnames(data) && post %in% colnames(data)) {
+        pred_val <- if (pred %in% colnames(data)) data[[pred]][i]
+                    else if (pred22 %in% colnames(data)) data[[pred22]][i]
+                    else NA_real_
+        rows[[length(rows) + 1]] <- data.frame(
+          patient = i, measure = m,
+          pre  = data[[pre]][i],
+          post = data[[post]][i],
+          pred = pred_val,
+          stringsAsFactors = FALSE
+        )
+      }
+    }
+  }
+  if (length(rows) == 0) {
+    stop("pft_plot(type = \"bdr\") requires at least one `<measure>_pre` ",
+         "/ `_post` pair (fev1, fvc, or fev1fvc).", call. = FALSE)
+  }
+  plot_df <- do.call(rbind, rows)
+  plot_df$pct_pred <- 100 * (plot_df$post - plot_df$pre) / plot_df$pred
+  plot_df$significant <- !is.na(plot_df$pct_pred) & plot_df$pct_pred >= 10
+
+  ggplot2::ggplot(plot_df, ggplot2::aes(x = measure,
+                                          y = pre, yend = post,
+                                          group = patient,
+                                          colour = significant)) +
+    ggplot2::geom_segment(
+      ggplot2::aes(xend = measure),
+      arrow = grid::arrow(length = grid::unit(0.08, "inches"),
+                          type = "closed"),
+      linewidth = 0.7,
+      position = ggplot2::position_dodge(width = 0.4)
+    ) +
+    ggplot2::scale_colour_manual(
+      values = c(`TRUE` = "#1a9850", `FALSE` = "gray40"),
+      labels = c(`TRUE` = "Significant (>= 10% pred)",
+                  `FALSE` = "Not significant"),
+      name = NULL
+    ) +
+    ggplot2::labs(
+      x = NULL, y = "Measured (L or ratio)",
+      title = "Bronchodilator response",
+      subtitle = "Pre -> post; threshold +10 % of predicted (Stanojevic 2022)"
+    ) +
+    ggplot2::theme_minimal(base_size = 12)
+}
+
+
+# Mode: equation-comparison (2012 vs 2022) reclassification arrows. ---------
+pft_plot_compare <- function(data) {
+  # Identify spirometry measures with both _zscore and _zscore_2022.
+  z12 <- grep("_zscore$", colnames(data), value = TRUE)
+  z22 <- grep("_zscore_[0-9]+$", colnames(data), value = TRUE)
+  if (length(z22) == 0) {
+    stop("pft_plot(type = \"compare\") requires _zscore_<year> companion ",
+         "columns (the output shape of pft_compare()). None found.",
+         call. = FALSE)
+  }
+
+  measures <- intersect(
+    sub("_zscore$", "", z12),
+    sub("_zscore_[0-9]+$", "", z22)
+  )
+  if (length(measures) == 0) {
+    stop("pft_plot(type = \"compare\") requires matched _zscore and ",
+         "_zscore_<year> columns. None matched.", call. = FALSE)
+  }
+
+  parts <- list()
+  for (m in measures) {
+    parts[[length(parts) + 1]] <- data.frame(
+      patient   = seq_len(nrow(data)),
+      measure   = m,
+      zscore12  = data[[paste0(m, "_zscore")]],
+      zscore22  = data[[grep(paste0("^", m, "_zscore_[0-9]+$"),
+                              colnames(data), value = TRUE)[1]]],
+      stringsAsFactors = FALSE
+    )
+  }
+  plot_df <- do.call(rbind, parts)
+  plot_df <- plot_df[!is.na(plot_df$zscore12) & !is.na(plot_df$zscore22), ]
+  plot_df$lln_crossed <- (plot_df$zscore12 < -1.645) !=
+                         (plot_df$zscore22 < -1.645)
+
+  bands <- severity_bands()
+  ggplot2::ggplot(plot_df, ggplot2::aes(x = measure,
+                                          y = zscore12, yend = zscore22,
+                                          colour = lln_crossed,
+                                          group = patient)) +
+    ggplot2::geom_rect(
+      data = bands,
+      ggplot2::aes(ymin = ymin, ymax = ymax, fill = fill),
+      xmin = -Inf, xmax = Inf, alpha = 0.25, inherit.aes = FALSE
+    ) +
+    ggplot2::scale_fill_identity() +
+    ggplot2::geom_hline(yintercept = 0, linetype = "dashed",
+                         colour = "gray40") +
+    ggplot2::geom_hline(yintercept = -1.645, linetype = "dotted",
+                         colour = "gray30") +
+    ggplot2::geom_segment(
+      ggplot2::aes(xend = measure),
+      arrow = grid::arrow(length = grid::unit(0.07, "inches"),
+                          type = "closed"),
+      linewidth = 0.5,
+      position = ggplot2::position_jitter(width = 0.15, height = 0)
+    ) +
+    ggplot2::scale_colour_manual(
+      values = c(`TRUE` = "#d73027", `FALSE` = "gray30"),
+      labels = c(`TRUE` = "Crossed LLN", `FALSE` = "Same side of LLN"),
+      name = NULL
+    ) +
+    ggplot2::coord_flip(ylim = c(-6, 6)) +
+    ggplot2::labs(
+      x = NULL, y = "z-score",
+      title = "GLI 2012 -> GLI Global 2022 reclassification",
+      subtitle = "Dotted line: LLN. Coloured arrows cross the LLN."
     ) +
     ggplot2::theme_minimal(base_size = 12)
 }
