@@ -115,8 +115,7 @@ Table 5 enumerates clinical contexts.
 
 **PRISm** — Preserved Ratio Impaired Spirometry. Low FEV1 with
 FEV1/FVC at or above LLN. A spirometry-only screening label (no TLC
-required); has been associated with elevated all-cause mortality and
-progression to COPD.
+required).
 
 **Dysanapsis** — A normal-variant pattern with normal FEV1, high
 FVC, and low FEV1/FVC. Listed in Stanojevic 2022 Table 5 but not

@@ -170,10 +170,8 @@ r <- pft_interpret(no_tlc)
 r[, c("ats_classification", "prism")]
 ```
 
-The `prism` column is `TRUE`. Stanojevic 2022 notes PRISm has been
-associated with elevated all-cause mortality and progression to
-chronic respiratory disease in the literature; the label itself is
-spirometry-only and not disease-specific.
+The `prism` column is `TRUE`. The label flags the spirometry
+pattern only; downstream clinical interpretation is out of scope.
 
 # Applying vector helpers inside a data-frame workflow
 
