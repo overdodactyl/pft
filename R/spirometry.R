@@ -158,12 +158,6 @@ spirometry_lms_fit <- function(sex_vec, age_vec, height_vec, race_vec = NULL,
   n_measures <- length(male_indices)
   use_race   <- !is.null(race_levels)
 
-  M     <- matrix(NA_real_, n, n_measures)
-  S     <- matrix(NA_real_, n, n_measures)
-  L     <- matrix(NA_real_, n, n_measures)
-  lower <- matrix(NA_real_, n, n_measures)
-  upper <- matrix(NA_real_, n, n_measures)
-
   # Build the race-dummy matrix once. A row whose race is NA or doesn't
   # match any of `race_levels` has row sum NA or 0 respectively; both
   # are flagged invalid so those patients return NA without dragging
@@ -186,8 +180,9 @@ spirometry_lms_fit <- function(sex_vec, age_vec, height_vec, race_vec = NULL,
   # Inner per-group fit. `rows` is the indices in the full result
   # matrix that this call writes to; `g` indexes into the parallel
   # `splines` / `coeff_*` tables (male-indices for M, female-indices
-  # for F).
-  fit_group <- function(rows, g) {
+  # for F). Spirometry is the same across all measures j, so we
+  # ignore the `j` arg from the dispatch helper.
+  fit_group <- function(rows, g, j) {
     if (length(rows) == 0) return(NULL)
     age      <- age_vec[rows]
     log_age  <- log(age)
@@ -215,30 +210,12 @@ spirometry_lms_fit <- function(sex_vec, age_vec, height_vec, race_vec = NULL,
     Mv <- exp(m_lin + si$Mspline[keep])
     Sv <- exp(s_lin + si$Sspline[keep])
     Lv <- coeff_l[1, g] + log_age_v * coeff_l[2, g] + si$Lspline[keep]
+    lims <- lms_limits(Mv, Sv, Lv)
 
-    write_rows <- rows[keep]
-    list(
-      rows  = write_rows,
-      M     = Mv,
-      S     = Sv,
-      L     = Lv,
-      lower = exp(log(Mv) + log(1 - 1.645 * Lv * Sv) / Lv),
-      upper = exp(log(Mv) + log(1 + 1.645 * Lv * Sv) / Lv)
-    )
+    list(rows = rows[keep], M = Mv, S = Sv, L = Lv,
+         lower = lims$lower, upper = lims$upper)
   }
 
-  for (j in seq_len(n_measures)) {
-    for (grp in list(list(rows = m_rows, g = male_indices[j]),
-                      list(rows = f_rows, g = female_indices[j]))) {
-      r <- fit_group(grp$rows, grp$g)
-      if (is.null(r)) next
-      M[r$rows, j]     <- r$M
-      S[r$rows, j]     <- r$S
-      L[r$rows, j]     <- r$L
-      lower[r$rows, j] <- r$lower
-      upper[r$rows, j] <- r$upper
-    }
-  }
-
-  list(M = M, S = S, L = L, lower = lower, upper = upper)
+  lms_matrix_assemble(n, n_measures, m_rows, f_rows,
+                       male_indices, female_indices, fit_group)
 }

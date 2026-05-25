@@ -74,17 +74,13 @@ pft_diffusion <- function(data, SI.units = FALSE,
   male_indices   <- c(1, 3, 5, 7, 9)
   female_indices <- c(2, 4, 6, 8, 10)
 
-  M     <- matrix(NA_real_, n, n_measures)
-  S     <- matrix(NA_real_, n, n_measures)
-  L     <- matrix(NA_real_, n, n_measures)
-  lower <- matrix(NA_real_, n, n_measures)
-  upper <- matrix(NA_real_, n, n_measures)
-
   demo_ok <- !is.na(sex_vec) & !is.na(age_vec) & !is.na(height_vec)
   m_rows  <- which(demo_ok & sex_vec == "M")
   f_rows  <- which(demo_ok & sex_vec == "F")
 
-  fit_group <- function(rows, g) {
+  # Diffusion uses the same covariate form for every measure, so the
+  # dispatch helper's `j` argument is unused here.
+  fit_group <- function(rows, g, j) {
     if (length(rows) == 0) return(NULL)
     age      <- age_vec[rows]
     log_age  <- log(age)
@@ -105,29 +101,14 @@ pft_diffusion <- function(data, SI.units = FALSE,
                 transfer_coeff$S2[g] * log_age_v +
                 si$Sspline[keep])
     Lv <- rep(transfer_coeff$L[g], length(log_age_v))
+    lims <- lms_limits(Mv, Sv, Lv)
 
-    list(
-      rows  = rows[keep],
-      M     = Mv,
-      S     = Sv,
-      L     = Lv,
-      lower = exp(log(Mv) + log(1 - 1.645 * Lv * Sv) / Lv),
-      upper = exp(log(Mv) + log(1 + 1.645 * Lv * Sv) / Lv)
-    )
+    list(rows = rows[keep], M = Mv, S = Sv, L = Lv,
+         lower = lims$lower, upper = lims$upper)
   }
 
-  for (j in seq_len(n_measures)) {
-    for (grp in list(list(rows = m_rows, g = male_indices[j]),
-                      list(rows = f_rows, g = female_indices[j]))) {
-      r <- fit_group(grp$rows, grp$g)
-      if (is.null(r)) next
-      M[r$rows, j]     <- r$M
-      S[r$rows, j]     <- r$S
-      L[r$rows, j]     <- r$L
-      lower[r$rows, j] <- r$lower
-      upper[r$rows, j] <- r$upper
-    }
-  }
+  mat <- lms_matrix_assemble(n, n_measures, m_rows, f_rows,
+                              male_indices, female_indices, fit_group)
 
   # The 5 spline-list columns are TLCO (SI), DLCO (Traditional), KCO_SI,
   # KCO_Tr, VA. Pick the 3 measures that match the requested unit system
@@ -142,11 +123,11 @@ pft_diffusion <- function(data, SI.units = FALSE,
 
   bind_lms_outputs(
     data,
-    M = M[, keep_cols, drop = FALSE],
-    S = S[, keep_cols, drop = FALSE],
-    L = L[, keep_cols, drop = FALSE],
-    lower = lower[, keep_cols, drop = FALSE],
-    upper = upper[, keep_cols, drop = FALSE],
+    M = mat$M[, keep_cols, drop = FALSE],
+    S = mat$S[, keep_cols, drop = FALSE],
+    L = mat$L[, keep_cols, drop = FALSE],
+    lower = mat$lower[, keep_cols, drop = FALSE],
+    upper = mat$upper[, keep_cols, drop = FALSE],
     measures = measures
   )
 }

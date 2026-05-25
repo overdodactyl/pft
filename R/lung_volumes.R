@@ -83,12 +83,6 @@ pft_volumes <- function(data,
   m_height_is_log <- c(TRUE, TRUE, FALSE, FALSE, TRUE,  TRUE,  TRUE)
   s_age_is_log    <- c(TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE)
 
-  M     <- matrix(NA_real_, n, n_measures)
-  S     <- matrix(NA_real_, n, n_measures)
-  L     <- matrix(NA_real_, n, n_measures)
-  lower <- matrix(NA_real_, n, n_measures)
-  upper <- matrix(NA_real_, n, n_measures)
-
   demo_ok <- !is.na(sex_vec) & !is.na(age_vec) & !is.na(height_vec)
   m_rows  <- which(demo_ok & sex_vec == "M")
   f_rows  <- which(demo_ok & sex_vec == "F")
@@ -116,34 +110,19 @@ pft_volumes <- function(data,
                 volume_coeff$S2[g] * age_s +
                 si$Sspline[keep])
     Lv <- rep(volume_coeff$L[g], length(age_v))
+    lims <- lms_limits(Mv, Sv, Lv)
 
-    list(
-      rows  = rows[keep],
-      M     = Mv,
-      S     = Sv,
-      L     = Lv,
-      lower = exp(log(Mv) + log(1 - 1.645 * Lv * Sv) / Lv),
-      upper = exp(log(Mv) + log(1 + 1.645 * Lv * Sv) / Lv)
-    )
+    list(rows = rows[keep], M = Mv, S = Sv, L = Lv,
+         lower = lims$lower, upper = lims$upper)
   }
 
-  for (j in seq_len(n_measures)) {
-    for (grp in list(list(rows = m_rows, g = male_indices[j]),
-                      list(rows = f_rows, g = female_indices[j]))) {
-      r <- fit_group(grp$rows, grp$g, j)
-      if (is.null(r)) next
-      M[r$rows, j]     <- r$M
-      S[r$rows, j]     <- r$S
-      L[r$rows, j]     <- r$L
-      lower[r$rows, j] <- r$lower
-      upper[r$rows, j] <- r$upper
-    }
-  }
+  mat <- lms_matrix_assemble(n, n_measures, m_rows, f_rows,
+                              male_indices, female_indices, fit_group)
 
   bind_lms_outputs(
     data,
-    M = M, S = S, L = L,
-    lower = lower, upper = upper,
+    M = mat$M, S = mat$S, L = mat$L,
+    lower = mat$lower, upper = mat$upper,
     measures = c("frc", "tlc", "rv", "rv_tlc", "erv", "ic", "vc")
   )
 }

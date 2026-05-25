@@ -58,6 +58,53 @@ vec_spline_interp <- function(age, sp) {
   out
 }
 
+# Lower and upper limit of normal (5th / 95th percentile) from LMS
+# parameters. This is the inverse of the LMS z-score transform at
+# z = ±1.645 (Cole 1988):
+#
+#   measured = M * (1 ± z*L*S)^(1/L)  =>  exp(log(M) + log(1 ± z*L*S) / L)
+#
+# Shared across pft_spirometry(), pft_volumes(), pft_diffusion().
+lms_limits <- function(Mv, Sv, Lv) {
+  list(
+    lower = exp(log(Mv) + log(1 - 1.645 * Lv * Sv) / Lv),
+    upper = exp(log(Mv) + log(1 + 1.645 * Lv * Sv) / Lv)
+  )
+}
+
+# Outer male/female × measure dispatch shared by every reference engine.
+#
+# `fit_group_fn(rows, g, j)` is the per-engine callback. It receives the
+# row indices for one sex and the spline-table column index `g`, and
+# should return either NULL (no valid rows) or a list with components
+# `rows` (the row indices it actually wrote to), and the parallel
+# numeric vectors `M`, `S`, `L`, `lower`, `upper`.
+#
+# Returns five n × n_measures matrices.
+lms_matrix_assemble <- function(n, n_measures, m_rows, f_rows,
+                                 male_indices, female_indices,
+                                 fit_group_fn) {
+  M     <- matrix(NA_real_, n, n_measures)
+  S     <- matrix(NA_real_, n, n_measures)
+  L     <- matrix(NA_real_, n, n_measures)
+  lower <- matrix(NA_real_, n, n_measures)
+  upper <- matrix(NA_real_, n, n_measures)
+
+  for (j in seq_len(n_measures)) {
+    for (grp in list(list(rows = m_rows, g = male_indices[j]),
+                      list(rows = f_rows, g = female_indices[j]))) {
+      r <- fit_group_fn(grp$rows, grp$g, j)
+      if (is.null(r)) next
+      M[r$rows, j]     <- r$M
+      S[r$rows, j]     <- r$S
+      L[r$rows, j]     <- r$L
+      lower[r$rows, j] <- r$lower
+      upper[r$rows, j] <- r$upper
+    }
+  }
+  list(M = M, S = S, L = L, lower = lower, upper = upper)
+}
+
 bind_lms_outputs <- function(data, M, S, L, lower, upper, measures,
                              suffix = "") {
   results <- data
