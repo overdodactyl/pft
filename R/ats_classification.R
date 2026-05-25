@@ -28,11 +28,30 @@
 #'     selected `standard`; see above.
 #'   * `ats_pattern_combination`: a 4-character string in fixed column
 #'     order **FEV1, FVC, FEV1/FVC, TLC**, with `"A"` denoting the value
-#'     is below its LLN and `"N"` denoting it is at or above. So
-#'     `"NNAN"` means only FEV1/FVC is below its LLN (pure airway
-#'     obstruction); `"AANA"` means FEV1, FVC, and TLC are all low while
-#'     FEV1/FVC is preserved (restriction). The pattern-combination
-#'     string is independent of the `standard` selected.
+#'     is below its LLN, `"N"` denoting it is at or above, and `"?"`
+#'     denoting the value (and its LLN) was missing. So `"NNAN"` means
+#'     only FEV1/FVC is below its LLN (pure airway obstruction);
+#'     `"AANA"` means FEV1, FVC, and TLC are all low while FEV1/FVC is
+#'     preserved (restriction); `"NNA?"` means FEV1/FVC is below LLN
+#'     and TLC is unknown. The pattern-combination string is
+#'     independent of the `standard` selected.
+#'
+#' @section Missing TLC (spirometry-only fallback):
+#' When the three spirometry inputs (`fev1`, `fvc`, `fev1fvc`) and
+#' their LLNs are all present but TLC is missing, `pft_classify()`
+#' falls back to a spirometry-only branch instead of returning `NA`.
+#' Under both standards, an `"Obstructed"` row is still recognisable
+#' from FEV1/FVC < LLN alone (Mixed would require TLC to distinguish
+#' but Mixed is itself an obstructive defect, so the row is labelled
+#' `"Obstructed"`). Under the 2005 standard, rows with FVC \eqn{\ge}
+#' LLN classify deterministically because the 2005 flowchart does not
+#' consult TLC in that branch (so `"Normal"` is emitted for normal
+#' spirometry). Cells where TLC would have been the disambiguating
+#' input (Normal vs Restricted, Non-specific vs Restricted under
+#' 2022; Normal vs Restricted, Obstructed vs Mixed under 2005) remain
+#' `NA`. Rows where any spirometry input is itself missing always
+#' return `NA`. See `pft_prism()` for the spirometry-only PRISm
+#' screen which is reported as a separate logical column.
 #'
 #' @references
 #' Stanojevic S, Kaminsky DA, Miller MR, et al. ERS/ATS technical standard
@@ -128,6 +147,33 @@ pft_classify <- function(data, standard = c("2022", "2005")) {
     "2005" = pattern_lookup_2005
   )
 
+  # Spirometry-only lookups for the TLC-missing fallback. Keys are
+  # 3-character combos in fixed order FEV1, FVC, FEV1/FVC (no TLC slot).
+  #   2022: only FEV1/FVC < LLN is decidable without TLC (Stanojevic
+  #         Table 5: "Suggests obstruction" -- Mixed cannot be ruled
+  #         out, but Mixed is itself obstructive). All FEV1/FVC normal
+  #         cells stay NA because TLC is exactly the distinguishing
+  #         input (Normal vs Restricted, Non-specific vs Restricted).
+  #   2005: the 2005 flowchart only consults TLC when FVC < LLN, so all
+  #         FVC normal cells classify deterministically without TLC.
+  pattern_lookup_2022_spironly <- c(
+    NNN = NA_character_, ANN = NA_character_,
+    NAN = NA_character_, AAN = NA_character_,
+    NNA = "Obstructed",  ANA = "Obstructed",
+    NAA = "Obstructed",  AAA = "Obstructed"
+  )
+  pattern_lookup_2005_spironly <- c(
+    NNN = "Normal",      ANN = "Normal",
+    NAN = NA_character_, AAN = NA_character_,
+    NNA = "Obstructed",  ANA = "Obstructed",
+    NAA = NA_character_, AAA = NA_character_
+  )
+  pattern_lookup_spironly <- switch(
+    standard,
+    "2022" = pattern_lookup_2022_spironly,
+    "2005" = pattern_lookup_2005_spironly
+  )
+
   # Per-column "A" if measured value is below its LLN, "N" otherwise; NA if
   # either input is NA. Vectorised over the whole data frame -- no R-level
   # loop required.
@@ -141,14 +187,36 @@ pft_classify <- function(data, standard = c("2022", "2005")) {
   fev1fvc_s <- status(data$fev1fvc, data$fev1fvc_lln)
   tlc_s     <- status(data$tlc,     data$tlc_lln)
 
-  # paste0 converts NA to the literal characters "NA", which would corrupt
-  # combos like "NNNA" / "ANNA" if used as a mask. Compute the per-row
-  # any-NA mask up front and apply after pasting.
-  any_na <- is.na(fev1_s) | is.na(fvc_s) | is.na(fev1fvc_s) | is.na(tlc_s)
-  combo  <- paste0(fev1_s, fvc_s, fev1fvc_s, tlc_s)
-  combo[any_na] <- NA_character_
+  spiro_known <- !is.na(fev1_s) & !is.na(fvc_s) & !is.na(fev1fvc_s)
+  tlc_known   <- !is.na(tlc_s)
 
-  data[["ats_classification"]] <- unname(pattern_lookup[combo])
+  combo          <- rep(NA_character_, length(fev1_s))
+  classification <- rep(NA_character_, length(fev1_s))
+
+  # Rows with all four inputs present: existing 4-char lookup.
+  full <- spiro_known & tlc_known
+  if (any(full)) {
+    full_combo <- paste0(fev1_s[full], fvc_s[full],
+                          fev1fvc_s[full], tlc_s[full])
+    combo[full]          <- full_combo
+    classification[full] <- unname(pattern_lookup[full_combo])
+  }
+
+  # Rows with spirometry complete but TLC missing: spirometry-only
+  # lookup. "?" in the TLC slot of the combo so downstream code can
+  # tell partial classifications apart without parsing the label.
+  spiro_only <- spiro_known & !tlc_known
+  if (any(spiro_only)) {
+    spiro_combo <- paste0(fev1_s[spiro_only], fvc_s[spiro_only],
+                            fev1fvc_s[spiro_only])
+    combo[spiro_only]          <- paste0(spiro_combo, "?")
+    classification[spiro_only] <- unname(pattern_lookup_spironly[spiro_combo])
+  }
+
+  # Rows missing any spirometry input remain NA (no classification
+  # attempted). This matches the pre-fallback behaviour.
+
+  data[["ats_classification"]] <- classification
   data[["ats_pattern_combination"]] <- combo
   tibble::as_tibble(data)
 }

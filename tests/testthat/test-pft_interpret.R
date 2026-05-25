@@ -35,6 +35,20 @@ test_that("pft_interpret runs ATS classification when measured + TLC present", {
   expect_true("ats_pattern_combination" %in% colnames(out))
 })
 
+test_that("pft_interpret runs ATS classification without TLC (spirometry-only)", {
+  # Cohorts pulled from spirometry-only labs (no plethysmography) used
+  # to get no classification at all. With the spirometry-only fallback,
+  # an Obstructed verdict is still recognised from FEV1/FVC < LLN, and
+  # the combo string ends in "?" to mark TLC as unavailable.
+  d <- data.frame(sex = "M", age = 45, height = 178, race = "Caucasian",
+                  fev1_measured = 2.0, fvc_measured = 3.8,
+                  fev1fvc_measured = 2.0 / 3.8)
+  out <- pft_interpret(d)
+  expect_true("ats_classification" %in% colnames(out))
+  expect_equal(out$ats_classification, "Obstructed")
+  expect_true(endsWith(out$ats_pattern_combination, "?"))
+})
+
 test_that("pft_interpret runs PRISm screen when spirometry measured present", {
   d <- data.frame(sex = "M", age = 45, height = 178, race = "Caucasian",
                   fev1_measured = 2.0, fvc_measured = 3.8,

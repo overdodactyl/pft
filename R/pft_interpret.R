@@ -142,15 +142,14 @@ pft_interpret <- function(data, year = 2012, SI.units = FALSE,
     }
   }
 
-  # 3. ATS pattern classification, if measured + LLN columns are present
-  #    for the four spirometry+TLC inputs.
-  pat_required <- c("fev1", "fev1_lln", "fvc", "fvc_lln",
-                    "fev1fvc", "fev1fvc_lln", "tlc", "tlc_lln")
-  # ats_classification expects unsuffixed columns. Synthesise them from
-  # the _measured + _lln pairs when both are available.
+  # 3. ATS pattern classification. Requires the three spirometry inputs
+  #    (fev1 / fvc / fev1fvc) with their LLNs; TLC is optional. When
+  #    TLC inputs are absent or NA, pft_classify() applies the
+  #    spirometry-only fallback (Stanojevic 2022 Table 5 /
+  #    Pellegrino 2005 Fig 2 spirometry-only branches).
   pat_ready <- TRUE
-  pat_data <- data
-  for (m in c("fev1", "fvc", "fev1fvc", "tlc")) {
+  pat_data  <- data
+  for (m in c("fev1", "fvc", "fev1fvc")) {
     measured <- paste0(m, "_measured")
     lln      <- paste0(m, "_lln")
     if (measured %in% colnames(data) && lln %in% colnames(data)) {
@@ -161,6 +160,14 @@ pft_interpret <- function(data, year = 2012, SI.units = FALSE,
     }
   }
   if (pat_ready) {
+    if ("tlc_measured" %in% colnames(data) && "tlc_lln" %in% colnames(data)) {
+      pat_data$tlc <- data$tlc_measured
+    } else {
+      # TLC inputs absent: synthesise NA columns so the classifier
+      # routes via its spirometry-only fallback.
+      pat_data$tlc     <- NA_real_
+      pat_data$tlc_lln <- NA_real_
+    }
     pat_out <- pft_classify(pat_data, standard = standard)
     data$ats_classification     <- pat_out$ats_classification
     data$ats_pattern_combination <- pat_out$ats_pattern_combination

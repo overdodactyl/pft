@@ -31,11 +31,13 @@ The original data frame with two appended columns:
 selected \code{standard}; see above.
 \item \code{ats_pattern_combination}: a 4-character string in fixed column
 order \strong{FEV1, FVC, FEV1/FVC, TLC}, with \code{"A"} denoting the value
-is below its LLN and \code{"N"} denoting it is at or above. So
-\code{"NNAN"} means only FEV1/FVC is below its LLN (pure airway
-obstruction); \code{"AANA"} means FEV1, FVC, and TLC are all low while
-FEV1/FVC is preserved (restriction). The pattern-combination
-string is independent of the \code{standard} selected.
+is below its LLN, \code{"N"} denoting it is at or above, and \code{"?"}
+denoting the value (and its LLN) was missing. So \code{"NNAN"} means
+only FEV1/FVC is below its LLN (pure airway obstruction);
+\code{"AANA"} means FEV1, FVC, and TLC are all low while FEV1/FVC is
+preserved (restriction); \code{"NNA?"} means FEV1/FVC is below LLN
+and TLC is unknown. The pattern-combination string is
+independent of the \code{standard} selected.
 }
 }
 \description{
@@ -44,6 +46,25 @@ By default it applies the Stanojevic et al. ERS/ATS 2022 algorithm
 (Figure 8); pass \code{standard = "2005"} to apply the predecessor
 Pellegrino et al. ERJ 2005 algorithm.
 }
+\section{Missing TLC (spirometry-only fallback)}{
+
+When the three spirometry inputs (\code{fev1}, \code{fvc}, \code{fev1fvc}) and
+their LLNs are all present but TLC is missing, \code{pft_classify()}
+falls back to a spirometry-only branch instead of returning \code{NA}.
+Under both standards, an \code{"Obstructed"} row is still recognisable
+from FEV1/FVC < LLN alone (Mixed would require TLC to distinguish
+but Mixed is itself an obstructive defect, so the row is labelled
+\code{"Obstructed"}). Under the 2005 standard, rows with FVC \eqn{\ge}
+LLN classify deterministically because the 2005 flowchart does not
+consult TLC in that branch (so \code{"Normal"} is emitted for normal
+spirometry). Cells where TLC would have been the disambiguating
+input (Normal vs Restricted, Non-specific vs Restricted under
+2022; Normal vs Restricted, Obstructed vs Mixed under 2005) remain
+\code{NA}. Rows where any spirometry input is itself missing always
+return \code{NA}. See \code{pft_prism()} for the spirometry-only PRISm
+screen which is reported as a separate logical column.
+}
+
 \examples{
 data <- data.frame(fev1 = c(3.453, 2.385),
                              fev1_lln = c(3.303, 3.384),
