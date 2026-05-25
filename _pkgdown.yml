@@ -39,6 +39,7 @@ reference:
       - pft_change
       - pft_decline
       - pft_fev1q
+      - pft_lung_age
       - pft_dlco_hb_correct
 
   - title: Predecessor 2005 standard

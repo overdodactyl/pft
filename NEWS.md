@@ -163,6 +163,40 @@ staging, IPF progression, or CF exacerbation alerts.
   trajectories.
 
 Test count: 1195 -> 1214 (+19, +1 skipped lme4 test).
+## pft_lung_age() — algebraic inversion of GLI predicted spirometry
+
+`pft_lung_age(data, measure = "fev1")` solves for the age at which
+the patient's measured FEV1 (or FVC) would equal the GLI predicted
+value for someone of their height, sex, and (under GLI 2012) race.
+This is the standard patient-communication tool used in smoking
+cessation and asthma counseling ("your lungs are equivalent to a
+65-year-old's"); it compresses the LMS distribution into a single
+age scalar.
+
+Implementation is a numeric inversion of [pft_spirometry()] via
+[stats::uniroot()] -- no new reference data is involved, the same
+GLI 2012 / GLI Global 2022 splines and coefficients are walked in
+reverse.
+
+* Supports `measure = c("fev1", "fvc")`. Other measures (FEV1/FVC
+  ratio, FEF segments) are non-monotonic over the GLI range and are
+  not supported.
+* Default `age_range = c(20, 95)` covers the monotonically
+  declining adult portion of the GLI curve, where lung age has a
+  well-defined interpretation. Pediatric / young-adult callers can
+  widen the range explicitly, with the caveat that the inversion
+  becomes non-unique below the age-20 peak.
+* Output: `<measure>_lung_age` (numeric, years) and
+  `<measure>_lung_age_delta` (lung age minus chronological age).
+* Returns `NA` when the measured value cannot be bracketed in the
+  search range (e.g., a measured FEV1 higher than the GLI peak at
+  the patient's height / sex / race).
+* New tests in `tests/testthat/test-lung_age.R` (11 expectations)
+  including the identity test "measured = predicted at age X
+  recovers lung age X", monotonicity (lower FEV1 -> older lung),
+  and NA propagation for out-of-range measurements.
+
+Test count: 1195 -> 1206 (+11).
 
 ## New interpretation primitives (audit follow-up)
 
