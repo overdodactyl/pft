@@ -18,11 +18,16 @@ prepended. \code{by = NULL} (default) gives the cohort-wide summary.
 Pass \code{by = "sex"} for per-sex summaries, \code{by = c("sex", "age_band")} for two-way stratification, etc.}
 }
 \value{
-A list with three components, each a tibble:
+A list with up to four components, each a tibble (omitted
+when the corresponding input columns are absent):
 \itemize{
 \item \code{zscores}: per-measure z-score quantiles and percent below LLN.
 \item \code{patterns}: ATS pattern frequencies (counts and proportions).
 \item \code{prism}: PRISm prevalence (count and proportion).
+\item \code{diffusion}: Hughes & Pride 2012 diffusion category frequencies
+(counts and proportions), present whenever the input contains a
+\code{diffusion_category} column (typically produced by
+\code{\link[=pft_diffusion_interpret]{pft_diffusion_interpret()}} or \code{\link[=pft_interpret]{pft_interpret()}}).
 }
 }
 \description{

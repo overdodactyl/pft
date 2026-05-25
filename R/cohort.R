@@ -9,10 +9,15 @@
 #'   individual reference / interpretation functions. The summary is
 #'   robust to which columns are present and skips anything absent.
 #'
-#' @return A list with three components, each a tibble:
+#' @return A list with up to four components, each a tibble (omitted
+#'   when the corresponding input columns are absent):
 #' - `zscores`: per-measure z-score quantiles and percent below LLN.
 #' - `patterns`: ATS pattern frequencies (counts and proportions).
 #' - `prism`: PRISm prevalence (count and proportion).
+#' - `diffusion`: Hughes & Pride 2012 diffusion category frequencies
+#'   (counts and proportions), present whenever the input contains a
+#'   `diffusion_category` column (typically produced by
+#'   [pft_diffusion_interpret()] or [pft_interpret()]).
 #'
 #' @seealso [pft_interpret()] to produce the per-patient input data
 #'   frame summarised here.
@@ -67,6 +72,7 @@ pft_cohort_summary <- function(data, by = NULL) {
   z_parts <- list()
   pat_parts <- list()
   prism_parts <- list()
+  diff_parts <- list()
   for (lvl in group_levels) {
     sub <- data[groups == lvl, , drop = FALSE]
     s   <- cohort_summary_one(sub)
@@ -76,13 +82,18 @@ pft_cohort_summary <- function(data, by = NULL) {
       pat_parts[[length(pat_parts) + 1]] <- cbind_group(s$patterns,  by, lvl)
     if (nrow(s$prism) > 0)
       prism_parts[[length(prism_parts) + 1]] <- cbind_group(s$prism, by, lvl)
+    if (!is.null(s$diffusion) && nrow(s$diffusion) > 0)
+      diff_parts[[length(diff_parts) + 1]] <- cbind_group(s$diffusion, by, lvl)
   }
 
   out <- list(
-    zscores  = if (length(z_parts)) do.call(rbind, z_parts) else tibble::tibble(),
-    patterns = if (length(pat_parts)) do.call(rbind, pat_parts) else tibble::tibble(),
+    zscores  = if (length(z_parts))     do.call(rbind, z_parts)     else tibble::tibble(),
+    patterns = if (length(pat_parts))   do.call(rbind, pat_parts)   else tibble::tibble(),
     prism    = if (length(prism_parts)) do.call(rbind, prism_parts) else tibble::tibble()
   )
+  if (length(diff_parts)) {
+    out$diffusion <- do.call(rbind, diff_parts)
+  }
 
   # Reclassification audit, available cohort-wide when both 2012 and
   # 2022 classifications are present (typically a pft_compare()
@@ -141,6 +152,13 @@ cohort_summary_one <- function(data) {
   } else tibble::tibble()
 
   out <- list(zscores = zsum, patterns = patterns, prism = prism)
+
+  if ("diffusion_category" %in% colnames(data)) {
+    t <- table(data$diffusion_category, useNA = "ifany")
+    out$diffusion <- tibble::tibble(category = names(t),
+                                     n = as.integer(t),
+                                     proportion = as.numeric(t) / sum(t))
+  }
 
   recl <- cohort_reclassification(data)
   if (!is.null(recl)) out$reclassification <- recl
