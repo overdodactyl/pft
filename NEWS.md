@@ -142,7 +142,8 @@
 * `pft_dlco_hb_correct(dlco, hemoglobin, sex, age)` applies the
   Cotes 1972 / Stanojevic 2017 hemoglobin correction. Reference Hb
   is 146 g/L (males ≥ 15) or 134 g/L (females, males < 15). Hb input
-  in g/L by default; g/dL auto-converted with a warning.
+  must be in g/L; the function does not detect or convert g/dL (see
+  the breaking change above).
 
 ## Bug fixes
 
