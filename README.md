@@ -1,4 +1,4 @@
-# pft
+# pft <a href="https://YOUR-ORG.github.io/pft/"><img src="man/figures/logo.png" align="right" height="120" alt="pft website" /></a>
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/YOUR-ORG/pft/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/YOUR-ORG/pft/actions/workflows/R-CMD-check.yaml)
