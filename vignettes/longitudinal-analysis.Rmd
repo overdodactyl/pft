@@ -25,7 +25,7 @@ standard that operate on serial measurements:
 | Tool | Use case | Inputs |
 |------|----------|--------|
 | `pft_change()` | Two-point conditional change z-score (Stanojevic 2022 Box 2) | Two FEV1 z-scores + age + elapsed time |
-| `pft_fev1q()` | Adult mortality index, alternative to CCS in adults | FEV1 (litres) + sex |
+| `pft_fev1q()` | Stanojevic 2022 Box 3 FEV1Q ratio; the standard's recommended alternative to CCS in adults | FEV1 (litres) + sex |
 
 For multi-point trajectory fitting (slopes, mixed-effects models,
 disease-specific decline thresholds), use the right tool for the
@@ -67,25 +67,25 @@ adults" but allows it as "a reasonable tool to facilitate
 interpretation". For adults the standard recommends FEV1Q instead
 (Box 3); see section 2 below.
 
-# 2. Adult FEV1Q: `pft_fev1q()`
+# 2. FEV1Q in adults: `pft_fev1q()`
 
 For *adults*, the 2022 standard recommends FEV1Q over the conditional
-change score: the ratio of FEV1 to a sex-specific 1st-percentile
-"bottom line" required for survival (Box 3). FEV1Q is not a change
-score -- it characterises the *absolute* impairment relative to a
-survivable lower limit, in a way that's interpretable across
-patients and over time.
+change score (Box 3). FEV1Q is the ratio of FEV1 to a sex-specific
+denominator (0.5 L for males, 0.4 L for females -- the 1st percentile
+of the adult lung-disease FEV1 distribution per Box 3). It is not a
+change score; it expresses FEV1 in absolute terms relative to that
+denominator, on a scale that's comparable across patients and over
+time.
 
 ```{r}
 # Box 3 worked example: 70-year-old female with FEV1 = 0.9 L.
 pft_fev1q(fev1 = 0.9, sex = "F", age = 70)
 ```
 
-Values closer to 1 indicate higher mortality risk; under normal
-ageing one unit of FEV1Q is lost approximately every 18 years (10
-years in smokers and the elderly). The function refuses age < 18 by
-returning `NA_real_` per the paper's "not appropriate for children
-and adolescents" caveat.
+The function refuses age < 18 by returning `NA_real_` per the
+paper's "not appropriate for children and adolescents" caveat. See
+Stanojevic 2022 Box 3 for the source standard's interpretation of
+the resulting ratio.
 
 # 3. Plotting trajectories
 
