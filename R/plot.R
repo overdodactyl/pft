@@ -25,6 +25,15 @@
 #'   columns (the output shape of [pft_compare()]), draws a segment
 #'   from the 2012 z-score to the 2022 z-score, coloured by whether
 #'   the row crossed the LLN.
+#' * `"flow_volume"` -- stylised single-patient flow-volume envelope.
+#'   Requires `fvc_measured`, `fef2575_measured`, and `fef75_measured`
+#'   columns; if `fvc_pred` / `fef2575_pred` / `fef75_pred` are also
+#'   present, the predicted envelope is overlaid as a dashed line for
+#'   reference. Errors if `nrow(data) != 1`. Note: this is a stylised
+#'   envelope (4 anchor points), not the full continuous flow-volume
+#'   loop -- the package's input contract supports only mid- and
+#'   end-expiratory flows (FEF25-75 and FEF75), not PEF / FEF25 / FEF50
+#'   individually.
 #'
 #' Requires the `ggplot2` package (a Suggested dependency).
 #'
@@ -69,7 +78,8 @@
 #' @export
 pft_plot <- function(data,
                       type = c("lollipop", "histogram",
-                                 "trajectory", "bdr", "compare"),
+                                 "trajectory", "bdr", "compare",
+                                 "flow_volume"),
                       time = NULL,
                       patient_id = NULL) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
@@ -83,11 +93,12 @@ pft_plot <- function(data,
 
   switch(
     type,
-    lollipop   = pft_plot_lollipop(data),
-    histogram  = pft_plot_histogram(data),
-    trajectory = pft_plot_trajectory(data, time_q, patient_id_q),
-    bdr        = pft_plot_bdr(data),
-    compare    = pft_plot_compare(data)
+    lollipop    = pft_plot_lollipop(data),
+    histogram   = pft_plot_histogram(data),
+    trajectory  = pft_plot_trajectory(data, time_q, patient_id_q),
+    bdr         = pft_plot_bdr(data),
+    compare     = pft_plot_compare(data),
+    flow_volume = pft_plot_flow_volume(data)
   )
 }
 
@@ -397,6 +408,81 @@ pft_plot_compare <- function(data) {
       x = NULL, y = "z-score",
       title = "GLI 2012 -> GLI Global 2022 reclassification",
       subtitle = "Dotted line: LLN. Coloured arrows cross the LLN."
+    ) +
+    ggplot2::theme_minimal(base_size = 12)
+}
+
+
+# Mode: single-patient flow-volume envelope. --------------------------------
+# Stylised: only 4 anchor points (origin, FEF2575 at 50% FVC exhaled,
+# FEF75 at 75% FVC exhaled, end of expiration). The package's input
+# contract does not include PEF / FEF25 / FEF50, so a full continuous
+# loop isn't producible without expanding the contract.
+pft_plot_flow_volume <- function(data) {
+  if (nrow(data) != 1) {
+    stop("pft_plot(type = \"flow_volume\") expects a single-patient data ",
+         "frame (nrow == 1).", call. = FALSE)
+  }
+  required <- c("fvc_measured", "fef2575_measured", "fef75_measured")
+  missing_cols <- setdiff(required, colnames(data))
+  if (length(missing_cols) > 0) {
+    stop(sprintf(
+      "pft_plot(type = \"flow_volume\") requires columns: %s. Missing: %s.",
+      paste(required, collapse = ", "),
+      paste(missing_cols, collapse = ", ")
+    ), call. = FALSE)
+  }
+
+  fvc       <- data$fvc_measured[1]
+  fef2575_m <- data$fef2575_measured[1]
+  fef75_m   <- data$fef75_measured[1]
+
+  measured_df <- data.frame(
+    volume = c(0, 0.5 * fvc, 0.75 * fvc, fvc),
+    flow   = c(0, fef2575_m, fef75_m, 0),
+    label  = c("Start", "FEF25-75", "FEF75", "End"),
+    stringsAsFactors = FALSE
+  )
+  # Drop the (0, 0) start point from the line trace -- it's an
+  # anchor, not a real measurement.
+
+  # Predicted envelope, if reference values are present.
+  pred_df <- NULL
+  if (all(c("fvc_pred", "fef2575_pred", "fef75_pred") %in% colnames(data))) {
+    fvc_p   <- data$fvc_pred[1]
+    f2575_p <- data$fef2575_pred[1]
+    f75_p   <- data$fef75_pred[1]
+    if (!is.na(fvc_p) && !is.na(f2575_p) && !is.na(f75_p)) {
+      pred_df <- data.frame(
+        volume = c(0, 0.5 * fvc_p, 0.75 * fvc_p, fvc_p),
+        flow   = c(0, f2575_p, f75_p, 0)
+      )
+    }
+  }
+
+  p <- ggplot2::ggplot(measured_df, ggplot2::aes(x = volume, y = flow)) +
+    ggplot2::geom_path(linewidth = 0.8, colour = "#1a1a1a") +
+    ggplot2::geom_point(size = 3, colour = "#1a1a1a")
+
+  if (!is.null(pred_df)) {
+    p <- p +
+      ggplot2::geom_path(data = pred_df,
+                          ggplot2::aes(x = volume, y = flow),
+                          linewidth = 0.6, linetype = "dashed",
+                          colour = "gray50")
+  }
+
+  subtitle <- if (is.null(pred_df)) {
+    "Stylised envelope from FEF25-75 and FEF75 (4 anchor points)."
+  } else {
+    "Solid: measured. Dashed: predicted envelope. Stylised, 4 anchor points each."
+  }
+
+  p +
+    ggplot2::labs(
+      x = "Volume exhaled (L)", y = "Flow (L/s)",
+      title = "Flow-volume envelope",
+      subtitle = subtitle
     ) +
     ggplot2::theme_minimal(base_size = 12)
 }

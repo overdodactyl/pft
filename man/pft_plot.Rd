@@ -6,7 +6,7 @@
 \usage{
 pft_plot(
   data,
-  type = c("lollipop", "histogram", "trajectory", "bdr", "compare"),
+  type = c("lollipop", "histogram", "trajectory", "bdr", "compare", "flow_volume"),
   time = NULL,
   patient_id = NULL
 )
@@ -57,6 +57,15 @@ measure with both \verb{<measure>_zscore} and \verb{<measure>_zscore_2022}
 columns (the output shape of \code{\link[=pft_compare]{pft_compare()}}), draws a segment
 from the 2012 z-score to the 2022 z-score, coloured by whether
 the row crossed the LLN.
+\item \code{"flow_volume"} -- stylised single-patient flow-volume envelope.
+Requires \code{fvc_measured}, \code{fef2575_measured}, and \code{fef75_measured}
+columns; if \code{fvc_pred} / \code{fef2575_pred} / \code{fef75_pred} are also
+present, the predicted envelope is overlaid as a dashed line for
+reference. Errors if \code{nrow(data) != 1}. Note: this is a stylised
+envelope (4 anchor points), not the full continuous flow-volume
+loop -- the package's input contract supports only mid- and
+end-expiratory flows (FEF25-75 and FEF75), not PEF / FEF25 / FEF50
+individually.
 }
 
 Requires the \code{ggplot2} package (a Suggested dependency).
