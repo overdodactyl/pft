@@ -4,7 +4,19 @@
 \alias{pft_volume_subpattern}
 \title{Classify lung-volume sub-pattern per Stanojevic 2022 Figure 10}
 \usage{
-pft_volume_subpattern(data)
+pft_volume_subpattern(
+  data,
+  year = 2022,
+  tlc = tlc,
+  tlc_lln = tlc_lln,
+  tlc_uln = tlc_uln,
+  fev1fvc = fev1fvc,
+  fev1fvc_lln = NULL,
+  rv_tlc = rv_tlc,
+  rv_tlc_uln = rv_tlc_uln,
+  frc_tlc = NULL,
+  frc_tlc_uln = NULL
+)
 }
 \arguments{
 \item{data}{A data frame containing at minimum:
@@ -18,6 +30,22 @@ Optional columns to refine the elevated-volumes branch:
 \itemize{
 \item \code{frc_tlc}, \code{frc_tlc_uln}
 }}
+
+\item{year}{GLI year suffix used when looking up the spirometry
+FEV1/FVC LLN column. Defaults to \code{2022}. Set to match the \code{year}
+argument used in the upstream \code{\link[=pft_spirometry]{pft_spirometry()}} /
+\code{\link[=pft_interpret]{pft_interpret()}} call. The TLC and RV/TLC columns (volumes
+reference) are unsuffixed and are not affected by \code{year}.}
+
+\item{tlc, tlc_lln, tlc_uln, fev1fvc, fev1fvc_lln, rv_tlc, rv_tlc_uln}{Column references for the seven required inputs. Defaults are the
+canonical names (\code{fev1fvc_lln} carries the \verb{_<year>} suffix);
+override with a bare name, a string, or \code{!!var} (see
+"Column-name overrides" below).}
+
+\item{frc_tlc, frc_tlc_uln}{Column references for the optional FRC/TLC
+pair. Default \code{NULL} means: auto-pickup if \code{frc_tlc} and
+\code{frc_tlc_uln} exist in \code{data}, otherwise skip the FRC branch and
+classify on RV/TLC alone.}
 }
 \value{
 The input \code{data} with a new \code{volume_subpattern} character
@@ -35,6 +63,10 @@ patterns that \code{\link[=pft_classify]{pft_classify()}} collapses into "Restri
 "Mixed", and "Obstructed" / "Normal" -- this function recovers the
 finer-grained labels when lung-volume ratios (FRC/TLC and / or
 RV/TLC) are available.
+
+Typically called via \code{\link[=pft_interpret]{pft_interpret()}} as part of the one-call
+workflow; exported for callers who want to apply the sub-pattern
+classifier to pre-computed columns directly.
 }
 \details{
 Implements the decision tree in Figure 10 of Stanojevic et al.
@@ -67,18 +99,34 @@ available, supply them as columns \code{frc_tlc} / \code{frc_tlc_uln} to
 refine the OR-condition. When absent (the typical case), only
 RV/TLC is consulted -- the function degrades gracefully.
 }
+\section{Column-name overrides}{
+
+Each column-reference argument accepts three forms:
+\itemize{
+\item a \strong{bare column name} -- \code{tlc = my_tlc}
+\item a \strong{string} -- \code{tlc = "my_tlc"}
+\item an \strong{injected value} -- \code{tlc = !!my_var} where \code{my_var <- "my_tlc"}
+}
+
+Defaults are the canonical pft column names, so callers whose data
+already follows the convention pass no extra arguments. The optional
+FRC/TLC pair (\code{frc_tlc}, \code{frc_tlc_uln}) defaults to \code{NULL} to enable
+canonical-name auto-pickup; pass explicit column references to
+override.
+}
+
 \examples{
 # Mixed disorder: TLC < LLN, RV/TLC > ULN, FEV1/FVC < LLN.
 data.frame(
   tlc = 4.0, tlc_lln = 5.0, tlc_uln = 7.0,
-  fev1fvc = 0.55, fev1fvc_lln = 0.70,
+  fev1fvc = 0.55, fev1fvc_lln_2022 = 0.70,
   rv_tlc = 0.55, rv_tlc_uln = 0.45
 ) |> pft_volume_subpattern()
 
 # Simple restriction: TLC < LLN, both ratios normal.
 data.frame(
   tlc = 4.0, tlc_lln = 5.0, tlc_uln = 7.0,
-  fev1fvc = 0.80, fev1fvc_lln = 0.70,
+  fev1fvc = 0.80, fev1fvc_lln_2022 = 0.70,
   rv_tlc = 0.30, rv_tlc_uln = 0.45
 ) |> pft_volume_subpattern()
 

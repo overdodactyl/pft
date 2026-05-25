@@ -23,7 +23,7 @@ test_that("pft_plot errors when more than one row supplied", {
   expect_error(pft_plot(out), "single-patient")
 })
 
-test_that("pft_plot prefers unsuffixed _zscore over _zscore_<year> when both present", {
+test_that("pft_plot picks the highest-year z-score when multiple GLI years present", {
   skip_if_not_installed("ggplot2")
   d <- data.frame(sex = "M", age = 45, height = 178, race = "Caucasian",
                   fev1_measured = 2.5, fvc_measured = 3.8)
@@ -31,7 +31,12 @@ test_that("pft_plot prefers unsuffixed _zscore over _zscore_<year> when both pre
   out <- pft_spirometry(out, year = 2022)
   p <- pft_plot(out)
   expect_s3_class(p, "ggplot")
-  # Lollipop only picks one standard's z-scores; data should not contain
-  # any "_2022" measure labels in the plot frame.
-  expect_false(any(grepl("_2022", p$data$measure)))
+  # Both fev1_zscore_2012 and fev1_zscore_2022 are present; the
+  # deduplicator should pick the highest year (2022). Confirm by
+  # comparing one of the plotted z-scores to the 2022 column value.
+  fev1_row <- p$data[p$data$measure == "fev1", ]
+  expect_equal(fev1_row$zscore, out$fev1_zscore_2022)
+  # And there should be exactly one row per measure (no duplicate
+  # spirometry measures).
+  expect_equal(anyDuplicated(p$data$measure), 0)
 })

@@ -99,10 +99,10 @@ serial <- data.frame(
   patient_id  = rep(1:2, each = 4),
   visit_date  = rep(as.Date(c("2020-01-15","2021-03-10",
                                "2022-05-20","2023-07-30")), 2),
-  fev1_zscore = c(-0.5, -0.8, -1.2, -1.6,
+  fev1_zscore_2022 = c(-0.5, -0.8, -1.2, -1.6,
                    0.2,  0.0, -0.3, -0.5)
 )
-ggplot(serial, aes(visit_date, fev1_zscore,
+ggplot(serial, aes(visit_date, fev1_zscore_2022,
                    colour = factor(patient_id), group = patient_id)) +
   geom_hline(yintercept = -1.645, linetype = "dotted") +
   geom_line() + geom_point() +

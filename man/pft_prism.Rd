@@ -4,11 +4,29 @@
 \alias{pft_prism}
 \title{Screen for Preserved Ratio Impaired Spirometry (PRISm)}
 \usage{
-pft_prism(data)
+pft_prism(
+  data,
+  year = 2022,
+  fev1 = fev1,
+  fev1_lln = NULL,
+  fvc = fvc,
+  fvc_lln = NULL,
+  fev1fvc = fev1fvc,
+  fev1fvc_lln = NULL
+)
 }
 \arguments{
-\item{data}{A data frame containing \code{fev1}, \code{fev1_lln}, \code{fvc},
-\code{fvc_lln}, \code{fev1fvc}, and \code{fev1fvc_lln} columns.}
+\item{data}{A data frame containing the six input columns named below.}
+
+\item{year}{GLI year suffix used when looking up the LLN columns
+(\code{fev1_lln}, \code{fvc_lln}, \code{fev1fvc_lln}). Defaults to \code{2022}. Set to
+match the \code{year} argument used in the upstream \code{\link[=pft_spirometry]{pft_spirometry()}}
+/ \code{\link[=pft_interpret]{pft_interpret()}} call.}
+
+\item{fev1, fev1_lln, fvc, fvc_lln, fev1fvc, fev1fvc_lln}{Column references
+for the six required columns. Defaults are the canonical names
+(\code{fev1}, \verb{fev1_lln_<year>}, ...); override with a bare name, a
+string, or \code{!!var} (see "Column-name overrides" below).}
 }
 \value{
 The original data frame with a \code{prism} logical column
@@ -23,15 +41,38 @@ standard (Stanojevic et al.) classifies it in Table 5 with row
 normal). The pattern is associated with elevated all-cause
 mortality and progression to chronic respiratory disease.
 
+Typically called via \code{\link[=pft_interpret]{pft_interpret()}} as part of the one-call
+workflow; exported for callers who want to apply the screen to
+pre-computed columns directly.
+
 This function adds a \code{prism} logical column to the data frame.
 PRISm is a spirometry-only screen and does not require a TLC
 measurement.
 }
+\section{Column-name overrides}{
+
+Each column-reference argument accepts three forms:
+\itemize{
+\item a \strong{bare column name} -- \code{fev1 = my_fev1}
+\item a \strong{string} -- \code{fev1 = "my_fev1"}
+\item an \strong{injected value} -- \code{fev1 = !!my_var} where \code{my_var <- "my_fev1"}
+}
+
+Defaults are the canonical pft column names, so callers whose data
+already follows the convention pass no extra arguments.
+}
+
 \examples{
-d <- data.frame(fev1    = 2.0, fev1_lln    = 2.5,
-                fvc     = 2.6, fvc_lln     = 3.0,
-                fev1fvc = 0.80, fev1fvc_lln = 0.70)
+d <- data.frame(fev1    = 2.0, fev1_lln_2022    = 2.5,
+                fvc     = 2.6, fvc_lln_2022     = 3.0,
+                fev1fvc = 0.80, fev1fvc_lln_2022 = 0.70)
 pft_prism(d)
+
+# Column-name override: data using non-canonical names.
+d2 <- data.frame(my_fev1 = 2.0, my_fev1_lln = 2.5,
+                 fvc = 2.6, fvc_lln_2022 = 3.0,
+                 fev1fvc = 0.80, fev1fvc_lln_2022 = 0.70)
+pft_prism(d2, fev1 = my_fev1, fev1_lln = my_fev1_lln)
 
 }
 \references{

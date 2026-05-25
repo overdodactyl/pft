@@ -109,16 +109,16 @@ test_that("Any NA in DLCO / VA / KCO propagates to NA category", {
 
 # SI vs traditional dispatch. ----------------------------------------------
 
-test_that("SI-units columns are recognised when traditional are absent", {
+test_that("SI-units columns are recognised when SI.units = TRUE", {
   d <- data.frame(tlco_zscore = LOW, va_zscore = NORMAL,
                    kco_si_zscore = LOW)
-  out <- pft_diffusion_interpret(d)
+  out <- pft_diffusion_interpret(d, SI.units = TRUE)
   expect_equal(out$diffusion_category, "Parenchymal")
 })
 
-test_that("Traditional units take precedence when both present", {
-  # If both traditional and SI columns exist, the function uses
-  # traditional (declared semantic in the docstring).
+test_that("SI.units = FALSE uses traditional column set", {
+  # When both column sets exist, SI.units = FALSE (the default)
+  # picks the traditional columns.
   d <- data.frame(
     dlco_zscore   = LOW,
     va_zscore     = NORMAL,
@@ -131,11 +131,11 @@ test_that("Traditional units take precedence when both present", {
 })
 
 
-# Error message when neither set of columns is present. --------------------
+# Error message when required columns are not present. --------------------
 
 test_that("Errors clearly when required z-score columns are absent", {
   expect_error(pft_diffusion_interpret(data.frame(x = 1)),
-                "diffusion z-score columns")
+                "required column\\(s\\) missing")
 })
 
 

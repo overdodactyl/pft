@@ -20,66 +20,66 @@ preds <- pft_spirometry(gli_test_grid, year = 2012) %>%
                 ~ round(.x, digits = 3)))
 
 ## Tests
-test_that("fev1_lln", {
-  expect_equal(preds$fev1_lln, gli_test_groundtruth$fev1_lln)
+test_that("fev1_lln_2012", {
+  expect_equal(preds$fev1_lln_2012, gli_test_groundtruth$fev1_lln)
 })
 
-test_that("fev1_uln", {
-  expect_equal(preds$fev1_uln, gli_test_groundtruth$fev1_uln)
+test_that("fev1_uln_2012", {
+  expect_equal(preds$fev1_uln_2012, gli_test_groundtruth$fev1_uln)
 })
 
-test_that("fvc_lln", {
-  expect_equal(preds$fvc_lln, gli_test_groundtruth$fvc_lln)
+test_that("fvc_lln_2012", {
+  expect_equal(preds$fvc_lln_2012, gli_test_groundtruth$fvc_lln)
 })
 
-test_that("fvc_uln", {
-  expect_equal(preds$fvc_uln, gli_test_groundtruth$fvc_uln)
+test_that("fvc_uln_2012", {
+  expect_equal(preds$fvc_uln_2012, gli_test_groundtruth$fvc_uln)
 })
 
-test_that("fev1fvc_lln", {
-  expect_equal(preds$fev1fvc_lln, gli_test_groundtruth$fev1fvc_lln)
+test_that("fev1fvc_lln_2012", {
+  expect_equal(preds$fev1fvc_lln_2012, gli_test_groundtruth$fev1fvc_lln)
 })
 
-test_that("fev1fvc_uln", {
-  expect_equal(preds$fev1fvc_uln, gli_test_groundtruth$fev1fvc_uln)
+test_that("fev1fvc_uln_2012", {
+  expect_equal(preds$fev1fvc_uln_2012, gli_test_groundtruth$fev1fvc_uln)
 })
 
-test_that("fef2575_lln", {
-  expect_equal(preds$fef2575_lln, gli_test_groundtruth$fef2575_lln)
+test_that("fef2575_lln_2012", {
+  expect_equal(preds$fef2575_lln_2012, gli_test_groundtruth$fef2575_lln)
 })
 
-test_that("fef2575_uln", {
-  expect_equal(preds$fef2575_uln, gli_test_groundtruth$fef2575_uln)
+test_that("fef2575_uln_2012", {
+  expect_equal(preds$fef2575_uln_2012, gli_test_groundtruth$fef2575_uln)
 })
 
-test_that("fef75_lln", {
-  expect_equal(preds$fef75_lln, gli_test_groundtruth$fef75_lln)
+test_that("fef75_lln_2012", {
+  expect_equal(preds$fef75_lln_2012, gli_test_groundtruth$fef75_lln)
 })
 
-test_that("fef75_uln", {
-  expect_equal(preds$fef75_uln, gli_test_groundtruth$fef75_uln)
+test_that("fef75_uln_2012", {
+  expect_equal(preds$fef75_uln_2012, gli_test_groundtruth$fef75_uln)
 })
 
 ## --- Predicted-value (median) tests against the GLI web calculator ------
 
-test_that("fev1_pred", {
-  expect_equal(preds$fev1_pred, gli_test_groundtruth$fev1_predicted)
+test_that("fev1_pred_2012", {
+  expect_equal(preds$fev1_pred_2012, gli_test_groundtruth$fev1_predicted)
 })
 
-test_that("fvc_pred", {
-  expect_equal(preds$fvc_pred, gli_test_groundtruth$fvc_predicted)
+test_that("fvc_pred_2012", {
+  expect_equal(preds$fvc_pred_2012, gli_test_groundtruth$fvc_predicted)
 })
 
-test_that("fev1fvc_pred", {
-  expect_equal(preds$fev1fvc_pred, gli_test_groundtruth$fev1fvc_predicted)
+test_that("fev1fvc_pred_2012", {
+  expect_equal(preds$fev1fvc_pred_2012, gli_test_groundtruth$fev1fvc_predicted)
 })
 
-test_that("fef2575_pred", {
-  expect_equal(preds$fef2575_pred, gli_test_groundtruth$fef2575_predicted)
+test_that("fef2575_pred_2012", {
+  expect_equal(preds$fef2575_pred_2012, gli_test_groundtruth$fef2575_predicted)
 })
 
-test_that("fef75_pred", {
-  expect_equal(preds$fef75_pred, gli_test_groundtruth$fef75_predicted)
+test_that("fef75_pred_2012", {
+  expect_equal(preds$fef75_pred_2012, gli_test_groundtruth$fef75_predicted)
 })
 
 ## --- NA-propagation tests ------------------------------------------------
@@ -96,9 +96,9 @@ test_that("NA in sex / age / height / race produces NA outputs (spirometry 2012)
     race   = c(NA,        "Caucasian", "Caucasian", "Caucasian")
   )
   out <- pft_spirometry(d, year = 2012)
-  expect_true(all(is.na(out$fev1_pred)))
-  expect_true(all(is.na(out$fev1_lln)))
-  expect_true(all(is.na(out$fev1_uln)))
+  expect_true(all(is.na(out$fev1_pred_2012)))
+  expect_true(all(is.na(out$fev1_lln_2012)))
+  expect_true(all(is.na(out$fev1_uln_2012)))
 })
 
 test_that("mixed valid and NA rows: valid rows still get predictions", {
@@ -109,9 +109,9 @@ test_that("mixed valid and NA rows: valid rows still get predictions", {
     race   = c("Caucasian","Caucasian","Caucasian")
   )
   out <- pft_spirometry(d, year = 2012)
-  expect_false(is.na(out$fev1_pred[1]))   # valid row
-  expect_true(is.na(out$fev1_pred[2]))    # NA sex
-  expect_false(is.na(out$fev1_pred[3]))   # valid row
+  expect_false(is.na(out$fev1_pred_2012[1]))   # valid row
+  expect_true(is.na(out$fev1_pred_2012[2]))    # NA sex
+  expect_false(is.na(out$fev1_pred_2012[3]))   # valid row
 })
 
 ## --- Out-of-range tests --------------------------------------------------
@@ -121,22 +121,22 @@ test_that("mixed valid and NA rows: valid rows still get predictions", {
 test_that("ages below GLI 2012 lower bound produce NA", {
   d <- data.frame(sex = "M", age = 2, height = 170, race = "Caucasian")
   out <- pft_spirometry(d, year = 2012)
-  expect_true(is.na(out$fev1_pred))
-  expect_true(is.na(out$fvc_pred))
+  expect_true(is.na(out$fev1_pred_2012))
+  expect_true(is.na(out$fvc_pred_2012))
 })
 
 test_that("ages above GLI 2012 upper bound produce NA", {
   d <- data.frame(sex = c("M","M"), age = c(96, 91), height = 170,
                   race = "Caucasian")
   out <- pft_spirometry(d, year = 2012)
-  expect_true(is.na(out$fev1_pred[1])) # age 96 is above FEV1's 95 ceiling
-  expect_true(is.na(out$fef75_pred[2])) # age 91 is above FEF75's 90 ceiling
+  expect_true(is.na(out$fev1_pred_2012[1])) # age 96 is above FEV1's 95 ceiling
+  expect_true(is.na(out$fef75_pred_2012[2])) # age 91 is above FEF75's 90 ceiling
 })
 
 test_that("unrecognized race string produces NA (with warning)", {
   d <- data.frame(sex = "M", age = 30, height = 170, race = "Martian")
   expect_warning(out <- pft_spirometry(d, year = 2012), "Martian|unrecognised")
-  expect_true(is.na(out$fev1_pred))
+  expect_true(is.na(out$fev1_pred_2012))
 })
 
 ## --- Structural / column-contract tests ----------------------------------
@@ -152,11 +152,11 @@ test_that("output preserves input columns and row count", {
 test_that("year = 2012 emits all expected reference columns", {
   d <- data.frame(sex = "M", age = 30, height = 170, race = "Caucasian")
   out <- pft_spirometry(d, year = 2012)
-  expected <- c("fev1_pred","fev1_lln","fev1_uln",
-                "fvc_pred","fvc_lln","fvc_uln",
-                "fev1fvc_pred","fev1fvc_lln","fev1fvc_uln",
-                "fef2575_pred","fef2575_lln","fef2575_uln",
-                "fef75_pred","fef75_lln","fef75_uln")
+  expected <- c("fev1_pred_2012","fev1_lln_2012","fev1_uln_2012",
+                "fvc_pred_2012","fvc_lln_2012","fvc_uln_2012",
+                "fev1fvc_pred_2012","fev1fvc_lln_2012","fev1fvc_uln_2012",
+                "fef2575_pred_2012","fef2575_lln_2012","fef2575_uln_2012",
+                "fef75_pred_2012","fef75_lln_2012","fef75_uln_2012")
   expect_true(all(expected %in% colnames(out)))
 })
 
@@ -178,37 +178,37 @@ test_that("year=2012: z-score is 0 at predicted and ~+/-1.645 at LLN/ULN", {
   d <- data.frame(sex="M", age=45, height=178, race="Caucasian")
   ref <- pft_spirometry(d, year = 2012)
   for (m in c("fev1","fvc","fev1fvc","fef2575","fef75")) {
-    d_at_pred <- d; d_at_pred[[paste0(m, "_measured")]] <- ref[[paste0(m, "_pred")]]
-    d_at_lln  <- d; d_at_lln [[paste0(m, "_measured")]] <- ref[[paste0(m, "_lln")]]
-    d_at_uln  <- d; d_at_uln [[paste0(m, "_measured")]] <- ref[[paste0(m, "_uln")]]
-    expect_equal(pft_spirometry(d_at_pred, 2012)[[paste0(m, "_zscore")]],   0,      tolerance = 1e-8, label = m)
-    expect_equal(pft_spirometry(d_at_lln,  2012)[[paste0(m, "_zscore")]], -1.645, tolerance = 1e-4, label = m)
-    expect_equal(pft_spirometry(d_at_uln,  2012)[[paste0(m, "_zscore")]],  1.645, tolerance = 1e-4, label = m)
+    d_at_pred <- d; d_at_pred[[paste0(m, "_measured")]] <- ref[[paste0(m, "_pred_2012")]]
+    d_at_lln  <- d; d_at_lln [[paste0(m, "_measured")]] <- ref[[paste0(m, "_lln_2012")]]
+    d_at_uln  <- d; d_at_uln [[paste0(m, "_measured")]] <- ref[[paste0(m, "_uln_2012")]]
+    expect_equal(pft_spirometry(d_at_pred, 2012)[[paste0(m, "_zscore_2012")]],   0,      tolerance = 1e-8, label = m)
+    expect_equal(pft_spirometry(d_at_lln,  2012)[[paste0(m, "_zscore_2012")]], -1.645, tolerance = 1e-4, label = m)
+    expect_equal(pft_spirometry(d_at_uln,  2012)[[paste0(m, "_zscore_2012")]],  1.645, tolerance = 1e-4, label = m)
   }
 })
 
 test_that("year=2012: pctpred is 100 at predicted, 80 at 0.8*predicted", {
   d <- data.frame(sex="M", age=45, height=178, race="Caucasian")
   ref <- pft_spirometry(d, year = 2012)
-  d_at_pred <- d; d_at_pred$fev1_measured <- ref$fev1_pred
-  d_at_80   <- d; d_at_80$fev1_measured   <- ref$fev1_pred * 0.8
-  expect_equal(pft_spirometry(d_at_pred, 2012)$fev1_pctpred, 100, tolerance = 1e-8)
-  expect_equal(pft_spirometry(d_at_80,   2012)$fev1_pctpred,  80, tolerance = 1e-8)
+  d_at_pred <- d; d_at_pred$fev1_measured <- ref$fev1_pred_2012
+  d_at_80   <- d; d_at_80$fev1_measured   <- ref$fev1_pred_2012 * 0.8
+  expect_equal(pft_spirometry(d_at_pred, 2012)$fev1_pctpred_2012, 100, tolerance = 1e-8)
+  expect_equal(pft_spirometry(d_at_80,   2012)$fev1_pctpred_2012,  80, tolerance = 1e-8)
 })
 
 test_that("z-score / pctpred columns absent when no measured cols supplied", {
   d <- data.frame(sex="M", age=45, height=178, race="Caucasian")
   out <- pft_spirometry(d, year = 2012)
-  expect_false("fev1_zscore" %in% colnames(out))
-  expect_false("fev1_pctpred" %in% colnames(out))
+  expect_false("fev1_zscore_2012" %in% colnames(out))
+  expect_false("fev1_pctpred_2012" %in% colnames(out))
 })
 
 test_that("NA measured value propagates to NA z-score and pctpred", {
   d <- data.frame(sex="M", age=45, height=178, race="Caucasian",
                   fev1_measured = NA_real_)
   out <- pft_spirometry(d, year = 2012)
-  expect_true(is.na(out$fev1_zscore))
-  expect_true(is.na(out$fev1_pctpred))
+  expect_true(is.na(out$fev1_zscore_2012))
+  expect_true(is.na(out$fev1_pctpred_2012))
 })
 
 ## --- Quanjer 2012 Table 4 worked examples (paper p. 1335) ---------------
@@ -231,11 +231,11 @@ test_that("Quanjer 2012 Table 4: Caucasian male predicted values", {
     fev1fvc = c(0.88, 0.88, 0.86, 0.86, 0.84, 0.79)
   )
   out <- pft_spirometry(cases, year = 2012)
-  expect_equal(out$fev1_pred,    expected$fev1,    tolerance = 0.02,
+  expect_equal(out$fev1_pred_2012,    expected$fev1,    tolerance = 0.02,
                label = "FEV1 vs Quanjer 2012 Table 4")
-  expect_equal(out$fvc_pred,     expected$fvc,     tolerance = 0.02,
+  expect_equal(out$fvc_pred_2012,     expected$fvc,     tolerance = 0.02,
                label = "FVC vs Quanjer 2012 Table 4")
-  expect_equal(out$fev1fvc_pred, expected$fev1fvc, tolerance = 0.01,
+  expect_equal(out$fev1fvc_pred_2012, expected$fev1fvc, tolerance = 0.01,
                label = "FEV1/FVC vs Quanjer 2012 Table 4")
 })
 

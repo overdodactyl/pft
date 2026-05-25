@@ -73,11 +73,11 @@ Non-specific / PRISm); Restricted and Mixed require TLC.
 ```{r}
 case <- data.frame(
   fev1    = c(2.5, 2.5, 1.5, 1.5,  3.5),
-  fev1_lln= c(3.0, 3.0, 2.5, 2.5,  3.0),
+  fev1_lln_2022= c(3.0, 3.0, 2.5, 2.5,  3.0),
   fvc     = c(3.8, 3.8, 2.2, 2.2,  4.5),
-  fvc_lln = c(3.5, 3.5, 2.5, 2.5,  4.0),
+  fvc_lln_2022 = c(3.5, 3.5, 2.5, 2.5,  4.0),
   fev1fvc = c(0.66, 0.66, 0.68, 0.80, 0.78),
-  fev1fvc_lln = 0.70,
+  fev1fvc_lln_2022 = 0.70,
   tlc     = c(6.0, 5.5, 4.0, 4.0,  6.5),
   tlc_lln = c(5.5, 5.5, 5.5, 5.5,  5.5)
 )
@@ -123,15 +123,15 @@ copd <- data.frame(
   tlc_measured     = 6.8
 )
 r <- pft_interpret(copd)
-r[, c("ats_classification", "fev1_severity", "fev1_zscore",
-       "fev1_pctpred")]
+r[, c("ats_classification", "fev1_severity_2022", "fev1_zscore_2022",
+       "fev1_pctpred_2022")]
 ```
 
 The pattern is **Obstructed** with **moderate** severity. GOLD
 staging (FEV1 % predicted) classifies this as **GOLD 2**:
 
 ```{r}
-pft_gold(r$fev1_pctpred, fev1fvc = r$fev1fvc_measured)
+pft_gold(r$fev1_pctpred_2022, fev1fvc = r$fev1fvc_measured)
 ```
 
 ## Example 2: restriction with preserved vs reduced KCO
@@ -174,6 +174,50 @@ The `prism` column is `TRUE`. Stanojevic 2022 notes PRISm has been
 associated with elevated all-cause mortality and progression to
 chronic respiratory disease in the literature; the label itself is
 spirometry-only and not disease-specific.
+
+# Applying vector helpers inside a data-frame workflow
+
+The package splits its public surface into two kinds of function:
+
+* **Data-frame helpers** -- `pft_classify()`, `pft_prism()`,
+  `pft_volume_subpattern()`, `pft_diffusion_interpret()` -- consume
+  several paired columns simultaneously and accept column-name
+  overrides via NSE (bare name, string, or `!!var`).
+* **Vector helpers** -- `pft_severity()`, `pft_severity_2005()`,
+  `pft_gold()`, `pft_fev1q()`, `pft_dlco_hb_correct()`, `pft_quality()`,
+  `pft_change()`, `pft_bdr()`, `pft_bdr_2005()` -- take one or more
+  numeric vectors and return a vector or a small per-row tibble. They
+  are designed to compose inside `dplyr::mutate()`.
+
+A cohort run that combines reference values with severity, GOLD
+staging, and bronchodilator response:
+
+```{r, eval = FALSE}
+library(dplyr)
+
+out <- pft_spirometry(cohort) |>
+  mutate(
+    fev1_severity_2022 = pft_severity(fev1_zscore_2022),
+    fvc_severity_2022  = pft_severity(fvc_zscore_2022),
+    gold          = pft_gold(fev1_pctpred_2022, fev1fvc = fev1fvc_measured),
+    bdr_sig       = pft_bdr(fev1_pre, fev1_post, fev1_pred_2022)$is_significant
+  )
+```
+
+Grading every z-score column in one pass with `dplyr::across()`. Use
+`matches("_zscore")` rather than `ends_with("_zscore")` so that
+year-suffixed spirometry columns (`fev1_zscore_2022`) are also caught:
+
+```{r, eval = FALSE}
+out |>
+  mutate(across(matches("_zscore"), pft_severity, .names = "{.col}_severity"))
+```
+
+The split exists because the data-frame helpers need to read paired
+columns (a value and its LLN/ULN, or three z-scores at once) and need
+to know how to find them in your data, while the vector helpers
+operate on a single named column and so compose naturally as `mutate()`
+expressions.
 
 # See also
 

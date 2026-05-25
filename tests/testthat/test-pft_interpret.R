@@ -6,7 +6,7 @@ test_that("pft_interpret with only demographics returns reference values", {
   d <- data.frame(sex = "M", age = 45, height = 178, race = "Caucasian")
   out <- pft_interpret(d)
   # Spirometry reference columns
-  expect_true(all(c("fev1_pred","fev1_lln","fev1_uln") %in% colnames(out)))
+  expect_true(all(c("fev1_pred_2022","fev1_lln_2022","fev1_uln_2022") %in% colnames(out)))
   # Volume reference columns
   expect_true(all(c("frc_pred","tlc_pred") %in% colnames(out)))
   # Diffusion reference columns
@@ -21,9 +21,9 @@ test_that("pft_interpret emits z-score and severity when measured supplied", {
   d <- data.frame(sex = "M", age = 45, height = 178, race = "Caucasian",
                   fev1_measured = 2.5)
   out <- pft_interpret(d)
-  expect_true("fev1_zscore" %in% colnames(out))
-  expect_true("fev1_severity" %in% colnames(out))
-  expect_true(out$fev1_severity %in% c("normal","mild","moderate","severe"))
+  expect_true("fev1_zscore_2022" %in% colnames(out))
+  expect_true("fev1_severity_2022" %in% colnames(out))
+  expect_true(out$fev1_severity_2022 %in% c("normal","mild","moderate","severe"))
 })
 
 test_that("pft_interpret runs ATS classification when measured + TLC present", {
@@ -71,17 +71,18 @@ test_that("pft_interpret produces the same numeric outputs as the components", {
   d <- data.frame(sex = "M", age = 45, height = 178, race = "Caucasian",
                   fev1_measured = 2.5)
   out <- pft_interpret(d)
-  direct <- pft_spirometry(d, year = 2012)
-  expect_equal(out$fev1_pred,   direct$fev1_pred)
-  expect_equal(out$fev1_lln,    direct$fev1_lln)
-  expect_equal(out$fev1_zscore, direct$fev1_zscore)
-  expect_equal(out$fev1_severity, pft_severity(direct$fev1_zscore))
+  direct <- pft_spirometry(d)
+  expect_equal(out$fev1_pred_2022,   direct$fev1_pred_2022)
+  expect_equal(out$fev1_lln_2022,    direct$fev1_lln_2022)
+  expect_equal(out$fev1_zscore_2022, direct$fev1_zscore_2022)
+  expect_equal(out$fev1_severity_2022, pft_severity(direct$fev1_zscore_2022))
 })
 
-test_that("pft_interpret year=2022 emits 2022 columns and uses them for BDR", {
-  d <- data.frame(sex = "M", age = 45, height = 178,
+test_that("pft_interpret year=2012 emits 2012 columns and uses them for BDR", {
+  # Explicit GLI 2012 path. Requires a race column.
+  d <- data.frame(sex = "M", age = 45, height = 178, race = "Caucasian",
                   fev1_pre = 2.5, fev1_post = 3.0)
-  out <- pft_interpret(d, year = 2022)
-  expect_true("fev1_pred_2022" %in% colnames(out))
+  out <- pft_interpret(d, year = 2012)
+  expect_true("fev1_pred_2012" %in% colnames(out))
   expect_true("fev1_bdr_pct" %in% colnames(out))
 })

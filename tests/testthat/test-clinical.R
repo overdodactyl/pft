@@ -176,7 +176,7 @@ test_that("pft_gold: fev1fvc NA leaves the row graded (don't mask on missing pre
 })
 
 test_that("pft_gold: backwards-compatible -- omitting fev1fvc behaves as before", {
-  # Pre-audit API used `pft_gold(fev1_pctpred)` only. New optional
+  # Pre-audit API used `pft_gold(fev1_pctpred_2022)` only. New optional
   # parameter must not change behavior when not supplied.
   expect_equal(pft_gold(c(90, 65, 40, 25)),
                c("GOLD 1", "GOLD 2", "GOLD 3", "GOLD 4"))

@@ -4,10 +4,26 @@
 \alias{pft_classify}
 \title{Classify ATS spirometry patterns from spirometry and lung-volume measurements}
 \usage{
-pft_classify(data, standard = c("2022", "2005"))
+pft_classify(
+  data,
+  standard = c("2022", "2005"),
+  year = 2022,
+  fev1 = fev1,
+  fev1_lln = NULL,
+  fvc = fvc,
+  fvc_lln = NULL,
+  fev1fvc = fev1fvc,
+  fev1fvc_lln = NULL,
+  tlc = tlc,
+  tlc_lln = tlc_lln
+)
 }
 \arguments{
-\item{data}{A data frame containing columns for fev1, fvc, fev1fvc, and their associated LLNs.}
+\item{data}{A data frame containing the six spirometry input columns
+(\code{fev1}, \code{fev1_lln}, \code{fvc}, \code{fvc_lln}, \code{fev1fvc}, \code{fev1fvc_lln})
+and optionally \code{tlc} and \code{tlc_lln}. TLC columns are optional --
+when either is absent from \code{data}, the classifier routes via the
+spirometry-only fallback (see "Missing TLC" below).}
 
 \item{standard}{Which interpretive standard's classifier to apply.
 \code{"2022"} (default) follows Stanojevic et al. ERJ 2022 Figure 8 and
@@ -23,6 +39,17 @@ normal FVC (NNNA, ANNA) become \code{Restricted} under 2022 but stay
 FVC (NNAA, ANAA) become \code{Mixed} under 2022 but stay \code{Obstructed}
 under 2005; the isolated-low-FVC cells (NANN, AANN) become
 \code{Non-specific} under 2022 but \code{Normal} under 2005.}
+
+\item{year}{GLI year suffix to use when looking up the spirometry
+LLN columns (\code{fev1_lln}, \code{fvc_lln}, \code{fev1fvc_lln}). Defaults to
+\code{2022} (GLI Global, race-neutral). Set to match the \code{year}
+argument used in the upstream \code{\link[=pft_spirometry]{pft_spirometry()}} /
+\code{\link[=pft_interpret]{pft_interpret()}} call. The TLC columns (volumes reference) are
+unsuffixed and are not affected by \code{year}.}
+
+\item{fev1, fev1_lln, fvc, fvc_lln, fev1fvc, fev1fvc_lln, tlc, tlc_lln}{Column references for the eight inputs. Defaults are the canonical
+names (\code{fev1}, \code{fev1_lln}, ...); override with a bare name, a
+string, or \code{!!var} (see "Column-name overrides" below).}
 }
 \value{
 The original data frame with two appended columns:
@@ -45,7 +72,27 @@ independent of the \code{standard} selected.
 By default it applies the Stanojevic et al. ERS/ATS 2022 algorithm
 (Figure 8); pass \code{standard = "2005"} to apply the predecessor
 Pellegrino et al. ERJ 2005 algorithm.
+
+Typically called via \code{\link[=pft_interpret]{pft_interpret()}} as part of the one-call
+workflow; exported for callers who want to apply the classifier to
+pre-computed columns directly.
 }
+\section{Column-name overrides}{
+
+Each column-reference argument accepts three forms:
+\itemize{
+\item a \strong{bare column name} -- \code{fev1 = my_fev1}
+\item a \strong{string} -- \code{fev1 = "my_fev1"}
+\item an \strong{injected value} -- \code{fev1 = !!my_var} where \code{my_var <- "my_fev1"}
+}
+
+Defaults are the canonical pft column names, so callers whose data
+already follows the convention pass no extra arguments. The two TLC
+references (\code{tlc}, \code{tlc_lln}) are optional: when either resolves to
+a column not present in \code{data}, the spirometry-only fallback
+triggers without raising an error.
+}
+
 \section{Missing TLC (spirometry-only fallback)}{
 
 When the three spirometry inputs (\code{fev1}, \code{fvc}, \code{fev1fvc}) and
@@ -67,15 +114,22 @@ screen which is reported as a separate logical column.
 
 \examples{
 data <- data.frame(fev1 = c(3.453, 2.385),
-                             fev1_lln = c(3.303, 3.384),
+                             fev1_lln_2022 = c(3.303, 3.384),
                              fvc = c(4.733, 3.485),
-                             fvc_lln = c(4.214, 4.24),
+                             fvc_lln_2022 = c(4.214, 4.24),
                              fev1fvc = c(0.600, 0.827),
-                             fev1fvc_lln = c(0.681, 0.700),
+                             fev1fvc_lln_2022 = c(0.681, 0.700),
                              tlc = c(1.5, 2.3),
                              tlc_lln = c(2, 2.5))
           pft_classify(data)
           pft_classify(data, standard = "2005")
+
+          # Column-name override: data using non-canonical names.
+          alt <- data.frame(my_fev1 = 3.0, my_fev1_lln = 2.5,
+                            fvc = 4.0, fvc_lln_2022 = 3.5,
+                            fev1fvc = 0.65, fev1fvc_lln_2022 = 0.70,
+                            tlc = 6.0, tlc_lln = 5.0)
+          pft_classify(alt, fev1 = my_fev1, fev1_lln = my_fev1_lln)
 
 }
 \references{

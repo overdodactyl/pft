@@ -6,16 +6,28 @@
 #' Hughes & Pride 2012 framework adopted by the ERS/ATS Stanojevic
 #' 2017 task force.
 #'
-#' The classifier consumes z-scores only and is unit-agnostic; it
-#' works identically on the traditional-units columns (`dlco_zscore`,
-#' `kco_tr_zscore`) and on the SI-units columns (`tlco_zscore`,
-#' `kco_si_zscore`). The function tries both naming conventions.
+#' The classifier consumes z-scores only and is unit-agnostic, but the
+#' default input column names differ between unit systems. Set
+#' `SI.units = TRUE` to pick up the SI-units column set
+#' (`tlco_zscore`, `va_zscore`, `kco_si_zscore`); otherwise the
+#' traditional-units column set (`dlco_zscore`, `va_zscore`,
+#' `kco_tr_zscore`) is used. Override individual column names via the
+#' `dlco` / `va` / `kco` arguments.
 #'
-#' @param data A data frame containing diffusion z-score columns.
-#'   Required columns (traditional units): `dlco_zscore`, `va_zscore`,
-#'   `kco_tr_zscore`. Required columns (SI units): `tlco_zscore`,
-#'   `va_zscore`, `kco_si_zscore`. The function tries traditional
-#'   first, then SI.
+#' Typically called via [pft_interpret()] as part of the one-call
+#' workflow; exported for callers who want to apply the classifier to
+#' pre-computed z-score columns directly.
+#'
+#' @param data A data frame containing the three z-score input columns.
+#' @param SI.units Logical, default `FALSE`. Selects the default
+#'   column names for `dlco` and `kco`. Traditional units (`FALSE`):
+#'   `dlco_zscore` and `kco_tr_zscore`. SI units (`TRUE`): `tlco_zscore`
+#'   and `kco_si_zscore`. `va` defaults to `va_zscore` in both unit
+#'   systems.
+#' @param dlco,va,kco Column references for the three z-score inputs.
+#'   `dlco` and `kco` default to `NULL`, which means: pick the
+#'   canonical column name based on `SI.units`. Pass a bare name, a
+#'   string, or `!!var` to override (see "Column-name overrides").
 #'
 #' @return The original data frame with a single appended column:
 #'   `diffusion_category`. Possible values:
@@ -43,6 +55,16 @@
 #'     patterns (e.g., low VA in isolation).}
 #'   \item{`NA`}{Required z-score columns missing.}
 #' }
+#'
+#' @section Column-name overrides:
+#' Each column-reference argument accepts three forms:
+#' * a **bare column name** -- `dlco = my_dlco`
+#' * a **string** -- `dlco = "my_dlco"`
+#' * an **injected value** -- `dlco = !!my_var` where `my_var <- "my_dlco"`
+#'
+#' `dlco` and `kco` default to `NULL`, which selects the canonical
+#' name based on `SI.units` (traditional or SI). Passing an explicit
+#' reference overrides this selection.
 #'
 #' @section References:
 #' Hughes JM, Pride NB. Examination of the carbon monoxide diffusing
@@ -72,27 +94,45 @@
 #' )
 #' pft_diffusion_interpret(d)
 #'
+#' # SI units (TLCO / KCO_SI). Pass SI.units = TRUE.
+#' d_si <- data.frame(
+#'   tlco_zscore   = c(-0.5, -2.0),
+#'   va_zscore     = c(-0.5, -0.5),
+#'   kco_si_zscore = c(-0.5, -2.0)
+#' )
+#' pft_diffusion_interpret(d_si, SI.units = TRUE)
+#'
 #' @export
-pft_diffusion_interpret <- function(data) {
-  cols <- colnames(data)
+pft_diffusion_interpret <- function(data,
+                                      SI.units = FALSE,
+                                      dlco = NULL,
+                                      va   = NULL,
+                                      kco  = NULL) {
+  dlco_q <- rlang::enquo(dlco)
+  va_q   <- rlang::enquo(va)
+  kco_q  <- rlang::enquo(kco)
 
-  # Traditional units (DLCO / KCO_tr / VA) first; fall back to SI.
-  if (all(c("dlco_zscore", "va_zscore", "kco_tr_zscore") %in% cols)) {
-    dlco <- data$dlco_zscore
-    va   <- data$va_zscore
-    kco  <- data$kco_tr_zscore
-  } else if (all(c("tlco_zscore", "va_zscore", "kco_si_zscore") %in% cols)) {
-    dlco <- data$tlco_zscore
-    va   <- data$va_zscore
-    kco  <- data$kco_si_zscore
-  } else {
-    stop("pft_diffusion_interpret() requires diffusion z-score columns. ",
-         "Provide either {dlco_zscore, va_zscore, kco_tr_zscore} (traditional",
-         " units) or {tlco_zscore, va_zscore, kco_si_zscore} (SI units).",
-         call. = FALSE)
-  }
+  # NULL defaults are filled with canonical column names as strings via
+  # quo_or_default(); passing strings through resolve_column_name()
+  # resolves cleanly via its is_string() branch and avoids tripping R
+  # CMD check's no-visible-binding analyzer.
+  dlco_q <- quo_or_default(
+    dlco_q, if (SI.units) "tlco_zscore" else "dlco_zscore")
+  va_q   <- quo_or_default(va_q, "va_zscore")
+  kco_q  <- quo_or_default(
+    kco_q, if (SI.units) "kco_si_zscore" else "kco_tr_zscore")
 
-  category <- classify_diffusion(dlco, va, kco)
+  cols <- resolve_data_cols(
+    data,
+    list(dlco = dlco_q, va = va_q, kco = kco_q),
+    "pft_diffusion_interpret"
+  )
+
+  category <- classify_diffusion(
+    data[[cols["dlco"]]],
+    data[[cols["va"]]],
+    data[[cols["kco"]]]
+  )
   data$diffusion_category <- category
   data
 }

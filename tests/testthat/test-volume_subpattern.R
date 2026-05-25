@@ -11,7 +11,7 @@
 row_at <- function(tlc, fev1fvc, rv_tlc, frc_tlc = NA_real_) {
   d <- data.frame(
     tlc = tlc, tlc_lln = 5.0, tlc_uln = 7.0,
-    fev1fvc = fev1fvc, fev1fvc_lln = 0.70,
+    fev1fvc = fev1fvc, fev1fvc_lln_2022 = 0.70,
     rv_tlc = rv_tlc, rv_tlc_uln = 0.45
   )
   if (!is.na(frc_tlc)) {
@@ -143,7 +143,7 @@ test_that("errors loudly on missing required column", {
   d <- data.frame(tlc = 4, tlc_lln = 5, tlc_uln = 7)
   expect_error(
     pft_volume_subpattern(d),
-    "missing required column"
+    "required column\\(s\\) missing"
   )
 })
 

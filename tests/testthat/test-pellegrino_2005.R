@@ -13,11 +13,11 @@ mk_grid <- function() {
   )
   data.frame(
     fev1        = ifelse(combos$fev1_a,    1, 4),
-    fev1_lln    = 2,
+    fev1_lln_2022    = 2,
     fvc         = ifelse(combos$fvc_a,     1, 4),
-    fvc_lln     = 2,
+    fvc_lln_2022     = 2,
     fev1fvc     = ifelse(combos$fev1fvc_a, 0.5, 0.9),
-    fev1fvc_lln = 0.7,
+    fev1fvc_lln_2022 = 0.7,
     tlc         = ifelse(combos$tlc_a,     1, 4),
     tlc_lln     = 2
   )
@@ -194,11 +194,11 @@ test_that("pft_interpret dispatches to 2005 primitives when standard='2005'", {
   out_05 <- pft_interpret(patient, standard = "2005")
 
   # Reference values themselves are unchanged
-  expect_equal(out_22$fev1_pred, out_05$fev1_pred)
-  expect_equal(out_22$fev1_lln,  out_05$fev1_lln)
+  expect_equal(out_22$fev1_pred_2022, out_05$fev1_pred_2022)
+  expect_equal(out_22$fev1_lln_2022,  out_05$fev1_lln_2022)
 
   # 2005 severity uses pctpred, 2022 uses zscore
-  expect_true(!is.na(out_05$fev1_severity))
+  expect_true(!is.na(out_05$fev1_severity_2022))
 
   # 2005 BDR adds an absolute-change column that 2022 does not
   expect_true("fev1_bdr_abs" %in% colnames(out_05))

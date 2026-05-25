@@ -69,6 +69,28 @@ test_that("print.pft_result handles a zero-row pft_result", {
   expect_true(any(grepl("(empty)", out, fixed = TRUE)))
 })
 
+test_that("print.pft_result falls back to tibble print when no _pred columns survive", {
+  # When a caller subsets to a shape that has interpretation columns
+  # (e.g. _zscore, severity, classification) but no _pred columns, the
+  # clinical-report format would render an empty measure table -- it
+  # iterates over the measure list keyed on `<measure>_pred`. Fall back
+  # to the standard tibble print so the user sees the columns they
+  # actually kept.
+  subset_keeping_zscore_only <- result[, c(
+    "sex", "age", "fev1_zscore_2022", "fev1_severity_2022",
+    "ats_classification", "prism"
+  )]
+  out <- capture.output(print(subset_keeping_zscore_only))
+  # Tibble print signature: "# A tibble:" header and the column names
+  # on their own header line. Clinical-format markers ("<pft_result>",
+  # "Patient:", "Pattern:") must be absent.
+  expect_true(any(grepl("# A tibble", out)))
+  expect_true(any(grepl("fev1_zscore_2022", out)))
+  expect_true(any(grepl("ats_classification", out)))
+  expect_false(any(grepl("<pft_result>", out, fixed = TRUE)))
+  expect_false(any(grepl("Patient:", out, fixed = TRUE)))
+})
+
 
 # Coercion methods ---------------------------------------------------------
 

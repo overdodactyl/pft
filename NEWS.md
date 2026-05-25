@@ -2,6 +2,57 @@
 
 ## Breaking changes
 
+* The default `year` argument for `pft_spirometry()`, `pft_interpret()`,
+  `pft_classify()`, `pft_prism()`, and `pft_volume_subpattern()` is
+  now `2022` (the GLI Global / race-neutral equations) — previously
+  `2012`. This aligns the package with the current ERS/ATS 2022
+  technical-standard recommendation and removes the need for a
+  `race` column when callers omit `year`. The combined effect with
+  the always-suffixed output convention is that
+  `pft_spirometry(d)` now emits `fev1_pred_2022` (was
+  `fev1_pred`), and `pft_classify(d)` looks up `fev1_lln_2022`
+  by default (was `fev1_lln`). To reproduce the previous behaviour
+  pass `year = 2012` explicitly and include a `race` column.
+
+* Spirometry reference outputs from `pft_spirometry()` / `pft_interpret()`
+  now always carry a four-digit GLI-year suffix: `fev1_pred_2012`,
+  `fev1_lln_2012`, `fev1_zscore_2012`, ... for GLI 2012, and the
+  existing `_2022` columns for GLI 2022. Previously the default
+  (2012) emitted unsuffixed columns and only 2022 carried a suffix;
+  the asymmetry meant flipping a default in the future would
+  silently change column names of code written against the
+  unsuffixed convention. The always-suffix scheme makes the source
+  equation explicit at every column and removes the implicit
+  "unsuffixed == default" rule.
+
+  Lung-volume (Hall 2021) and diffusion (GLI 2017) outputs stay
+  unsuffixed for now — each module currently ships a single
+  standard. The same suffixing convention will be adopted there
+  when competing standards emerge.
+
+  Knock-on changes:
+  * `pft_classify()`, `pft_prism()`, and `pft_volume_subpattern()`
+    gain a `year` argument (default `2012`) that suffixes the
+    spirometry-derived `_lln` defaults. Standalone callers should
+    pass the year matching their upstream reference-function call.
+  * `pft_interpret()` threads `year` through the internal pipeline
+    so the helpers above receive it automatically.
+  * `pft_long()`'s `year` column is now populated for every
+    spirometry row; volume / diffusion rows remain `year = NA` until
+    those modules adopt the convention.
+  * `print.pft_result` annotates the per-measure rows with the
+    chosen GLI year (e.g. "FEV1 (2012)"). When both `_2012` and
+    `_2022` columns are present, the highest year is rendered.
+  * `pft_plot()` deduplicates per measure when both years are
+    present, picking the highest year so a single lollipop renders
+    one z-score per measure.
+
+  Tests, vignettes, and rendered docs have been updated to the new
+  convention. If you wrote code against `fev1_pred` /
+  `fev1_zscore` / etc., add the `_2012` suffix to those names (or
+  pass column-name overrides to the helpers).
+
+
 * `pft_compare()`, `print.pft_compare()`, `summary.pft_compare()`, and
   the `pft_plot(type = "compare")` mode have been removed. The
   GLI 2012 vs GLI Global 2022 reclassification analysis can still be
@@ -53,6 +104,26 @@
 
 ## New features
 
+* `pft_classify()`, `pft_prism()`, `pft_volume_subpattern()`, and
+  `pft_diffusion_interpret()` now accept tidy-eval column-name
+  overrides (bare name, string, or `!!var`) for every input column,
+  matching the pattern already used by `pft_spirometry()`,
+  `pft_volumes()`, `pft_diffusion()`, and `pft_interpret()`. Defaults
+  are the canonical pft column names, so callers using the convention
+  pass no extra arguments. The error message when a required column
+  is absent now reads `"required column(s) missing from input: ..."`
+  (was function-specific wording).
+* `pft_diffusion_interpret()` gains an `SI.units` argument matching
+  `pft_diffusion()` and `pft_interpret()`. The previous silent
+  traditional-vs-SI auto-detect is dropped; SI-units callers must now
+  pass `SI.units = TRUE` (or override `dlco` / `kco` directly).
+  Threaded through `pft_interpret()` so the package-level `SI.units`
+  flag now reaches every stage that needs it.
+* `pft_classify()` now tolerates absence of the `tlc` / `tlc_lln`
+  columns: when either is missing from `data`, the existing
+  spirometry-only fallback (Stanojevic 2022 Table 5 / Pellegrino 2005
+  Fig 2) triggers without raising. Previously a caller working from
+  spirometry-only data had to add explicit NA TLC columns first.
 * `pft_long()` pivots a `pft_result` to long form (one row per
   `(patient, measure)`). The `tidy.pft_result()` S3 method
   dispatches to it when `broom` is installed.

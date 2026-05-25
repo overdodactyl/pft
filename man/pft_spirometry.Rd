@@ -6,7 +6,7 @@
 \usage{
 pft_spirometry(
   data,
-  year = 2012,
+  year = 2022,
   sex = sex,
   age = age,
   height = height,
@@ -28,7 +28,8 @@ percent-predicted for that measure (see Value).}
 
 \item{year}{The year of GLI published equations. Valid options are
 2012 (multi-ethnic, requires a \code{race} column) and 2022 (race-neutral
-"GLI Global"; the \code{race} column, if present, is ignored).}
+"GLI Global"; the \code{race} column, if present, is ignored). Defaults
+to \code{2022}, the current ERS/ATS recommendation.}
 
 \item{sex, age, height, race}{Column references. By default
 \code{pft_spirometry()} reads from \code{sex}, \code{age}, \code{height}, and (for GLI
@@ -39,16 +40,17 @@ names are preserved in the output.}
 }
 \value{
 The original data frame with extra columns appended for each
-measure:
+measure. Every output column carries the GLI year as a suffix so
+a single result frame can hold multiple equation outputs
+side-by-side (\code{fev1_pred_2012}, \code{fev1_pred_2022}, ...).
 \itemize{
-\item \verb{<measure>_pred}: predicted (median) value.
-\item \verb{<measure>_lln}:  lower limit of normal (5th percentile).
-\item \verb{<measure>_uln}:  upper limit of normal (95th percentile).
+\item \verb{<measure>_pred_<year>}: predicted (median) value.
+\item \verb{<measure>_lln_<year>}:  lower limit of normal (5th percentile).
+\item \verb{<measure>_uln_<year>}:  upper limit of normal (95th percentile).
 If a \verb{<measure>_measured} column was supplied in \code{data}, two
 additional columns are emitted:
-\item \verb{<measure>_zscore}:  LMS z-score \code{((measured/M)^L - 1) / (L*S)}.
-\item \verb{<measure>_pctpred}: percent predicted \code{(measured / pred) * 100}.
-For \code{year = 2022} the output column names carry a \verb{_2022} suffix.
+\item \verb{<measure>_zscore_<year>}:  LMS z-score \code{((measured/M)^L - 1) / (L*S)}.
+\item \verb{<measure>_pctpred_<year>}: percent predicted \code{(measured / pred) * 100}.
 }
 }
 \description{

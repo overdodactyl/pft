@@ -41,19 +41,40 @@ pft_plot <- function(data) {
 
   zcols <- grep("_zscore(?:_[0-9]+)?$", colnames(data),
                 value = TRUE, perl = TRUE)
-  # Prefer the unsuffixed columns when both are present (a single
-  # lollipop should pick one standard, not mix).
-  if (any(grepl("_zscore$", zcols)) && any(grepl("_zscore_[0-9]+$", zcols))) {
-    zcols <- zcols[grepl("_zscore$", zcols)]
-  }
   if (length(zcols) == 0) {
     stop("No z-score columns found in `data`. Did you forget to supply ",
          "`<measure>_measured` columns before calling pft_interpret()?",
          call. = FALSE)
   }
 
+  # Per-measure deduplication: when a row carries z-scores from multiple
+  # GLI years for the same measure (e.g. fev1_zscore_2012 and
+  # fev1_zscore_2022 side-by-side), keep only the highest-year variant
+  # so the lollipop picks one standard and doesn't render two points
+  # per measure. Unsuffixed z-scores (volumes / diffusion under the
+  # current convention) are kept as-is.
+  parsed <- regmatches(
+    zcols,
+    regexec("^(.+?)_zscore(?:_([0-9]+))?$", zcols)
+  )
+  measures <- vapply(parsed, function(m) m[2], character(1))
+  years    <- vapply(parsed, function(m) if (length(m) >= 3) m[3] else "",
+                      character(1))
+  picked_idx <- vapply(unique(measures), function(meas) {
+    rows <- which(measures == meas)
+    if (length(rows) == 1) return(rows)
+    years_int <- suppressWarnings(as.integer(years[rows]))
+    if (any(!is.na(years_int))) {
+      rows[which.max(replace(years_int, is.na(years_int), -Inf))]
+    } else {
+      rows[1]
+    }
+  }, integer(1))
+  zcols    <- zcols[picked_idx]
+  measures <- measures[picked_idx]
+
   plot_df <- data.frame(
-    measure = sub("_zscore.*", "", zcols),
+    measure = measures,
     zscore  = vapply(zcols, function(c) data[[c]][1], numeric(1)),
     stringsAsFactors = FALSE
   )

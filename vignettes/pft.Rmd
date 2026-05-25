@@ -37,13 +37,18 @@ normal (ULN) for every measure.
 
 ```{r}
 patient <- data.frame(
-  sex = "M", age = 45, height = 178, race = "Caucasian"
+  sex = "M", age = 45, height = 178
 )
 
-ref <- pft_spirometry(patient, year = 2012)
-ref[, c("fev1_pred", "fev1_lln", "fev1_uln",
-        "fvc_pred",  "fvc_lln",  "fvc_uln")]
+ref <- pft_spirometry(patient)
+ref[, c("fev1_pred_2022", "fev1_lln_2022", "fev1_uln_2022",
+        "fvc_pred_2022",  "fvc_lln_2022",  "fvc_uln_2022")]
 ```
+
+The default is GLI 2022 ("GLI Global"), the race-neutral
+equation set recommended by the ERS/ATS 2022 standard. To use the
+predecessor GLI 2012 multi-ethnic equations, pass `year = 2012` and
+include a `race` column.
 
 The same pattern works for lung volumes and diffusion:
 
@@ -65,8 +70,8 @@ patient_with_measurements <- data.frame(
 )
 
 out <- pft_spirometry(patient_with_measurements)
-out[, c("fev1_pred", "fev1_zscore", "fev1_pctpred",
-        "fvc_pred",  "fvc_zscore",  "fvc_pctpred")]
+out[, c("fev1_pred_2022", "fev1_zscore_2022", "fev1_pctpred_2022",
+        "fvc_pred_2022",  "fvc_zscore_2022",  "fvc_pctpred_2022")]
 ```
 
 The z-score uses the standard LMS formula
@@ -85,9 +90,9 @@ pft_severity(c(0, -1.7, -3, -5))
 You can grade any z-score column directly:
 
 ```{r}
-out$fev1_severity <- pft_severity(out$fev1_zscore)
-out$fvc_severity  <- pft_severity(out$fvc_zscore)
-out[, c("fev1_zscore", "fev1_severity", "fvc_zscore", "fvc_severity")]
+out$fev1_severity_2022 <- pft_severity(out$fev1_zscore_2022)
+out$fvc_severity_2022  <- pft_severity(out$fvc_zscore_2022)
+out[, c("fev1_zscore_2022", "fev1_severity_2022", "fvc_zscore_2022", "fvc_severity_2022")]
 ```
 
 # 4. ATS pattern classification
@@ -97,9 +102,9 @@ labels the pattern per Stanojevic 2022 Figure 8:
 
 ```{r}
 classification_input <- data.frame(
-  fev1 = 2.5,  fev1_lln = 3.0,
-  fvc  = 3.8,  fvc_lln  = 3.5,
-  fev1fvc = 0.66, fev1fvc_lln = 0.70,
+  fev1 = 2.5,  fev1_lln_2022 = 3.0,
+  fvc  = 3.8,  fvc_lln_2022  = 3.5,
+  fev1fvc = 0.66, fev1fvc_lln_2022 = 0.70,
   tlc  = 6.0,  tlc_lln = 5.0
 )
 pft_classify(classification_input)[
@@ -128,9 +133,9 @@ Spirometry-only; no TLC needed.
 
 ```{r}
 pft_prism(data.frame(
-  fev1    = 2.0,  fev1_lln    = 2.5,
-  fvc     = 2.6,  fvc_lln     = 3.0,
-  fev1fvc = 0.80, fev1fvc_lln = 0.70
+  fev1    = 2.0,  fev1_lln_2022    = 2.5,
+  fvc     = 2.6,  fvc_lln_2022     = 3.0,
+  fev1fvc = 0.80, fev1fvc_lln_2022 = 0.70
 ))
 ```
 
@@ -163,8 +168,8 @@ patient <- data.frame(
 result <- pft_interpret(patient)
 
 # A high-level subset of the ~60 columns generated:
-result[, c("fev1_pred", "fev1_zscore", "fev1_severity",
-           "fvc_zscore", "fvc_severity",
+result[, c("fev1_pred_2022", "fev1_zscore_2022", "fev1_severity_2022",
+           "fvc_zscore_2022", "fvc_severity_2022",
            "ats_classification", "prism",
            "fev1_bdr_pct", "fev1_bdr_significant")]
 ```
@@ -198,7 +203,7 @@ cohort <- data.frame(
 
 interpreted <- pft_interpret(cohort)
 interpreted[, c("sex", "age",
-                "fev1_zscore", "fev1_severity",
+                "fev1_zscore_2022", "fev1_severity_2022",
                 "ats_classification", "prism")]
 ```
 

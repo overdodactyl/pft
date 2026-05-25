@@ -6,8 +6,26 @@
 #' (Figure 8); pass `standard = "2005"` to apply the predecessor
 #' Pellegrino et al. ERJ 2005 algorithm.
 #'
-#' @param data A data frame containing columns for fev1, fvc, fev1fvc, and their associated LLNs.
+#' Typically called via [pft_interpret()] as part of the one-call
+#' workflow; exported for callers who want to apply the classifier to
+#' pre-computed columns directly.
 #'
+#' @param data A data frame containing the six spirometry input columns
+#'   (`fev1`, `fev1_lln`, `fvc`, `fvc_lln`, `fev1fvc`, `fev1fvc_lln`)
+#'   and optionally `tlc` and `tlc_lln`. TLC columns are optional --
+#'   when either is absent from `data`, the classifier routes via the
+#'   spirometry-only fallback (see "Missing TLC" below).
+#' @param fev1,fev1_lln,fvc,fvc_lln,fev1fvc,fev1fvc_lln,tlc,tlc_lln
+#'   Column references for the eight inputs. Defaults are the canonical
+#'   names (`fev1`, `fev1_lln`, ...); override with a bare name, a
+#'   string, or `!!var` (see "Column-name overrides" below).
+#'
+#' @param year GLI year suffix to use when looking up the spirometry
+#'   LLN columns (`fev1_lln`, `fvc_lln`, `fev1fvc_lln`). Defaults to
+#'   `2022` (GLI Global, race-neutral). Set to match the `year`
+#'   argument used in the upstream [pft_spirometry()] /
+#'   [pft_interpret()] call. The TLC columns (volumes reference) are
+#'   unsuffixed and are not affected by `year`.
 #' @param standard Which interpretive standard's classifier to apply.
 #'   `"2022"` (default) follows Stanojevic et al. ERJ 2022 Figure 8 and
 #'   recognises five labels: `Normal`, `Non-specific`, `Obstructed`,
@@ -35,6 +53,18 @@
 #'     preserved (restriction); `"NNA?"` means FEV1/FVC is below LLN
 #'     and TLC is unknown. The pattern-combination string is
 #'     independent of the `standard` selected.
+#'
+#' @section Column-name overrides:
+#' Each column-reference argument accepts three forms:
+#' * a **bare column name** -- `fev1 = my_fev1`
+#' * a **string** -- `fev1 = "my_fev1"`
+#' * an **injected value** -- `fev1 = !!my_var` where `my_var <- "my_fev1"`
+#'
+#' Defaults are the canonical pft column names, so callers whose data
+#' already follows the convention pass no extra arguments. The two TLC
+#' references (`tlc`, `tlc_lln`) are optional: when either resolves to
+#' a column not present in `data`, the spirometry-only fallback
+#' triggers without raising an error.
 #'
 #' @section Missing TLC (spirometry-only fallback):
 #' When the three spirometry inputs (`fev1`, `fvc`, `fev1fvc`) and
@@ -72,20 +102,55 @@
 #'   argument for end-to-end reclassification.
 #'
 #' @examples data <- data.frame(fev1 = c(3.453, 2.385),
-#'                              fev1_lln = c(3.303, 3.384),
+#'                              fev1_lln_2022 = c(3.303, 3.384),
 #'                              fvc = c(4.733, 3.485),
-#'                              fvc_lln = c(4.214, 4.24),
+#'                              fvc_lln_2022 = c(4.214, 4.24),
 #'                              fev1fvc = c(0.600, 0.827),
-#'                              fev1fvc_lln = c(0.681, 0.700),
+#'                              fev1fvc_lln_2022 = c(0.681, 0.700),
 #'                              tlc = c(1.5, 2.3),
 #'                              tlc_lln = c(2, 2.5))
 #'           pft_classify(data)
 #'           pft_classify(data, standard = "2005")
 #'
+#'           # Column-name override: data using non-canonical names.
+#'           alt <- data.frame(my_fev1 = 3.0, my_fev1_lln = 2.5,
+#'                             fvc = 4.0, fvc_lln_2022 = 3.5,
+#'                             fev1fvc = 0.65, fev1fvc_lln_2022 = 0.70,
+#'                             tlc = 6.0, tlc_lln = 5.0)
+#'           pft_classify(alt, fev1 = my_fev1, fev1_lln = my_fev1_lln)
+#'
 #' @export
-pft_classify <- function(data, standard = c("2022", "2005")) {
+pft_classify <- function(data,
+                          standard = c("2022", "2005"),
+                          year     = 2022,
+                          fev1        = fev1,
+                          fev1_lln    = NULL,
+                          fvc         = fvc,
+                          fvc_lln     = NULL,
+                          fev1fvc     = fev1fvc,
+                          fev1fvc_lln = NULL,
+                          tlc         = tlc,
+                          tlc_lln     = tlc_lln) {
 
   standard <- match.arg(standard)
+  suf <- paste0("_", year)
+
+  required_quos <- list(
+    fev1        = rlang::enquo(fev1),
+    fev1_lln    = quo_or_default(rlang::enquo(fev1_lln),    paste0("fev1_lln",    suf)),
+    fvc         = rlang::enquo(fvc),
+    fvc_lln     = quo_or_default(rlang::enquo(fvc_lln),     paste0("fvc_lln",     suf)),
+    fev1fvc     = rlang::enquo(fev1fvc),
+    fev1fvc_lln = quo_or_default(rlang::enquo(fev1fvc_lln), paste0("fev1fvc_lln", suf))
+  )
+  cols <- resolve_data_cols(data, required_quos, "pft_classify")
+
+  # TLC is optional: resolve the names but tolerate absence so the
+  # spirometry-only fallback (see "Missing TLC" section) triggers
+  # without raising.
+  tlc_name     <- resolve_column_name(rlang::enquo(tlc),     "tlc")
+  tlc_lln_name <- resolve_column_name(rlang::enquo(tlc_lln), "tlc_lln")
+  has_tlc <- tlc_name %in% colnames(data) && tlc_lln_name %in% colnames(data)
 
   # 2022 (Stanojevic ERJ 2022, Figure 8) pattern lookup. Positions in the
   # 4-char key correspond to FEV1, FVC, FEV1/FVC, TLC (A = below LLN,
@@ -182,10 +247,11 @@ pft_classify <- function(data, standard = c("2022", "2005")) {
     out[is.na(x) | is.na(lln)] <- NA_character_
     out
   }
-  fev1_s    <- status(data$fev1,    data$fev1_lln)
-  fvc_s     <- status(data$fvc,     data$fvc_lln)
-  fev1fvc_s <- status(data$fev1fvc, data$fev1fvc_lln)
-  tlc_s     <- status(data$tlc,     data$tlc_lln)
+  fev1_s    <- status(data[[cols["fev1"]]],    data[[cols["fev1_lln"]]])
+  fvc_s     <- status(data[[cols["fvc"]]],     data[[cols["fvc_lln"]]])
+  fev1fvc_s <- status(data[[cols["fev1fvc"]]], data[[cols["fev1fvc_lln"]]])
+  tlc_s     <- if (has_tlc) status(data[[tlc_name]], data[[tlc_lln_name]])
+               else rep(NA_character_, nrow(data))
 
   spiro_known <- !is.na(fev1_s) & !is.na(fvc_s) & !is.na(fev1fvc_s)
   tlc_known   <- !is.na(tlc_s)

@@ -10,14 +10,15 @@ new_pft_result <- function(x) {
 
 #' @export
 print.pft_result <- function(x, ...) {
-  # If the column shape no longer resembles a pft_interpret() output
-  # (e.g. after a dplyr verb like select() that dropped the _pred /
-  # _zscore columns, or count() / summarise() that collapsed the
-  # frame), fall back to the standard tibble print so the user sees
-  # the actual data instead of a malformed clinical report.
-  has_pft_cols <- any(grepl("_pred(?:_[0-9]+)?$", colnames(x))) ||
-                  any(grepl("_zscore(?:_[0-9]+)?$", colnames(x)))
-  if (!has_pft_cols) {
+  # The clinical-report format is keyed off `<measure>_pred` columns
+  # (print_pft_row() iterates over the measure list and only emits a
+  # row when the corresponding `_pred` column is present). If no
+  # `_pred` column survives -- because the caller subset / selected to
+  # a non-PFT shape, or summarised the frame -- fall back to the
+  # standard tibble print so the user sees the columns they kept
+  # instead of an empty clinical report.
+  has_pred_cols <- any(grepl("_pred(?:_[0-9]+)?$", colnames(x)))
+  if (!has_pred_cols) {
     return(NextMethod())
   }
   if (nrow(x) == 0) {
@@ -70,33 +71,16 @@ print_pft_row <- function(row) {
   rows <- list()
   for (spec in measure_specs) {
     key <- spec[1]; label <- spec[2]
-    # Skip if there is no predicted value for this measure (with or
-    # without _2022 suffix).
-    pred_col <- paste0(key, "_pred")
-    pred_col_2022 <- paste0(key, "_pred_2022")
-    if (pred_col %in% colnames(row)) {
-      meas_col <- paste0(key, "_measured")
-      z_col    <- paste0(key, "_zscore")
-      sev_col  <- paste0(key, "_severity")
-      rows[[length(rows) + 1]] <- c(
-        label,
-        fmt_num(row[[pred_col]]),
-        if (meas_col %in% colnames(row)) fmt_num(row[[meas_col]]) else "-",
-        if (z_col   %in% colnames(row)) fmt_num(row[[z_col]])   else "-",
-        if (sev_col %in% colnames(row)) as.character(row[[sev_col]]) else "-"
-      )
-    } else if (pred_col_2022 %in% colnames(row)) {
-      meas_col <- paste0(key, "_measured")
-      z_col    <- paste0(key, "_zscore_2022")
-      sev_col  <- paste0(key, "_severity_2022")
-      rows[[length(rows) + 1]] <- c(
-        label,
-        fmt_num(row[[pred_col_2022]]),
-        if (meas_col %in% colnames(row)) fmt_num(row[[meas_col]]) else "-",
-        if (z_col   %in% colnames(row)) fmt_num(row[[z_col]])   else "-",
-        if (sev_col %in% colnames(row)) as.character(row[[sev_col]]) else "-"
-      )
-    }
+    rc <- resolve_measure_cols(key, label, colnames(row))
+    if (is.null(rc)) next
+    meas_col <- paste0(key, "_measured")
+    rows[[length(rows) + 1]] <- c(
+      rc$label,
+      fmt_num(row[[rc$pred]]),
+      if (meas_col %in% colnames(row)) fmt_num(row[[meas_col]]) else "-",
+      if (rc$z   %in% colnames(row)) fmt_num(row[[rc$z]])   else "-",
+      if (rc$sev %in% colnames(row)) as.character(row[[rc$sev]]) else "-"
+    )
   }
   if (length(rows) > 0) {
     m <- do.call(rbind, rows)
@@ -123,6 +107,39 @@ print_pft_row <- function(row) {
                   toupper(m), row[[bdr]], fmt_num(row[[pct]])))
     }
   }
+}
+
+# Resolve the per-measure column-name set used by print_pft_row(). Picks
+# the year-suffixed variant if any are present (highest year wins, so
+# the printed clinical report tracks the newest equation when both 2012
+# and 2022 columns sit side-by-side), else the unsuffixed variant
+# (volumes / diffusion). Returns NULL when no matching _pred column
+# exists in `cols`. The returned label appends the year in parentheses
+# for spirometry so the reader can see which equation was applied.
+resolve_measure_cols <- function(key, label, cols) {
+  m <- regmatches(cols, regexec(sprintf("^%s_pred_([0-9]+)$", key), cols))
+  m <- m[lengths(m) > 0]
+  if (length(m) > 0) {
+    years <- as.integer(vapply(m, `[`, character(1), 2))
+    yr    <- max(years)
+    suf   <- paste0("_", yr)
+    return(list(
+      pred  = paste0(key, "_pred",     suf),
+      z     = paste0(key, "_zscore",   suf),
+      sev   = paste0(key, "_severity", suf),
+      label = sprintf("%s (%d)", label, yr)
+    ))
+  }
+  unsuffixed <- paste0(key, "_pred")
+  if (unsuffixed %in% cols) {
+    return(list(
+      pred  = unsuffixed,
+      z     = paste0(key, "_zscore"),
+      sev   = paste0(key, "_severity"),
+      label = label
+    ))
+  }
+  NULL
 }
 
 # Compact numeric formatter that handles NA cleanly.
@@ -169,15 +186,22 @@ plot.pft_result <- function(x, ...) pft_plot(x)
 #' `ggplot2` faceting, cohort modelling, and `broom`-style downstream
 #' workflows.
 #'
-#' Discovery is keyed off `<measure>_pred` columns; if your data frame
-#' has predicted columns from a non-default GLI year, they are picked up
-#' automatically and the four-digit year ends up in the `year` column.
-#' Columns whose suffix does not match a recognised statistic are
-#' ignored, so id / demographic columns are dropped (use the `.patient`
-#' integer to join back).
+#' Discovery is keyed off `<measure>_pred` columns; the four-digit GLI
+#' year is extracted from the column suffix and recorded in the `year`
+#' column. Spirometry outputs from [pft_spirometry()] / [pft_interpret()]
+#' always carry a year suffix (`fev1_pred_2012`, `fev1_pred_2022`, ...)
+#' and produce a populated `year`; lung-volume (Hall 2021) and
+#' diffusion (GLI 2017) outputs are unsuffixed and produce `year = NA`
+#' until a competing standard ships and the same suffixing convention
+#' is adopted there. Columns whose suffix does not match a recognised
+#' statistic are ignored, so id / demographic columns are dropped (use
+#' the `.patient` integer to join back).
 #'
 #' @param x A data frame; typically a `pft_result` but any data frame
-#'   with `<measure>_pred[_<year>]` columns works.
+#'   with `<measure>_pred[_<year>]` columns works. Named `x` (rather
+#'   than `data`) to match the S3 first-argument convention shared with
+#'   `print.pft_result`, `plot.pft_result`, and the other `pft_result`
+#'   methods.
 #' @param ... Currently unused; reserved for forward compatibility.
 #'
 #' @return A tibble with columns `.patient` (integer row position),

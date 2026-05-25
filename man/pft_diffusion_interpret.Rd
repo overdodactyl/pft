@@ -4,14 +4,27 @@
 \alias{pft_diffusion_interpret}
 \title{Classify a diffusion result into a clinical pattern category}
 \usage{
-pft_diffusion_interpret(data)
+pft_diffusion_interpret(
+  data,
+  SI.units = FALSE,
+  dlco = NULL,
+  va = NULL,
+  kco = NULL
+)
 }
 \arguments{
-\item{data}{A data frame containing diffusion z-score columns.
-Required columns (traditional units): \code{dlco_zscore}, \code{va_zscore},
-\code{kco_tr_zscore}. Required columns (SI units): \code{tlco_zscore},
-\code{va_zscore}, \code{kco_si_zscore}. The function tries traditional
-first, then SI.}
+\item{data}{A data frame containing the three z-score input columns.}
+
+\item{SI.units}{Logical, default \code{FALSE}. Selects the default
+column names for \code{dlco} and \code{kco}. Traditional units (\code{FALSE}):
+\code{dlco_zscore} and \code{kco_tr_zscore}. SI units (\code{TRUE}): \code{tlco_zscore}
+and \code{kco_si_zscore}. \code{va} defaults to \code{va_zscore} in both unit
+systems.}
+
+\item{dlco, va, kco}{Column references for the three z-score inputs.
+\code{dlco} and \code{kco} default to \code{NULL}, which means: pick the
+canonical column name based on \code{SI.units}. Pass a bare name, a
+string, or \code{!!var} to override (see "Column-name overrides").}
 }
 \value{
 The original data frame with a single appended column:
@@ -49,11 +62,32 @@ Hughes & Pride 2012 framework adopted by the ERS/ATS Stanojevic
 2017 task force.
 }
 \details{
-The classifier consumes z-scores only and is unit-agnostic; it
-works identically on the traditional-units columns (\code{dlco_zscore},
-\code{kco_tr_zscore}) and on the SI-units columns (\code{tlco_zscore},
-\code{kco_si_zscore}). The function tries both naming conventions.
+The classifier consumes z-scores only and is unit-agnostic, but the
+default input column names differ between unit systems. Set
+\code{SI.units = TRUE} to pick up the SI-units column set
+(\code{tlco_zscore}, \code{va_zscore}, \code{kco_si_zscore}); otherwise the
+traditional-units column set (\code{dlco_zscore}, \code{va_zscore},
+\code{kco_tr_zscore}) is used. Override individual column names via the
+\code{dlco} / \code{va} / \code{kco} arguments.
+
+Typically called via \code{\link[=pft_interpret]{pft_interpret()}} as part of the one-call
+workflow; exported for callers who want to apply the classifier to
+pre-computed z-score columns directly.
 }
+\section{Column-name overrides}{
+
+Each column-reference argument accepts three forms:
+\itemize{
+\item a \strong{bare column name} -- \code{dlco = my_dlco}
+\item a \strong{string} -- \code{dlco = "my_dlco"}
+\item an \strong{injected value} -- \code{dlco = !!my_var} where \code{my_var <- "my_dlco"}
+}
+
+\code{dlco} and \code{kco} default to \code{NULL}, which selects the canonical
+name based on \code{SI.units} (traditional or SI). Passing an explicit
+reference overrides this selection.
+}
+
 \section{References}{
 
 Hughes JM, Pride NB. Examination of the carbon monoxide diffusing
@@ -79,6 +113,14 @@ d <- data.frame(
   kco_tr_zscore = c(-0.5, -2.0, -0.5)
 )
 pft_diffusion_interpret(d)
+
+# SI units (TLCO / KCO_SI). Pass SI.units = TRUE.
+d_si <- data.frame(
+  tlco_zscore   = c(-0.5, -2.0),
+  va_zscore     = c(-0.5, -0.5),
+  kco_si_zscore = c(-0.5, -2.0)
+)
+pft_diffusion_interpret(d_si, SI.units = TRUE)
 
 }
 \seealso{

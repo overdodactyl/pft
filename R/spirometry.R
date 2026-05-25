@@ -18,7 +18,8 @@
 #'
 #' @param year The year of GLI published equations. Valid options are
 #'    2012 (multi-ethnic, requires a `race` column) and 2022 (race-neutral
-#'    "GLI Global"; the `race` column, if present, is ignored).
+#'    "GLI Global"; the `race` column, if present, is ignored). Defaults
+#'    to `2022`, the current ERS/ATS recommendation.
 #'
 #' @param sex,age,height,race Column references. By default
 #'    `pft_spirometry()` reads from `sex`, `age`, `height`, and (for GLI
@@ -28,15 +29,16 @@
 #'    names are preserved in the output.
 #'
 #' @return The original data frame with extra columns appended for each
-#'    measure:
-#'    - `<measure>_pred`: predicted (median) value.
-#'    - `<measure>_lln`:  lower limit of normal (5th percentile).
-#'    - `<measure>_uln`:  upper limit of normal (95th percentile).
+#'    measure. Every output column carries the GLI year as a suffix so
+#'    a single result frame can hold multiple equation outputs
+#'    side-by-side (`fev1_pred_2012`, `fev1_pred_2022`, ...).
+#'    - `<measure>_pred_<year>`: predicted (median) value.
+#'    - `<measure>_lln_<year>`:  lower limit of normal (5th percentile).
+#'    - `<measure>_uln_<year>`:  upper limit of normal (95th percentile).
 #'    If a `<measure>_measured` column was supplied in `data`, two
 #'    additional columns are emitted:
-#'    - `<measure>_zscore`:  LMS z-score `((measured/M)^L - 1) / (L*S)`.
-#'    - `<measure>_pctpred`: percent predicted `(measured / pred) * 100`.
-#'    For `year = 2022` the output column names carry a `_2022` suffix.
+#'    - `<measure>_zscore_<year>`:  LMS z-score `((measured/M)^L - 1) / (L*S)`.
+#'    - `<measure>_pctpred_<year>`: percent predicted `(measured / pred) * 100`.
 #'
 #' @references
 #' Quanjer PH, Stanojevic S, Cole TJ, et al. Multi-ethnic reference values for
@@ -63,7 +65,7 @@
 #' pft_spirometry(data)
 #'
 #' @export
-pft_spirometry <- function(data, year = 2012,
+pft_spirometry <- function(data, year = 2022,
                             sex = sex, age = age,
                             height = height, race = race) {
 
@@ -96,7 +98,7 @@ pft_spirometry <- function(data, year = 2012,
       M = fits$M, S = fits$S, L = fits$L,
       lower = fits$lower, upper = fits$upper,
       measures = c("fev1", "fvc", "fev1fvc", "fef2575", "fef75"),
-      suffix = ""
+      suffix = "_2012"
     )
   } else if (year == 2022) {
     fits <- spirometry_lms_fit(

@@ -99,20 +99,20 @@ test_that("sex=\"Male\" no longer silently produces female predictions", {
   d_lower   <- data.frame(sex = "Male", age = 45, height = 178, race = "Caucasian")
   out_correct <- pft_spirometry(d_correct)
   out_lower   <- suppressWarnings(pft_spirometry(d_lower))
-  expect_equal(out_correct$fev1_pred, out_lower$fev1_pred,
+  expect_equal(out_correct$fev1_pred_2022, out_lower$fev1_pred_2022,
                tolerance = 1e-9)  # both should be male predictions now
 })
 
 test_that("sex=\"X\" produces NA, not silent-female predictions", {
   d <- data.frame(sex = "X", age = 45, height = 178, race = "Caucasian")
   out <- suppressWarnings(pft_spirometry(d))
-  expect_true(is.na(out$fev1_pred))
+  expect_true(is.na(out$fev1_pred_2022))
 })
 
 test_that("race=\"caucasian\" is accepted with a warning, not silent NA", {
   d <- data.frame(sex = "M", age = 45, height = 178, race = "caucasian")
   out <- suppressWarnings(pft_spirometry(d))
-  expect_false(is.na(out$fev1_pred))
+  expect_false(is.na(out$fev1_pred_2022))
 })
 
 test_that("year=2012 without race column errors loudly, not silently NAs", {

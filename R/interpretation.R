@@ -114,15 +114,35 @@ pft_bdr <- function(pre, post, predicted, threshold = BDR_THRESHOLD_PCT_PRED) {
 #' normal). The pattern is associated with elevated all-cause
 #' mortality and progression to chronic respiratory disease.
 #'
+#' Typically called via [pft_interpret()] as part of the one-call
+#' workflow; exported for callers who want to apply the screen to
+#' pre-computed columns directly.
+#'
 #' This function adds a `prism` logical column to the data frame.
 #' PRISm is a spirometry-only screen and does not require a TLC
 #' measurement.
 #'
-#' @param data A data frame containing `fev1`, `fev1_lln`, `fvc`,
-#'   `fvc_lln`, `fev1fvc`, and `fev1fvc_lln` columns.
+#' @param data A data frame containing the six input columns named below.
+#' @param year GLI year suffix used when looking up the LLN columns
+#'   (`fev1_lln`, `fvc_lln`, `fev1fvc_lln`). Defaults to `2022`. Set to
+#'   match the `year` argument used in the upstream [pft_spirometry()]
+#'   / [pft_interpret()] call.
+#' @param fev1,fev1_lln,fvc,fvc_lln,fev1fvc,fev1fvc_lln Column references
+#'   for the six required columns. Defaults are the canonical names
+#'   (`fev1`, `fev1_lln_<year>`, ...); override with a bare name, a
+#'   string, or `!!var` (see "Column-name overrides" below).
 #'
 #' @return The original data frame with a `prism` logical column
 #'   appended. `NA` propagates from any of the six input columns.
+#'
+#' @section Column-name overrides:
+#' Each column-reference argument accepts three forms:
+#' * a **bare column name** -- `fev1 = my_fev1`
+#' * a **string** -- `fev1 = "my_fev1"`
+#' * an **injected value** -- `fev1 = !!my_var` where `my_var <- "my_fev1"`
+#'
+#' Defaults are the canonical pft column names, so callers whose data
+#' already follows the convention pass no extra arguments.
 #'
 #' @references
 #' Stanojevic S, Kaminsky DA, Miller MR, et al. ERS/ATS technical
@@ -137,16 +157,40 @@ pft_bdr <- function(pre, post, predicted, threshold = BDR_THRESHOLD_PCT_PRED) {
 #'   present.
 #'
 #' @examples
-#' d <- data.frame(fev1    = 2.0, fev1_lln    = 2.5,
-#'                 fvc     = 2.6, fvc_lln     = 3.0,
-#'                 fev1fvc = 0.80, fev1fvc_lln = 0.70)
+#' d <- data.frame(fev1    = 2.0, fev1_lln_2022    = 2.5,
+#'                 fvc     = 2.6, fvc_lln_2022     = 3.0,
+#'                 fev1fvc = 0.80, fev1fvc_lln_2022 = 0.70)
 #' pft_prism(d)
 #'
+#' # Column-name override: data using non-canonical names.
+#' d2 <- data.frame(my_fev1 = 2.0, my_fev1_lln = 2.5,
+#'                  fvc = 2.6, fvc_lln_2022 = 3.0,
+#'                  fev1fvc = 0.80, fev1fvc_lln_2022 = 0.70)
+#' pft_prism(d2, fev1 = my_fev1, fev1_lln = my_fev1_lln)
+#'
 #' @export
-pft_prism <- function(data) {
-  fev1_low     <- data$fev1    <  data$fev1_lln
-  fvc_low      <- data$fvc     <  data$fvc_lln
-  ratio_normal <- data$fev1fvc >= data$fev1fvc_lln
+pft_prism <- function(data,
+                       year        = 2022,
+                       fev1        = fev1,
+                       fev1_lln    = NULL,
+                       fvc         = fvc,
+                       fvc_lln     = NULL,
+                       fev1fvc     = fev1fvc,
+                       fev1fvc_lln = NULL) {
+  suf <- paste0("_", year)
+  quos <- list(
+    fev1        = rlang::enquo(fev1),
+    fev1_lln    = quo_or_default(rlang::enquo(fev1_lln),    paste0("fev1_lln",    suf)),
+    fvc         = rlang::enquo(fvc),
+    fvc_lln     = quo_or_default(rlang::enquo(fvc_lln),     paste0("fvc_lln",     suf)),
+    fev1fvc     = rlang::enquo(fev1fvc),
+    fev1fvc_lln = quo_or_default(rlang::enquo(fev1fvc_lln), paste0("fev1fvc_lln", suf))
+  )
+  cols <- resolve_data_cols(data, quos, "pft_prism")
+
+  fev1_low     <- data[[cols["fev1"]]]    <  data[[cols["fev1_lln"]]]
+  fvc_low      <- data[[cols["fvc"]]]     <  data[[cols["fvc_lln"]]]
+  ratio_normal <- data[[cols["fev1fvc"]]] >= data[[cols["fev1fvc_lln"]]]
   data$prism <- fev1_low & fvc_low & ratio_normal
   tibble::as_tibble(data)
 }

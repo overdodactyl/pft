@@ -42,7 +42,8 @@
 #'
 #' @param data A data frame containing whatever inputs are available.
 #'   See Details for the column-name conventions.
-#' @param year GLI spirometry equation year. See [pft_spirometry()].
+#' @param year GLI spirometry equation year. Defaults to `2022` (GLI
+#'   Global, race-neutral). See [pft_spirometry()].
 #' @param SI.units Whether to report diffusion in SI units. See
 #'   [pft_diffusion()].
 #' @param standard Interpretive standard whose downstream rules to
@@ -89,7 +90,7 @@
 #' pft_interpret(patient)
 #'
 #' @export
-pft_interpret <- function(data, year = 2012, SI.units = FALSE,
+pft_interpret <- function(data, year = 2022, SI.units = FALSE,
                            standard = c("2022", "2005"),
                            sex = sex, age = age,
                            height = height, race = race) {
@@ -104,10 +105,10 @@ pft_interpret <- function(data, year = 2012, SI.units = FALSE,
   data <- interpret_reference_values(data, year, SI.units,
                                       sex_q, age_q, height_q, race_q)
   data <- interpret_severity(data, standard)
-  data <- interpret_pattern(data, standard)
-  data <- interpret_volume_subpattern(data)
-  data <- interpret_diffusion(data)
-  data <- interpret_prism(data)
+  data <- interpret_pattern(data, standard, year)
+  data <- interpret_volume_subpattern(data, year)
+  data <- interpret_diffusion(data, SI.units)
+  data <- interpret_prism(data, year)
   data <- interpret_bdr(data, standard, year)
 
   new_pft_result(data)
@@ -162,12 +163,16 @@ interpret_severity <- function(data, standard) {
 # inputs (fev1 / fvc / fev1fvc) with their LLNs; TLC is optional. When
 # TLC inputs are absent or NA, pft_classify() applies the spirometry-only
 # fallback (Stanojevic 2022 Table 5 / Pellegrino 2005 Fig 2 branches).
-interpret_pattern <- function(data, standard) {
+interpret_pattern <- function(data, standard, year) {
+  suf <- paste0("_", year)
   pat_data <- data
   for (m in c("fev1", "fvc", "fev1fvc")) {
     measured <- paste0(m, "_measured")
-    lln      <- paste0(m, "_lln")
+    lln      <- paste0(m, "_lln", suf)
     if (!(measured %in% colnames(data) && lln %in% colnames(data))) return(data)
+    # Place the measured value at the canonical position; the LLN
+    # stays in its year-suffixed column and pft_classify(year = year)
+    # picks it up via its default-name machinery.
     pat_data[[m]] <- data[[measured]]
   }
   if ("tlc_measured" %in% colnames(data) && "tlc_lln" %in% colnames(data)) {
@@ -178,28 +183,28 @@ interpret_pattern <- function(data, standard) {
     pat_data$tlc     <- NA_real_
     pat_data$tlc_lln <- NA_real_
   }
-  pat_out <- pft_classify(pat_data, standard = standard)
+  pat_out <- pft_classify(pat_data, standard = standard, year = year)
   data$ats_classification      <- pat_out$ats_classification
   data$ats_pattern_combination <- pat_out$ats_pattern_combination
   data
 }
 
 # Stage 3.5: lung-volume sub-pattern (Stanojevic 2022 Figure 10).
-interpret_volume_subpattern <- function(data) {
+interpret_volume_subpattern <- function(data, year) {
+  suf <- paste0("_", year)
+  fev1fvc_lln_col <- paste0("fev1fvc_lln", suf)
   required <- c("tlc_measured", "tlc_lln", "tlc_uln",
-                "fev1fvc_measured", "fev1fvc_lln",
+                "fev1fvc_measured", fev1fvc_lln_col,
                 "rv_tlc_measured", "rv_tlc_uln")
   if (!all(required %in% colnames(data))) return(data)
 
-  vsp_data <- data.frame(
-    tlc         = data$tlc_measured,
-    tlc_lln     = data$tlc_lln,
-    tlc_uln     = data$tlc_uln,
-    fev1fvc     = data$fev1fvc_measured,
-    fev1fvc_lln = data$fev1fvc_lln,
-    rv_tlc      = data$rv_tlc_measured,
-    rv_tlc_uln  = data$rv_tlc_uln
-  )
+  # Build a temp frame with measured values at canonical positions; the
+  # year-suffixed fev1fvc_lln column passes through and is picked up by
+  # pft_volume_subpattern(year = year).
+  vsp_data <- data
+  vsp_data$tlc     <- data$tlc_measured
+  vsp_data$fev1fvc <- data$fev1fvc_measured
+  vsp_data$rv_tlc  <- data$rv_tlc_measured
   # Optional FRC/TLC (no Hall 2021 reference equation, but accepted by
   # pft_volume_subpattern() when the caller supplies external values).
   if (all(c("frc_tlc_measured", "frc_tlc_uln") %in% colnames(data))) {
@@ -207,43 +212,43 @@ interpret_volume_subpattern <- function(data) {
     vsp_data$frc_tlc_uln <- data$frc_tlc_uln
   }
   data$volume_subpattern <-
-    pft_volume_subpattern(vsp_data)$volume_subpattern
+    pft_volume_subpattern(vsp_data, year = year)$volume_subpattern
   data
 }
 
 # Stage 3.9: diffusion clinical-category classifier (Hughes & Pride 2012;
 # adopted by Stanojevic 2017). Runs whenever the diffusion z-score
 # columns are present (traditional or SI units).
-interpret_diffusion <- function(data) {
+interpret_diffusion <- function(data, SI.units) {
   has_tr <- all(c("dlco_zscore", "va_zscore", "kco_tr_zscore") %in% colnames(data))
   has_si <- all(c("tlco_zscore", "va_zscore", "kco_si_zscore") %in% colnames(data))
   if (!(has_tr || has_si)) return(data)
-  pft_diffusion_interpret(data)
+  pft_diffusion_interpret(data, SI.units = SI.units)
 }
 
 # Stage 4: PRISm screen (spirometry-only; independent of TLC).
-interpret_prism <- function(data) {
-  required <- c("fev1_measured", "fev1_lln",
-                "fvc_measured",  "fvc_lln",
-                "fev1fvc_measured", "fev1fvc_lln")
+interpret_prism <- function(data, year) {
+  suf <- paste0("_", year)
+  required <- c("fev1_measured",    paste0("fev1_lln",    suf),
+                "fvc_measured",     paste0("fvc_lln",     suf),
+                "fev1fvc_measured", paste0("fev1fvc_lln", suf))
   if (!all(required %in% colnames(data))) return(data)
 
-  prism_data <- data.frame(
-    fev1        = data$fev1_measured,
-    fev1_lln    = data$fev1_lln,
-    fvc         = data$fvc_measured,
-    fvc_lln     = data$fvc_lln,
-    fev1fvc     = data$fev1fvc_measured,
-    fev1fvc_lln = data$fev1fvc_lln
-  )
-  data$prism <- pft_prism(prism_data)$prism
+  # Build a minimal frame with measured values at canonical positions;
+  # LLN columns stay year-suffixed and pft_prism(year = year) looks
+  # them up via its default-name machinery.
+  prism_data <- data
+  prism_data$fev1    <- data$fev1_measured
+  prism_data$fvc     <- data$fvc_measured
+  prism_data$fev1fvc <- data$fev1fvc_measured
+  data$prism <- pft_prism(prism_data, year = year)$prism
   data
 }
 
 # Stage 5: bronchodilator response, per spirometry measure. 2022
 # requires a predicted-value denominator; 2005 doesn't.
 interpret_bdr <- function(data, standard, year) {
-  pred_suffix <- if (year == 2022) "_2022" else ""
+  pred_suffix <- paste0("_", year)
 
   for (m in c("fev1", "fvc", "fev1fvc")) {
     pre  <- paste0(m, "_pre")

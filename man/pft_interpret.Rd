@@ -6,7 +6,7 @@
 \usage{
 pft_interpret(
   data,
-  year = 2012,
+  year = 2022,
   SI.units = FALSE,
   standard = c("2022", "2005"),
   sex = sex,
@@ -19,7 +19,8 @@ pft_interpret(
 \item{data}{A data frame containing whatever inputs are available.
 See Details for the column-name conventions.}
 
-\item{year}{GLI spirometry equation year. See \code{\link[=pft_spirometry]{pft_spirometry()}}.}
+\item{year}{GLI spirometry equation year. Defaults to \code{2022} (GLI
+Global, race-neutral). See \code{\link[=pft_spirometry]{pft_spirometry()}}.}
 
 \item{SI.units}{Whether to report diffusion in SI units. See
 \code{\link[=pft_diffusion]{pft_diffusion()}}.}

@@ -8,7 +8,10 @@ pft_long(x, ...)
 }
 \arguments{
 \item{x}{A data frame; typically a \code{pft_result} but any data frame
-with \verb{<measure>_pred[_<year>]} columns works.}
+with \verb{<measure>_pred[_<year>]} columns works. Named \code{x} (rather
+than \code{data}) to match the S3 first-argument convention shared with
+\code{print.pft_result}, \code{plot.pft_result}, and the other \code{pft_result}
+methods.}
 
 \item{...}{Currently unused; reserved for forward compatibility.}
 }
@@ -28,12 +31,16 @@ columns for each statistic). This is the natural shape for \code{dplyr} /
 workflows.
 }
 \details{
-Discovery is keyed off \verb{<measure>_pred} columns; if your data frame
-has predicted columns from a non-default GLI year, they are picked up
-automatically and the four-digit year ends up in the \code{year} column.
-Columns whose suffix does not match a recognised statistic are
-ignored, so id / demographic columns are dropped (use the \code{.patient}
-integer to join back).
+Discovery is keyed off \verb{<measure>_pred} columns; the four-digit GLI
+year is extracted from the column suffix and recorded in the \code{year}
+column. Spirometry outputs from \code{\link[=pft_spirometry]{pft_spirometry()}} / \code{\link[=pft_interpret]{pft_interpret()}}
+always carry a year suffix (\code{fev1_pred_2012}, \code{fev1_pred_2022}, ...)
+and produce a populated \code{year}; lung-volume (Hall 2021) and
+diffusion (GLI 2017) outputs are unsuffixed and produce \code{year = NA}
+until a competing standard ships and the same suffixing convention
+is adopted there. Columns whose suffix does not match a recognised
+statistic are ignored, so id / demographic columns are dropped (use
+the \code{.patient} integer to join back).
 }
 \examples{
 patient <- data.frame(

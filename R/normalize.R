@@ -180,6 +180,44 @@ resolve_column_name <- function(quosure, default) {
   ), call. = FALSE)
 }
 
+# Return the caller's quosure if it carries a real reference, else build
+# a quosure from a default column name string. Used by functions whose
+# defaults depend on a runtime argument (e.g. a year suffix): give the
+# user-facing argument a NULL default and call this to substitute the
+# runtime-derived canonical name when the user didn't override.
+quo_or_default <- function(quo, default_name) {
+  if (rlang::quo_is_null(quo)) {
+    rlang::new_quosure(default_name, env = rlang::empty_env())
+  } else {
+    quo
+  }
+}
+
+# Resolve a named list of column-reference quosures against a data frame.
+# Each list element is a quosure captured via rlang::enquo() at the caller's
+# boundary; names of the list are canonical roles (used as the `default`
+# argument to resolve_column_name() for error messages) and as the names of
+# the returned character vector. `fn_name` prefixes the consolidated
+# missing-column error message.
+#
+# This is the multi-column counterpart to resolve_column_name(); use it
+# when a function needs to resolve 4+ column references and report any
+# missing columns in a single error.
+resolve_data_cols <- function(data, quos, fn_name = "pft") {
+  cols <- vapply(names(quos),
+                  function(nm) resolve_column_name(quos[[nm]], nm),
+                  character(1))
+  missing_cols <- setdiff(unname(cols), colnames(data))
+  if (length(missing_cols)) {
+    stop(sprintf(
+      "%s: required column(s) missing from input: %s.",
+      fn_name,
+      paste(sprintf("'%s'", missing_cols), collapse = ", ")
+    ), call. = FALSE)
+  }
+  cols
+}
+
 # Top-level normalization called by pft_spirometry, pft_volumes,
 # pft_diffusion. Resolves the four input column references (each a
 # quosure captured via rlang::enquo() at the caller's boundary),
