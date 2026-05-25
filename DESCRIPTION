@@ -1,7 +1,7 @@
 Package: pft
 Type: Package
 Title: Compute ATS-Compliant PFT Reference Values
-Version: 0.1.0
+Version: 0.1.0.9000
 Authors@R: c(
     person(given = "Pat",   family = "Johnson",   email = "johnson.pat@mayo.edu",
            role = c("aut", "cre")),
