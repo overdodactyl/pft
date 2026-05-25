@@ -43,63 +43,62 @@ RACE_SYNONYMS <- c(
 #   $dropped:   character vector of original values that didn't match
 #               and got NA'd
 normalize_sex_vec <- function(x) {
-  corrected <- character(0)
-  dropped   <- character(0)
-  out <- rep(NA_character_, length(x))
+  out    <- rep(NA_character_, length(x))
+  raw    <- as.character(x)
+  clean  <- trimws(raw)
+  upper  <- toupper(clean)
+  not_na <- !is.na(x)
 
-  for (i in seq_along(x)) {
-    if (is.na(x[i])) next
-    raw   <- as.character(x[i])
-    clean <- trimws(raw)
-    upper <- toupper(clean)
+  is_canonical <- not_na & clean %in% c("M", "F")
+  is_male_alt  <- not_na & !is_canonical &
+                    upper %in% c("M", "MALE", "MAN", "BOY")
+  is_female_alt <- not_na & !is_canonical &
+                    upper %in% c("F", "FEMALE", "WOMAN", "GIRL")
 
-    if (clean %in% c("M", "F")) {
-      out[i] <- clean
-    } else if (upper %in% c("M", "MALE", "MAN", "BOY")) {
-      out[i] <- "M"
-      corrected <- c(corrected, raw)
-    } else if (upper %in% c("F", "FEMALE", "WOMAN", "GIRL")) {
-      out[i] <- "F"
-      corrected <- c(corrected, raw)
-    } else {
-      out[i] <- NA_character_
-      dropped <- c(dropped, raw)
-    }
-  }
-  list(values = out, corrected = corrected, dropped = dropped)
+  out[is_canonical]  <- clean[is_canonical]
+  out[is_male_alt]   <- "M"
+  out[is_female_alt] <- "F"
+
+  is_dropped <- not_na & !is_canonical & !is_male_alt & !is_female_alt
+
+  list(
+    values    = out,
+    corrected = raw[is_male_alt | is_female_alt],
+    dropped   = raw[is_dropped]
+  )
 }
 
 # Normalise a race vector to the canonical GLI 2012 levels. Case-
 # insensitive, whitespace-tolerant, with synonym mapping. Same return
 # shape as normalize_sex_vec().
 normalize_race_vec <- function(x, levels = GLI_2012_RACE_LEVELS) {
-  corrected <- character(0)
-  dropped   <- character(0)
-  out <- rep(NA_character_, length(x))
-
+  out    <- rep(NA_character_, length(x))
+  raw    <- as.character(x)
+  clean  <- trimws(raw)
+  lower  <- tolower(clean)
+  not_na <- !is.na(x)
   lower_levels <- tolower(levels)
 
-  for (i in seq_along(x)) {
-    if (is.na(x[i])) next
-    raw   <- as.character(x[i])
-    clean <- trimws(raw)
-    lower <- tolower(clean)
+  is_canonical  <- not_na & clean %in% levels
+  is_case_match <- not_na & !is_canonical & lower %in% lower_levels
+  is_synonym    <- not_na & !is_canonical & !is_case_match &
+                     lower %in% names(RACE_SYNONYMS)
 
-    if (clean %in% levels) {
-      out[i] <- clean
-    } else if (lower %in% lower_levels) {
-      # Case-only mismatch -- soft-correct
-      out[i] <- levels[match(lower, lower_levels)]
-      corrected <- c(corrected, raw)
-    } else if (lower %in% names(RACE_SYNONYMS)) {
-      out[i] <- unname(RACE_SYNONYMS[lower])
-      corrected <- c(corrected, raw)
-    } else {
-      out[i] <- NA_character_
-      dropped <- c(dropped, raw)
-    }
+  out[is_canonical]  <- clean[is_canonical]
+  if (any(is_case_match)) {
+    out[is_case_match] <- levels[match(lower[is_case_match], lower_levels)]
   }
-  list(values = out, corrected = corrected, dropped = dropped)
+  if (any(is_synonym)) {
+    out[is_synonym] <- unname(RACE_SYNONYMS[lower[is_synonym]])
+  }
+
+  is_dropped <- not_na & !is_canonical & !is_case_match & !is_synonym
+
+  list(
+    values    = out,
+    corrected = raw[is_case_match | is_synonym],
+    dropped   = raw[is_dropped]
+  )
 }
 
 # Emit a single, consolidated warning summarising what was normalised
