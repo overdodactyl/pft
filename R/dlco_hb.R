@@ -37,7 +37,8 @@
 #'   function warns and multiplies by 10 to convert. Routine clinical
 #'   adult Hb in g/L is 120-160; in g/dL it is 12-16.
 #' @param sex Character vector ("M"/"F"). Soft-corrected via
-#'   [normalize_sex_vec()] so "Male", "female", etc. work.
+#'   the internal `normalize_sex_vec()` helper so "Male", "female",
+#'   etc. work.
 #' @param age Optional numeric vector. When supplied, males aged < 15
 #'   yr use the female / child reference (134 g/L) per Stanojevic
 #'   2017 p. 11. When omitted (the default `NA_real_`), males default

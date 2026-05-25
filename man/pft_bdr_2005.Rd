@@ -11,14 +11,13 @@ pft_bdr_2005(pre, post)
 measurements, in litres, same length.}
 }
 \value{
-A data frame with one row per input observation and columns:
-\itemize{
-\item \code{pct_change}: \code{(post - pre) / pre * 100}.
-\item \code{abs_change}: \code{post - pre} (litres).
-\item \code{is_significant}: logical, \code{TRUE} when \code{pct_change > 12} AND
-\code{abs_change > 0.2}. Both inequalities are strict per the
-paper's explicit wording on p. 959 ("(>12\% of control and200 mL)").NA is propagated wherever either of pre / post is NA.
-}
+A data frame with one row per input observation and three
+columns: \code{pct_change} (i.e. \code{(post - pre) / pre * 100}),
+\code{abs_change} (i.e. \code{post - pre} in litres), and \code{is_significant}
+(logical, \code{TRUE} when \code{pct_change > 12} AND \code{abs_change > 0.2},
+both inequalities strict per the paper's wording on p. 959:
+"(>12\% of control and >200 mL)"). \code{NA} propagates wherever
+either of \code{pre} / \code{post} is \code{NA}.
 }
 \description{
 Classifies bronchodilator response (BDR) by the Pellegrino et al.

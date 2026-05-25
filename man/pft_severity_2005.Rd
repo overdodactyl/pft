@@ -51,6 +51,6 @@ Table 4.
 }
 \seealso{
 \code{\link[=pft_severity]{pft_severity()}} for the current Stanojevic 2022
-z-score-based grading. \link{pft_classify(standard = "2005")} for the
-matching 2005-era pattern classifier.
+z-score-based grading. \code{\link[=pft_classify]{pft_classify()}} with \code{standard = "2005"}
+for the matching 2005-era pattern classifier.
 }

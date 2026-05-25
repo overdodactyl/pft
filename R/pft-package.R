@@ -65,35 +65,29 @@
 #'
 #' @section Implemented reference standards:
 #' * **Spirometry, GLI 2012**: Quanjer et al. *Eur Respir J* 2012;40(6):1324-43.
-#'   doi:[10.1183/09031936.00080312](https://doi.org/10.1183/09031936.00080312).
+#'   \doi{10.1183/09031936.00080312}.
 #' * **Spirometry, GLI Global 2022**: Bowerman et al. *Am J Respir Crit Care Med*
-#'   2023;207(6):768-74.
-#'   doi:[10.1164/rccm.202205-0963OC](https://doi.org/10.1164/rccm.202205-0963OC).
+#'   2023;207(6):768-74. \doi{10.1164/rccm.202205-0963OC}.
 #' * **Static lung volumes, GLI 2021**: Hall et al. *Eur Respir J*
-#'   2021;57(3):2000289.
-#'   doi:[10.1183/13993003.00289-2020](https://doi.org/10.1183/13993003.00289-2020).
+#'   2021;57(3):2000289. \doi{10.1183/13993003.00289-2020}.
 #' * **Carbon-monoxide transfer factor, GLI 2017**: Stanojevic et al.
-#'   *Eur Respir J* 2017;50(3):1700010.
-#'   doi:[10.1183/13993003.00010-2017](https://doi.org/10.1183/13993003.00010-2017).
-#'   The 2020 author correction
-#'   (doi:[10.1183/13993003.50010-2017](https://doi.org/10.1183/13993003.50010-2017))
-#'   is the version implemented.
+#'   *Eur Respir J* 2017;50(3):1700010. \doi{10.1183/13993003.00010-2017}.
+#'   The 2020 author correction (\doi{10.1183/13993003.50010-2017}) is
+#'   the version implemented.
 #' * **Spirometry acquisition standard 2019**: Graham et al.
 #'   *Am J Respir Crit Care Med* 2019;200(8):e70-e88.
-#'   doi:[10.1164/rccm.201908-1590ST](https://doi.org/10.1164/rccm.201908-1590ST).
-#'   Implemented by [pft_quality()].
+#'   \doi{10.1164/rccm.201908-1590ST}. Implemented by [pft_quality()].
 #' * **Interpretive strategy 2022**: Stanojevic et al. *Eur Respir J*
-#'   2022;60(1):2101499.
-#'   doi:[10.1183/13993003.01499-2021](https://doi.org/10.1183/13993003.01499-2021).
-#'   Implemented by [pft_classify()], [pft_severity()], [pft_bdr()],
-#'   [pft_prism()], [pft_change()], and [pft_interpret()].
+#'   2022;60(1):2101499. \doi{10.1183/13993003.01499-2021}. Implemented
+#'   by [pft_classify()], [pft_severity()], [pft_bdr()], [pft_prism()],
+#'   [pft_change()], and [pft_interpret()].
 #' * **COPD severity**: Global Initiative for Chronic Obstructive Lung
 #'   Disease (GOLD). \url{https://goldcopd.org}. Implemented by
 #'   [pft_gold()].
 #' * **Predecessor interpretive strategy 2005**: Pellegrino et al.
 #'   *Eur Respir J* 2005;26(5):948-68.
-#'   doi:[10.1183/09031936.05.00035205](https://doi.org/10.1183/09031936.05.00035205).
-#'   Cited for historical comparison in [pft_classify()].
+#'   \doi{10.1183/09031936.05.00035205}. Cited for historical comparison
+#'   in [pft_classify()].
 #'
 #' @section Scope and limitations:
 #' `pft` does **not** currently cover:
@@ -116,8 +110,8 @@
 #'   coarse 5-category classifier doesn't enumerate (Dysanapsis, etc.).
 #'   The package's [pft_classify()] folds Dysanapsis into "Obstructed"
 #'   when FEV1/FVC is below its LLN.
-#' * Altitude or haemoglobin corrections to DLCO. Adjust inputs upstream
-#'   if needed.
+#' * Altitude corrections to DLCO. (Haemoglobin correction *is*
+#'   supported -- see [pft_dlco_hb_correct()].)
 #' * Sex categories outside `"M"` and `"F"`.
 #'
 #' Outputs are intended for research and education. Clinical decisions

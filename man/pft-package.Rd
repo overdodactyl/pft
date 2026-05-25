@@ -77,35 +77,29 @@ uses positions FEV1, FVC, FEV1/FVC, TLC, in that order, with
 
 \itemize{
 \item \strong{Spirometry, GLI 2012}: Quanjer et al. \emph{Eur Respir J} 2012;40(6):1324-43.
-doi:\href{https://doi.org/10.1183/09031936.00080312}{10.1183/09031936.00080312}.
+\doi{10.1183/09031936.00080312}.
 \item \strong{Spirometry, GLI Global 2022}: Bowerman et al. \emph{Am J Respir Crit Care Med}
-2023;207(6):768-74.
-doi:\href{https://doi.org/10.1164/rccm.202205-0963OC}{10.1164/rccm.202205-0963OC}.
+2023;207(6):768-74. \doi{10.1164/rccm.202205-0963OC}.
 \item \strong{Static lung volumes, GLI 2021}: Hall et al. \emph{Eur Respir J}
-2021;57(3):2000289.
-doi:\href{https://doi.org/10.1183/13993003.00289-2020}{10.1183/13993003.00289-2020}.
+2021;57(3):2000289. \doi{10.1183/13993003.00289-2020}.
 \item \strong{Carbon-monoxide transfer factor, GLI 2017}: Stanojevic et al.
-\emph{Eur Respir J} 2017;50(3):1700010.
-doi:\href{https://doi.org/10.1183/13993003.00010-2017}{10.1183/13993003.00010-2017}.
-The 2020 author correction
-(doi:\href{https://doi.org/10.1183/13993003.50010-2017}{10.1183/13993003.50010-2017})
-is the version implemented.
+\emph{Eur Respir J} 2017;50(3):1700010. \doi{10.1183/13993003.00010-2017}.
+The 2020 author correction (\doi{10.1183/13993003.50010-2017}) is
+the version implemented.
 \item \strong{Spirometry acquisition standard 2019}: Graham et al.
 \emph{Am J Respir Crit Care Med} 2019;200(8):e70-e88.
-doi:\href{https://doi.org/10.1164/rccm.201908-1590ST}{10.1164/rccm.201908-1590ST}.
-Implemented by \code{\link[=pft_quality]{pft_quality()}}.
+\doi{10.1164/rccm.201908-1590ST}. Implemented by \code{\link[=pft_quality]{pft_quality()}}.
 \item \strong{Interpretive strategy 2022}: Stanojevic et al. \emph{Eur Respir J}
-2022;60(1):2101499.
-doi:\href{https://doi.org/10.1183/13993003.01499-2021}{10.1183/13993003.01499-2021}.
-Implemented by \code{\link[=pft_classify]{pft_classify()}}, \code{\link[=pft_severity]{pft_severity()}}, \code{\link[=pft_bdr]{pft_bdr()}},
-\code{\link[=pft_prism]{pft_prism()}}, \code{\link[=pft_change]{pft_change()}}, and \code{\link[=pft_interpret]{pft_interpret()}}.
+2022;60(1):2101499. \doi{10.1183/13993003.01499-2021}. Implemented
+by \code{\link[=pft_classify]{pft_classify()}}, \code{\link[=pft_severity]{pft_severity()}}, \code{\link[=pft_bdr]{pft_bdr()}}, \code{\link[=pft_prism]{pft_prism()}},
+\code{\link[=pft_change]{pft_change()}}, and \code{\link[=pft_interpret]{pft_interpret()}}.
 \item \strong{COPD severity}: Global Initiative for Chronic Obstructive Lung
 Disease (GOLD). \url{https://goldcopd.org}. Implemented by
 \code{\link[=pft_gold]{pft_gold()}}.
 \item \strong{Predecessor interpretive strategy 2005}: Pellegrino et al.
 \emph{Eur Respir J} 2005;26(5):948-68.
-doi:\href{https://doi.org/10.1183/09031936.05.00035205}{10.1183/09031936.05.00035205}.
-Cited for historical comparison in \code{\link[=pft_classify]{pft_classify()}}.
+\doi{10.1183/09031936.05.00035205}. Cited for historical comparison
+in \code{\link[=pft_classify]{pft_classify()}}.
 }
 }
 
@@ -131,8 +125,8 @@ adult criterion is applied uniformly).
 coarse 5-category classifier doesn't enumerate (Dysanapsis, etc.).
 The package's \code{\link[=pft_classify]{pft_classify()}} folds Dysanapsis into "Obstructed"
 when FEV1/FVC is below its LLN.
-\item Altitude or haemoglobin corrections to DLCO. Adjust inputs upstream
-if needed.
+\item Altitude corrections to DLCO. (Haemoglobin correction \emph{is}
+supported -- see \code{\link[=pft_dlco_hb_correct]{pft_dlco_hb_correct()}}.)
 \item Sex categories outside \code{"M"} and \code{"F"}.
 }
 

@@ -16,7 +16,8 @@ function warns and multiplies by 10 to convert. Routine clinical
 adult Hb in g/L is 120-160; in g/dL it is 12-16.}
 
 \item{sex}{Character vector ("M"/"F"). Soft-corrected via
-\code{\link[=normalize_sex_vec]{normalize_sex_vec()}} so "Male", "female", etc. work.}
+the internal \code{normalize_sex_vec()} helper so "Male", "female",
+etc. work.}
 
 \item{age}{Optional numeric vector. When supplied, males aged < 15
 yr use the female / child reference (134 g/L) per Stanojevic

@@ -44,8 +44,8 @@
 #' Table 4.
 #'
 #' @seealso [pft_severity()] for the current Stanojevic 2022
-#'   z-score-based grading. [pft_classify(standard = "2005")] for the
-#'   matching 2005-era pattern classifier.
+#'   z-score-based grading. [pft_classify()] with `standard = "2005"`
+#'   for the matching 2005-era pattern classifier.
 #'
 #' @examples
 #' pft_severity_2005(c(85, 65, 55, 40, 30))
@@ -77,14 +77,13 @@ pft_severity_2005 <- function(pctpred) {
 #' @param pre,post Numeric vectors of pre- and post-bronchodilator
 #'   measurements, in litres, same length.
 #'
-#' @return A data frame with one row per input observation and columns:
-#'   - `pct_change`: `(post - pre) / pre * 100`.
-#'   - `abs_change`: `post - pre` (litres).
-#'   - `is_significant`: logical, `TRUE` when `pct_change > 12` AND
-#'     `abs_change > 0.2`. Both inequalities are strict per the
-#'     paper's explicit wording on p. 959 ("(>12% of control and
-#'     >200 mL)").
-#'   `NA` is propagated wherever either of `pre` / `post` is `NA`.
+#' @return A data frame with one row per input observation and three
+#'   columns: `pct_change` (i.e. `(post - pre) / pre * 100`),
+#'   `abs_change` (i.e. `post - pre` in litres), and `is_significant`
+#'   (logical, `TRUE` when `pct_change > 12` AND `abs_change > 0.2`,
+#'   both inequalities strict per the paper's wording on p. 959:
+#'   "(>12% of control and >200 mL)"). `NA` propagates wherever
+#'   either of `pre` / `post` is `NA`.
 #'
 #' @references
 #' Pellegrino R, Viegi G, Brusasco V, et al. Interpretative strategies
