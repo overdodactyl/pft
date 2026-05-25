@@ -21,3 +21,7 @@
 ^lib$
 ^doc$
 ^Meta$
+^pft\.Rcheck$
+^pft_.*\.tar\.gz$
+^\.Rhistory$
+^backup-.*$
