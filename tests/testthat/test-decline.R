@@ -187,3 +187,38 @@ test_that("empty input with flag_threshold returns empty tibble with flag column
   expect_true("decline_flag" %in% colnames(out))
   expect_type(out$decline_flag, "logical")
 })
+
+test_that("empty-input patient_id preserves input column class", {
+  # Verify the type-preservation fix for empty_decline_tbl(): a downstream
+  # bind_rows() across cohorts (some empty, some not) should not fail
+  # because the empty cohort branch defaulted to character().
+  base_na <- serial
+  base_na$fev1_zscore <- NA_real_
+
+  # Character (the existing default).
+  out_chr <- pft_decline(base_na, by = patient_id,
+                          measure = "fev1_zscore", time = year)
+  expect_type(out_chr$patient_id, "character")
+
+  # Integer.
+  d_int <- base_na
+  d_int$patient_id <- as.integer(factor(d_int$patient_id))
+  out_int <- pft_decline(d_int, by = patient_id,
+                          measure = "fev1_zscore", time = year)
+  expect_type(out_int$patient_id, "integer")
+
+  # Double.
+  d_num <- base_na
+  d_num$patient_id <- as.numeric(as.integer(factor(d_num$patient_id)))
+  out_num <- pft_decline(d_num, by = patient_id,
+                          measure = "fev1_zscore", time = year)
+  expect_type(out_num$patient_id, "double")
+
+  # Factor (preserves levels).
+  d_fac <- base_na
+  d_fac$patient_id <- factor(d_fac$patient_id, levels = c("P1", "P2", "P3"))
+  out_fac <- pft_decline(d_fac, by = patient_id,
+                          measure = "fev1_zscore", time = year)
+  expect_s3_class(out_fac$patient_id, "factor")
+  expect_equal(levels(out_fac$patient_id), c("P1", "P2", "P3"))
+})

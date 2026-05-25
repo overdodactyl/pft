@@ -131,7 +131,8 @@ pft_decline <- function(data,
   df <- df[ok, , drop = FALSE]
 
   if (nrow(df) == 0) {
-    return(empty_decline_tbl(flag_threshold))
+    return(empty_decline_tbl(flag_threshold,
+                              patient_id_proto = data[[by_name]][0]))
   }
 
   if (model == "ols") {
@@ -236,9 +237,13 @@ decline_mixed <- function(df, min_points) {
 }
 
 
-empty_decline_tbl <- function(flag_threshold) {
+empty_decline_tbl <- function(flag_threshold,
+                                patient_id_proto = character()) {
+  # Preserve the input patient_id column's class so callers binding
+  # results across cohorts (some empty, some non-empty) don't hit a
+  # type-mismatch from this branch.
   out <- tibble::tibble(
-    patient_id     = character(),
+    patient_id     = patient_id_proto,
     n_points       = integer(),
     time_span      = double(),
     mean_value     = double(),
