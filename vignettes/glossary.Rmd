@@ -163,14 +163,18 @@ two-sided 95% normal-limits threshold (Box 2). Implemented by
 a grade based on the number of acceptable maneuvers from a session
 and the difference between the two best values:
 
-| Grade | Acceptable | Best-two diff (adult) | Best-two diff (child < 6) |
-|-------|------------|------------------------|----------------------------|
-| A     | ≥ 3        | ≤ 0.150 L              | ≤ 0.100 L                  |
-| B     | 2          | ≤ 0.150 L              | ≤ 0.100 L                  |
-| C     | ≥ 2        | ≤ 0.200 L              | ≤ 0.150 L                  |
-| D     | ≥ 2        | ≤ 0.250 L              | ≤ 0.200 L                  |
-| E     | 1          | n/a                     | n/a                         |
-| F     | 0          | n/a                     | n/a                         |
+| Grade | Acceptable | Best-two diff (adult)     | Best-two diff (child ≤ 6)  |
+|-------|------------|---------------------------|-----------------------------|
+| A     | ≥ 3        | ≤ 0.150 L                 | ≤ 0.100 L                   |
+| B     | 2          | ≤ 0.150 L                 | ≤ 0.100 L                   |
+| C     | ≥ 2        | ≤ 0.200 L                 | ≤ 0.150 L                   |
+| D     | ≥ 2        | ≤ 0.250 L                 | ≤ 0.200 L                   |
+| E     | ≥ 2        | > 0.250 L, or 1 maneuver  | > 0.200 L, or 1 maneuver    |
+| F     | 0          | n/a                       | n/a                         |
+
+The child thresholds (column "Best-two diff (child ≤ 6)") are
+additionally floored at 10% of the highest measured value per
+Graham 2019 Table 10's footnote.
 
 Implemented by `pft_quality()`.
 
