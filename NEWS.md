@@ -1,5 +1,43 @@
 # pft (development version)
 
+## Highlights of this development cycle
+
+A broad API-modernisation and clinical-depth pass, all built on
+top of the existing input contract (no new measurement modalities
+required):
+
+* **Equation-migration tooling** — `pft_compare()` runs GLI 2012
+  and GLI Global 2022 side-by-side and emits per-row
+  reclassification deltas; `pft_cohort_summary()` gains a `by =`
+  stratification argument and a `reclassification` confusion-
+  matrix component when both standards are present.
+* **Tidiers and introspection** — `pft_long()` / `pft_glance()`
+  (plus `broom::tidy()` / `broom::glance()` S3 dispatch) pivot a
+  `pft_result` to long form; `pft_schema()` documents every output
+  column the pipeline can produce for a given configuration.
+* **New interpretation outputs** — `pft_diffusion_interpret()`
+  assigns a Hughes & Pride 2012 clinical category from DLCO / VA /
+  KCO z-scores; `pft_pattern_severity()` composes
+  `ats_classification` with per-measure severity into a single
+  "Moderate Obstructed" label.
+* **Longitudinal and patient-communication outputs** —
+  `pft_decline()` fits per-patient OLS or mixed-effects slopes for
+  multi-timepoint data; `pft_lung_age()` solves for the
+  "equivalent" age via GLI inversion.
+* **Visualisation** — `pft_plot()` gains four new modes
+  (`histogram`, `trajectory`, `bdr`, `compare`) alongside the
+  existing single-patient `lollipop`.
+* **Ergonomics** — `pft_normalize_units()` auto-detects
+  inches-vs-cm and millilitres-vs-litres on input.
+* **Deployment scaffolding** — `inst/plumber/plumber.R` exposes
+  `/interpret`, `/compare`, and `/schema` HTTP endpoints.
+* **Maintenance** — minimum R version bumped from 2.10 to 4.0 to
+  match the actual transitive dependency floor.
+
+Test count: 1195 -> 1424 (+229; +1 skipped lme4 test).
+
+---
+
 ## Output-column introspection: pft_schema()
 
 `pft_schema(year, SI.units, standard)` returns a tibble enumerating
@@ -26,8 +64,6 @@ configuration, and the year-suffix scheme (`_2022` for GLI Global
 spirometry; unsuffixed for GLI 2012 / 2021 / 2017) is enforced both
 ways (no leakage of 2012 columns into a 2022 pipeline and vice
 versa).
-
-Test count: 1235 -> 1266 (+31).
 
 ## Tidiers — broom integration and long-form pivot
 
@@ -60,8 +96,6 @@ installed unless the user actually calls `broom::tidy()` /
   interpretation primitives ran).
 * New tests in `tests/testthat/test-pft_result_tidiers.R` (40 new
   expectations).
-
-Test count: 1195 -> 1235 (+40).
 
 ## Equation-migration audit: pft_compare()
 
@@ -101,8 +135,6 @@ The `_changed` flags propagate `NA` (rather than collapsing to
 reclassification rate over patients where both pipelines actually
 produced a label.
 
-Test count: 1195 -> 1249 (+54).
-
 ## pft_plot() gains four new visualisation modes
 
 `pft_plot(type = c("lollipop", "histogram", "trajectory", "bdr",
@@ -131,7 +163,6 @@ continues to produce the single-patient lollipop and continues to
 error on multi-row input. Callers that were using the lollipop need
 no changes.
 
-Test count: 1195 -> 1208 (+13).
 ## pft_decline() — longitudinal slope fitting
 
 `pft_decline(data, by, measure, time)` fits a per-patient linear
@@ -162,7 +193,6 @@ staging, IPF progression, or CF exacerbation alerts.
   including hand-calculated slope reproduction for known
   trajectories.
 
-Test count: 1195 -> 1214 (+19, +1 skipped lme4 test).
 ## pft_lung_age() — algebraic inversion of GLI predicted spirometry
 
 `pft_lung_age(data, measure = "fev1")` solves for the age at which
@@ -196,7 +226,6 @@ reverse.
   recovers lung age X", monotonicity (lower FEV1 -> older lung),
   and NA propagation for out-of-range measurements.
 
-Test count: 1195 -> 1206 (+11).
 ## pft_pattern_severity() — composite "Moderate Obstructed" labels
 
 `pft_pattern_severity(data)` composes the existing
@@ -225,8 +254,6 @@ columns when the unsuffixed columns are absent.
 
 Operates on the package's existing wide-form output -- no new
 input data is required.
-
-Test count: 1211 -> 1223 (+12).
 
 ## pft_diffusion_interpret() — clinical category from DLCO/VA/KCO z-scores
 
@@ -266,7 +293,6 @@ Constants `DIFFUSION_LLN_Z` / `DIFFUSION_ULN_Z` in
 `R/constants.R` (aliased to the package's existing `LLN_Z` /
 `ULN_Z`) -- the boundary semantics match the rest of the package.
 
-Test count: 1195 -> 1211 (+16).
 ## pft_cohort_summary() — `by =` stratification + reclassification audit
 
 Two enhancements to the existing cohort-summary helper:
@@ -298,7 +324,6 @@ component containing:
 Pure post-processing over existing outputs; no new input data is
 required.
 
-Test count: 1195 -> 1210 (+15).
 ## pft_normalize_units() — auto-detect inches / millilitres on input
 
 Catches the two most common clinic / lab data-import bugs that
@@ -328,7 +353,6 @@ DLCO / TLCO are not auto-corrected: their unit landscape (SI vs
 traditional, with values in similar magnitudes) doesn't admit a
 safe heuristic.
 
-Test count: 1195 -> 1213 (+18).
 ## plumber endpoint scaffold
 
 A starter `plumber.R` lands at `inst/plumber/plumber.R`. It exposes

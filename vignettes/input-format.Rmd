@@ -60,6 +60,32 @@ The canonical types and units are:
 See the [Glossary](glossary.html) for definitions of every measure
 abbreviation.
 
+# Auto-detecting common unit mistakes
+
+The two most common data-import bugs that yield silently wrong
+reference values are height in inches (instead of cm) and measured
+volumes in millilitres (instead of L). `pft_normalize_units()`
+detects both heuristically and converts in place, emitting a single
+consolidated warning:
+
+```{r}
+suppressWarnings(
+  pft_normalize_units(data.frame(
+    sex = "M", age = 45, height = 70,   # 70 inches!
+    race = "Caucasian",
+    fev1_measured = 2500                # millilitres!
+  ))
+)
+```
+
+Detection is conservative -- the heuristic only fires on
+unambiguous input. Pipe it before the rest of the workflow when
+the data source is uncertain:
+
+```r
+df |> pft_normalize_units() |> pft_interpret()
+```
+
 # Using non-canonical column names
 
 If your data frame uses different column names for the demographics,

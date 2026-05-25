@@ -65,12 +65,14 @@ reference:
 
   - title: Workflow and reporting
     desc: >
-      End-to-end interpretation in a single call, input QC,
-      clinical-style visualisation, and HTML report rendering.
+      End-to-end interpretation in a single call, input QC and unit
+      normalisation, clinical-style visualisation, and HTML report
+      rendering.
     contents:
       - pft_interpret
       - pft_compare
       - pft_validate
+      - pft_normalize_units
       - pft_plot
       - pft_report
 

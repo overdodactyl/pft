@@ -22,3 +22,5 @@ papers/**/*.csv
 # scripts are version-controlled (reproducible); their .out dumps are
 # regeneratable and bulky.
 notes/*.out
+/doc/
+/Meta/
