@@ -4,7 +4,8 @@ Title: Compute ATS-Compliant PFT Reference Values
 Version: 0.1.0.9000
 Authors@R: c(
     person(given = "Pat",   family = "Johnson",   email = "johnson.pat@mayo.edu",
-           role = c("aut", "cre")),
+           role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-8365-1375")),
     person(given = "Zach",  family = "Quicksall",
            role = "aut"),
     person(given = "Jairo", family = "Pena",
