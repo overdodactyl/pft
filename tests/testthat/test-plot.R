@@ -94,6 +94,22 @@ test_that("pft_plot(type = 'bdr') draws arrows from pre to post", {
   expect_true(grepl("Bronchodilator", p$labels$title))
 })
 
+test_that("pft_plot(type = 'bdr') legend and subtitle track the BDR constant", {
+  skip_if_not_installed("ggplot2")
+  d <- cohort
+  d$fev1_pre  <- c(2.5, 1.8, 4.0, 1.5)
+  d$fev1_post <- c(2.9, 2.0, 4.4, 1.65)
+  d$fvc_pre   <- c(3.8, 2.4, 5.2, 2.5)
+  d$fvc_post  <- c(4.0, 2.5, 5.4, 2.6)
+  r <- pft_interpret(d)
+  p <- pft_plot(r, type = "bdr")
+
+  thr <- pft:::BDR_THRESHOLD_PCT_PRED
+  sig_label <- sprintf("Significant (>= %g%% pred)", thr)
+  expect_true(sig_label %in% unname(p$scales$scales[[1]]$labels))
+  expect_true(grepl(sprintf("\\+%g %% of predicted", thr), p$labels$subtitle))
+})
+
 test_that("pft_plot(type = 'compare') needs _zscore_<year> columns", {
   skip_if_not_installed("ggplot2")
   expect_error(pft_plot(result_cohort, type = "compare"),

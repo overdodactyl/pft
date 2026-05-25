@@ -295,7 +295,14 @@ pft_plot_bdr <- function(data) {
   }
   plot_df <- do.call(rbind, rows)
   plot_df$pct_pred <- 100 * (plot_df$post - plot_df$pre) / plot_df$pred
-  plot_df$significant <- !is.na(plot_df$pct_pred) & plot_df$pct_pred >= 10
+  plot_df$significant <- !is.na(plot_df$pct_pred) &
+    plot_df$pct_pred >= BDR_THRESHOLD_PCT_PRED
+
+  sig_label <- sprintf("Significant (>= %g%% pred)", BDR_THRESHOLD_PCT_PRED)
+  subtitle  <- sprintf(
+    "Pre -> post; threshold +%g %% of predicted (Stanojevic 2022)",
+    BDR_THRESHOLD_PCT_PRED
+  )
 
   ggplot2::ggplot(plot_df, ggplot2::aes(x = measure,
                                           y = pre, yend = post,
@@ -310,14 +317,13 @@ pft_plot_bdr <- function(data) {
     ) +
     ggplot2::scale_colour_manual(
       values = c(`TRUE` = "#1a9850", `FALSE` = "gray40"),
-      labels = c(`TRUE` = "Significant (>= 10% pred)",
-                  `FALSE` = "Not significant"),
+      labels = c(`TRUE` = sig_label, `FALSE` = "Not significant"),
       name = NULL
     ) +
     ggplot2::labs(
       x = NULL, y = "Measured (L or ratio)",
       title = "Bronchodilator response",
-      subtitle = "Pre -> post; threshold +10 % of predicted (Stanojevic 2022)"
+      subtitle = subtitle
     ) +
     ggplot2::theme_minimal(base_size = 12)
 }
