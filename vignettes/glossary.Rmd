@@ -158,8 +158,9 @@ Implemented by `pft_gold()`.
 **CCS (conditional change score)** — A z-score-style index of whether
 the change between two measurements computed as
 `(z2 − r * z1) / sqrt(1 − r^2)` exceeds the within-subject variability expected by
-regression-to-the-mean alone. `|CCS| > 1.645` corresponds to a
-one-sided p < 0.05 under normality. Implemented by `pft_change()`.
+regression-to-the-mean alone. `|CCS| > 1.96` is the Stanojevic 2022
+two-sided 95% normal-limits threshold (Box 2). Implemented by
+`pft_change()`.
 
 **Spirometry quality grade (A–F)** — Per Graham et al. ATS/ERS 2019,
 a grade based on the number of acceptable maneuvers from a session
