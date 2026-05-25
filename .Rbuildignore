@@ -16,5 +16,8 @@
 ^CONTRIBUTING\.md$
 ^\.lintr$
 ^codecov\.yml$
+^Makefile$
+^covr-report\.html$
+^lib$
 ^doc$
 ^Meta$

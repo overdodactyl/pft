@@ -24,3 +24,7 @@ papers/**/*.csv
 notes/*.out
 /doc/
 /Meta/
+
+# covr local coverage reports
+covr-report.html
+/lib/

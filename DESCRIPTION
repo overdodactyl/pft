@@ -34,6 +34,7 @@ Imports:
     tibble
 Suggests:
     broom,
+    covr,
     dplyr,
     ggplot2,
     knitr,
