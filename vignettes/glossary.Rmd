@@ -100,13 +100,11 @@ Stanojevic 2022 standard but still widely used in clinical practice.
 **Normal** — All measured values at or above their LLN.
 
 **Obstructed** — FEV1/FVC below LLN with TLC at or above LLN (or
-unknown). Implies airway obstruction.
+unknown).
 
-**Restricted** — TLC below LLN with FEV1/FVC at or above LLN. Implies
-a restrictive ventilatory defect.
+**Restricted** — TLC below LLN with FEV1/FVC at or above LLN.
 
-**Mixed** — Both FEV1/FVC and TLC below their LLNs. Implies coexistent
-obstruction and restriction.
+**Mixed** — Both FEV1/FVC and TLC below their LLNs.
 
 **Non-specific pattern** — Low FVC with normal FEV1/FVC and normal
 TLC. By definition not restrictive (TLC is normal) and not obstructive
