@@ -85,6 +85,14 @@ pft_severity_2005 <- function(pctpred) {
 #'   "(>12% of control and >200 mL)"). `NA` propagates wherever
 #'   either of `pre` / `post` is `NA`.
 #'
+#' @section Column naming:
+#' This function's `pct_change` column is **percent-of-baseline**
+#' change (the 2005 criterion). The 2022 [pft_bdr()] emits a
+#' similarly-named but different column, `pct_pred_change`, which is
+#' **percent-of-predicted** change (`(post - pre) / predicted * 100`,
+#' the 2022 criterion). The two functions deliberately use distinct
+#' column names so a result frame can carry both without ambiguity.
+#'
 #' @references
 #' Pellegrino R, Viegi G, Brusasco V, et al. Interpretative strategies
 #' for lung function tests. Eur Respir J. 2005;26(5):948-968.

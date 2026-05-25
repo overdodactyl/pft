@@ -33,6 +33,16 @@ as a post-bronchodilator increase of more than 10\% of the predicted
 value in either FEV1 or FVC. This replaces the 2005 standard, which
 used a >=12\% AND >=200 mL change from baseline.
 }
+\section{Column naming}{
+
+This function's \code{pct_pred_change} column is \strong{percent-of-predicted}
+change (the 2022 criterion). The predecessor \code{\link[=pft_bdr_2005]{pft_bdr_2005()}} emits a
+similarly-named but different column, \code{pct_change}, which is
+\strong{percent-of-baseline} change (\code{(post - pre) / pre * 100}, the 2005
+criterion). The two functions deliberately use distinct column names
+so a result frame can carry both without ambiguity.
+}
+
 \examples{
 pft_bdr(pre = 2.5, post = 3.0, predicted = 4.0)
 # -> 12.5\% of predicted change, is_significant = TRUE

@@ -26,6 +26,16 @@ from baseline is at least 12\% AND the absolute change is at least
 200 mL. Replaced in 2022 by \code{\link[=pft_bdr]{pft_bdr()}}'s simpler
 "> 10\% of predicted" rule.
 }
+\section{Column naming}{
+
+This function's \code{pct_change} column is \strong{percent-of-baseline}
+change (the 2005 criterion). The 2022 \code{\link[=pft_bdr]{pft_bdr()}} emits a
+similarly-named but different column, \code{pct_pred_change}, which is
+\strong{percent-of-predicted} change (\code{(post - pre) / predicted * 100},
+the 2022 criterion). The two functions deliberately use distinct
+column names so a result frame can carry both without ambiguity.
+}
+
 \examples{
 pft_bdr_2005(pre = c(2.5, 2.0), post = c(2.8, 2.1))
 # -> first row significant (>=12\% AND >=200 mL),

@@ -71,6 +71,14 @@ pft_severity <- function(zscore) {
 #'   - `is_significant`: logical, `TRUE` when `pct_pred_change > threshold`.
 #'   `NA` is propagated wherever any of `pre`, `post`, `predicted` is `NA`.
 #'
+#' @section Column naming:
+#' This function's `pct_pred_change` column is **percent-of-predicted**
+#' change (the 2022 criterion). The predecessor [pft_bdr_2005()] emits a
+#' similarly-named but different column, `pct_change`, which is
+#' **percent-of-baseline** change (`(post - pre) / pre * 100`, the 2005
+#' criterion). The two functions deliberately use distinct column names
+#' so a result frame can carry both without ambiguity.
+#'
 #' @references
 #' Stanojevic S, Kaminsky DA, Miller MR, et al. ERS/ATS technical standard
 #' on interpretive strategies for routine lung function tests. Eur Respir J.
