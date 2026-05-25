@@ -295,7 +295,7 @@ cohort_summary_one <- function(data) {
         q25       = stats::quantile(x, 0.25, na.rm = TRUE),
         median    = stats::median(x, na.rm = TRUE),
         q75       = stats::quantile(x, 0.75, na.rm = TRUE),
-        pct_below_lln = mean(x < -1.645, na.rm = TRUE) * 100
+        pct_below_lln = mean(x < LLN_Z, na.rm = TRUE) * 100
       )
     })
     do.call(rbind, rows)
