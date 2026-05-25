@@ -14,10 +14,14 @@
   removed. The signature is now `pft_plot(data)` with no `type`
   argument. Cohort and longitudinal figures are easier to build
   directly from `pft_long()` output piped into `ggplot2`.
+* `pft_cohort_summary()` has been removed. Its outputs (per-measure
+  z-score quantiles, ATS pattern frequencies, PRISm prevalence,
+  diffusion-category frequencies) are easier expressed as plain
+  `dplyr::group_by() |> summarise()` calls on a `pft_interpret()`
+  result, optionally piped through `pft_long()` first.
 
 ## New features
 
-* `pft_cohort_summary()` gains a `by =` stratification argument.
 * `pft_long()` and `pft_glance()` pivot a `pft_result` to long form
   and per-patient summary. `tidy.pft_result()` /
   `glance.pft_result()` S3 methods dispatch to them when `broom` is
@@ -157,10 +161,6 @@ extraction is documented in
   repeatability thresholds applied for children under 6.
 * `pft_gold(fev1_pctpred)` returns the GOLD COPD severity grade (1-4)
   from FEV1 % predicted.
-* `pft_cohort_summary(data)` produces a population-level summary from
-  a `pft_interpret()` result over many patients: per-measure z-score
-  quantiles and percent-below-LLN, ATS pattern frequencies, and PRISm
-  prevalence.
 
 ## New interpretation primitives
 

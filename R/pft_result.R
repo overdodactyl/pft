@@ -272,8 +272,7 @@ pft_long <- function(x, ...) {
 #'   `.patient` (row position); other columns are added only when
 #'   present in `x`.
 #'
-#' @seealso [pft_long()] for the per-measure long-form pivot;
-#'   [pft_cohort_summary()] for cohort-level (not per-patient) summaries.
+#' @seealso [pft_long()] for the per-measure long-form pivot.
 #'
 #' @examples
 #' cohort <- data.frame(

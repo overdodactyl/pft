@@ -52,12 +52,11 @@ reference:
 
   - title: Clinical extensions
     desc: >
-      Maneuver-level quality grading (ATS/ERS 2019), COPD-specific
-      severity (GOLD), and cohort-level summarisation.
+      Maneuver-level quality grading (ATS/ERS 2019) and COPD-specific
+      severity (GOLD).
     contents:
       - pft_quality
       - pft_gold
-      - pft_cohort_summary
 
   - title: Workflow and visualisation
     desc: >

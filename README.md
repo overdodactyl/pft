@@ -64,7 +64,6 @@ Each reference function emits `*_pred`, `*_lln`, `*_uln`. If a `<measure>_measur
 | `pft_dlco_hb_correct()` | Hemoglobin correction for DLCO/TLCO | Cotes 1972 / Stanojevic 2017 |
 | `pft_quality()` | Spirometry quality grade (A-F) from a set of maneuvers | Graham 2019 |
 | `pft_gold()` | COPD severity (GOLD 1-4) from FEV1 % predicted | GOLD reports |
-| `pft_cohort_summary()` | Population-level z-score / pattern / PRISm summary; stratified via `by =` | — |
 | `pft_validate()` | QC checks on PFT inputs (FEV1 > FVC, out-of-range demographics, etc.) | — |
 | `pft_plot()` | Single-patient z-score lollipop with severity bands | — |
 | `pft_long()` / `pft_glance()` | Long-form pivot + per-patient summary; `broom::tidy`/`glance` dispatch | — |
@@ -146,7 +145,6 @@ pft_plot(result[1, ])   # per-patient z-score figure
 result <- pft_interpret(cohort)
 result |> pft_long()              # one row per (patient, measure)
 result |> pft_glance()            # one row per patient
-pft_cohort_summary(result, by = "sex")   # stratified summary
 ```
 
 ## Reference equations

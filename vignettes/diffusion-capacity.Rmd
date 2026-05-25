@@ -141,11 +141,11 @@ low-VA + low-KCO is **Mixed**, low-DLCO + low-VA + normal-KCO is
 
 # 5. Cohort-level diffusion summaries
 
-`pft_cohort_summary()` includes a `diffusion` component when the
-input data frame carries a `diffusion_category` column (e.g. a
-`pft_interpret()` result):
+For cohort-level breakdowns of `diffusion_category`, group and count
+with `dplyr` directly on a `pft_interpret()` result:
 
-```{r}
+```{r, eval = requireNamespace("dplyr", quietly = TRUE)}
+library(dplyr)
 cohort <- data.frame(
   sex    = c("M","F","M","F","M","F"),
   age    = c(45,60,30,55,70,28),
@@ -158,9 +158,8 @@ cohort <- data.frame(
   va_measured      = c(5.8, 4.0, 6.5, 3.5, 5.5, 6.0),
   kco_tr_measured  = c(3.5, 3.2, 4.3, 2.9, 3.3, 4.0)
 )
-r <- pft_interpret(cohort)
-s <- pft_cohort_summary(r, by = "sex")
-s$diffusion
+pft_interpret(cohort) |>
+  count(sex, diffusion_category)
 ```
 
 # When NOT to order a diffusion test

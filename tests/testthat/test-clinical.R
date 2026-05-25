@@ -188,24 +188,3 @@ test_that("pft_gold: all-NA fev1fvc is equivalent to omitting fev1fvc", {
   expect_equal(pft_gold(c(85, 65), fev1fvc = c(NA, NA)),
                pft_gold(c(85, 65)))
 })
-
-## --- pft_cohort_summary ------------------------------------------------
-
-test_that("pft_cohort_summary returns expected list structure", {
-  d <- data.frame(
-    sex = c("M","F"), age = c(45, 60), height = c(178, 165), race = "Caucasian",
-    fev1_measured = c(2.5, 1.8), fvc_measured = c(3.8, 2.4),
-    fev1fvc_measured = c(0.66, 0.75), tlc_measured = c(6.0, 4.5)
-  )
-  out <- pft_cohort_summary(pft_interpret(d))
-  expect_named(out, c("zscores", "patterns", "prism"))
-  expect_true("fev1" %in% out$zscores$measure)
-  expect_true(all(c("mean_z", "median", "pct_below_lln") %in% colnames(out$zscores)))
-})
-
-test_that("pft_cohort_summary handles empty input gracefully", {
-  out <- pft_cohort_summary(data.frame())
-  expect_equal(nrow(out$zscores), 0)
-  expect_equal(nrow(out$patterns), 0)
-  expect_equal(nrow(out$prism), 0)
-})

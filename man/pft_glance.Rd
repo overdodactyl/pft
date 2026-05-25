@@ -39,6 +39,5 @@ pft_glance(pft_interpret(cohort))
 
 }
 \seealso{
-\code{\link[=pft_long]{pft_long()}} for the per-measure long-form pivot;
-\code{\link[=pft_cohort_summary]{pft_cohort_summary()}} for cohort-level (not per-patient) summaries.
+\code{\link[=pft_long]{pft_long()}} for the per-measure long-form pivot.
 }

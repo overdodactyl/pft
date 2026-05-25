@@ -253,17 +253,6 @@ patient_dlco <- data.frame(
 pft_interpret(patient_dlco)$diffusion_category
 ```
 
-# 14. Cohort-level audits
-
-`pft_cohort_summary()` summarises a `pft_result` (or compatible
-data frame) cohort-wide; pass `by = "sex"` (or any other column
-vector) for stratification:
-
-```{r}
-pft_cohort_summary(interpreted)
-pft_cohort_summary(interpreted, by = "sex")
-```
-
 # Citations
 
 See `citation("pft")` for the package and underlying reference
