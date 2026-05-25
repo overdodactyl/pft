@@ -122,6 +122,31 @@ pft_classify(patient)
 #> 1  2.5      3.0  3.8     3.5    0.66        0.70 6.2     5.0         Obstructed                    ANAN
 ```
 
+### End-to-end pipeline
+
+For the canonical "validate → interpret → visualise → report" workflow on a
+cohort:
+
+```r
+cohort <- data.frame(
+  sex    = c("M", "F"),
+  age    = c(45,  60),
+  height = c(178, 165),
+  race   = c("Caucasian", "AfrAm"),
+  fev1_measured = c(3.2, 1.8),
+  fvc_measured  = c(4.5, 2.4),
+  tlc_measured  = c(7.0, 4.8)
+)
+
+cohort |>
+  pft_validate() |>      # QC the inputs (FEV1 > FVC, ranges, ...)
+  pft_interpret()  ->    # everything: spirometry + volumes + classify + severity
+  result
+
+pft_plot(result, type = "lollipop")   # per-patient z-score figure
+pft_report(result, file = "cohort.html")   # one-call HTML report
+```
+
 ## Common workflows
 
 ### Equation-migration audit (GLI 2012 → GLI Global 2022)
