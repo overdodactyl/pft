@@ -34,9 +34,8 @@
 #'   correctable variants from [pft_spirometry()] (`"Male"`, `"female"`,
 #'   etc.); unrecognized values yield `NA`.
 #' @param age Optional numeric vector. When supplied, rows with `age <
-#'   `r FEV1Q_MIN_AGE`` return `NA_real_` per the paper's
-#'   "not appropriate for children and adolescents" caveat. Default
-#'   `NA_real_` skips the guard.
+#'   18` return `NA_real_` per the paper's "not appropriate for children
+#'   and adolescents" caveat. Default `NA_real_` skips the guard.
 #'
 #' @return Numeric vector of FEV1Q ratios, same length as `fev1`. `NA`
 #'   propagates from any input.

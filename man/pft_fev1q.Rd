@@ -13,9 +13,8 @@ pft_fev1q(fev1, sex, age = NA_real_)
 correctable variants from \code{\link[=pft_spirometry]{pft_spirometry()}} (\code{"Male"}, \code{"female"},
 etc.); unrecognized values yield \code{NA}.}
 
-\item{age}{Optional numeric vector. When supplied, rows with \verb{age < }r FEV1Q_MIN_AGE`` return \code{NA_real_} per the paper's
-"not appropriate for children and adolescents" caveat. Default
-`NA_real_` skips the guard.}
+\item{age}{Optional numeric vector. When supplied, rows with \code{age < 18} return \code{NA_real_} per the paper's "not appropriate for children
+and adolescents" caveat. Default \code{NA_real_} skips the guard.}
 }
 \value{
 Numeric vector of FEV1Q ratios, same length as \code{fev1}. \code{NA}
