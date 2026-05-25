@@ -28,3 +28,4 @@ notes/*.out
 # covr local coverage reports
 covr-report.html
 /lib/
+Rplots.pdf

@@ -56,12 +56,16 @@
 #' @seealso [pft_interpret()] and [pft_compare()] for the input data
 #'   shape; [pft_report()] to embed the plot into a clinical report.
 #'
-#' @examples
-#' \dontrun{
+#' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
 #' # Single-patient lollipop (default).
-#' p <- data.frame(sex = "M", age = 45, height = 178, race = "Caucasian",
-#'                 fev1_measured = 2.5, fvc_measured = 3.8)
-#' pft_plot(pft_interpret(p))
+#' patient <- data.frame(
+#'   sex = "M", age = 45, height = 178, race = "Caucasian",
+#'   fev1_measured    = 2.5,
+#'   fvc_measured     = 3.8,
+#'   fev1fvc_measured = 2.5 / 3.8,
+#'   tlc_measured     = 6.0
+#' )
+#' pft_plot(pft_interpret(patient))
 #'
 #' # Cohort histogram (z-score distribution by measure).
 #' cohort <- data.frame(
@@ -73,7 +77,28 @@
 #'   fvc_measured  = c(3.8, 2.4, 5.2, 2.5, 3.5)
 #' )
 #' pft_plot(pft_interpret(cohort), type = "histogram")
-#' }
+#'
+#' # Longitudinal trajectory across visit dates.
+#' serial <- data.frame(
+#'   patient_id  = rep(1:2, each = 4),
+#'   visit_date  = rep(as.Date(c("2020-01-15","2021-03-10",
+#'                                "2022-05-20","2023-07-30")), 2),
+#'   fev1_zscore = c(-0.5, -0.8, -1.2, -1.6,
+#'                    0.2,  0.0, -0.3, -0.5)
+#' )
+#' pft_plot(serial, type = "trajectory",
+#'          time = visit_date, patient_id = patient_id)
+#'
+#' # Stylised flow-volume envelope (single patient).
+#' fv_patient <- data.frame(
+#'   fvc_measured     = 4.0,
+#'   fef2575_measured = 3.5,
+#'   fef75_measured   = 1.2,
+#'   fvc_pred         = 4.5,
+#'   fef2575_pred     = 4.0,
+#'   fef75_pred       = 1.5
+#' )
+#' pft_plot(fv_patient, type = "flow_volume")
 #'
 #' @export
 pft_plot <- function(data,
