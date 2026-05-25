@@ -347,6 +347,12 @@ package = "pft"))$run(port = 8080)`. Not loaded automatically,
 not part of the exported API; intended as starter scaffolding for
 downstream institutional deployments that need an HTTP frontend
 to the package.
+## Minimum R version bumped to 4.0
+
+`DESCRIPTION` declared `R (>= 2.10)`, which is 12+ years stale and
+matches none of the actual transitive dependency floors (the
+`tidyverse`-aligned packages `rlang` and `tibble` long ago dropped
+support for pre-4.0 R). Bumped to `R (>= 4.0)` to match reality.
 
 ## New interpretation primitives (audit follow-up)
 
