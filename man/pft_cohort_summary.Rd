@@ -36,16 +36,6 @@ z-scores, severity grades, ATS pattern labels, and / or PRISm flags
 (typically the output of \code{\link[=pft_interpret]{pft_interpret()}} applied to many patients).
 Useful for cohort papers, screening reports, and quick QA looks.
 }
-\section{Reclassification audit}{
-
-When both \code{ats_classification} and \code{ats_classification_2022}
-columns are present in \code{data} (e.g., a \code{\link[=pft_compare]{pft_compare()}} output),
-the returned list gains a fourth \code{reclassification} component: a
-confusion-matrix tibble counting the 2012 -> 2022 transitions,
-a \code{n_reclassified} / \code{rate} summary row, and a \code{severity} tibble
-counting per-measure severity reclassification.
-}
-
 \examples{
 cohort <- data.frame(
   sex    = c("M","F","M","F","M"),

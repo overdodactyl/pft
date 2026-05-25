@@ -253,23 +253,7 @@ patient_dlco <- data.frame(
 pft_interpret(patient_dlco)$diffusion_category
 ```
 
-# 14. Comparing GLI 2012 vs GLI Global 2022
-
-For institutions migrating from race-stratified GLI 2012 to
-race-neutral GLI Global 2022, `pft_compare()` runs both equation
-sets on the same input and emits per-row reclassification
-deltas plus a `summary()` method for cohort-level audits:
-
-```{r}
-cmp <- pft_compare(cohort)
-cmp[, c("sex", "race",
-        "fev1_zscore", "fev1_zscore_2022", "fev1_zscore_delta",
-        "ats_classification", "ats_classification_2022",
-        "ats_pattern_changed")]
-summary(cmp)
-```
-
-# 15. Cohort-level audits
+# 14. Cohort-level audits
 
 `pft_cohort_summary()` summarises a `pft_result` (or compatible
 data frame) cohort-wide; pass `by = "sex"` (or any other column
@@ -280,22 +264,14 @@ pft_cohort_summary(interpreted)
 pft_cohort_summary(interpreted, by = "sex")
 ```
 
-When the data contains both 2012 and 2022 classifications (e.g.,
-a `pft_compare()` output), the summary gains a
-`reclassification` component containing the 2012 -> 2022
-confusion matrix.
+# 15. Multi-mode visualisation
 
-# 16. Multi-mode visualisation
-
-`pft_plot()` supports five modes:
+`pft_plot()` supports four modes:
 
 * `"lollipop"` (default, single patient; section 10 above)
 * `"histogram"` -- cohort z-score distribution per measure
 * `"trajectory"` -- longitudinal z-score per measure over time
 * `"bdr"` -- pre/post bronchodilator paired arrows
-* `"compare"` -- GLI 2012 -> GLI Global 2022 reclassification
-  arrows (consumes a `pft_compare()` result or any data with
-  paired `_zscore` and `_zscore_2022` columns)
 
 ```{r, eval = requireNamespace("ggplot2", quietly = TRUE)}
 pft_plot(interpreted, type = "histogram")

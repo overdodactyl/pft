@@ -6,19 +6,18 @@
 \usage{
 pft_plot(
   data,
-  type = c("lollipop", "histogram", "trajectory", "bdr", "compare"),
+  type = c("lollipop", "histogram", "trajectory", "bdr"),
   time = NULL,
   patient_id = NULL
 )
 }
 \arguments{
-\item{data}{A data frame produced by \code{\link[=pft_interpret]{pft_interpret()}},
-\code{\link[=pft_compare]{pft_compare()}}, or any of the reference functions with
-measured values supplied. Shape requirements depend on \code{type} --
-see the per-mode notes above.}
+\item{data}{A data frame produced by \code{\link[=pft_interpret]{pft_interpret()}} or any of the
+reference functions with measured values supplied. Shape
+requirements depend on \code{type} -- see the per-mode notes above.}
 
 \item{type}{One of \code{"lollipop"} (default), \code{"histogram"},
-\code{"trajectory"}, \code{"bdr"}, \code{"compare"}.}
+\code{"trajectory"}, \code{"bdr"}.}
 
 \item{time}{For \code{type = "trajectory"}: the column name (bare or
 string) giving the time axis. Required for trajectory mode;
@@ -37,8 +36,7 @@ A \code{ggplot} object.
 \code{type = "lollipop"} mode draws a single-patient z-score figure (one
 row per measure, points at the patient's z-score, shaded reference
 bands for Stanojevic 2022 severity). Other modes cover cohorts,
-longitudinal series, bronchodilator response, and equation
-comparison:
+longitudinal series, and bronchodilator response:
 \itemize{
 \item \code{"lollipop"} -- single-patient z-score figure (default). Errors if
 \code{nrow(data) != 1}.
@@ -51,11 +49,6 @@ measure. Requires a \code{time} column (numeric or Date).
 \verb{<measure>_pre} to \verb{<measure>_post} for each spirometry measure
 with a \verb{_pre} / \verb{_post} pair, with the Stanojevic 2022 +10 \% of
 predicted significance threshold overlaid.
-\item \code{"compare"} -- equation reclassification. For each spirometry
-measure with both \verb{<measure>_zscore} and \verb{<measure>_zscore_2022}
-columns (the output shape of \code{\link[=pft_compare]{pft_compare()}}), draws a segment
-from the 2012 z-score to the 2022 z-score, coloured by whether
-the row crossed the LLN.
 }
 
 Requires the \code{ggplot2} package (a Suggested dependency).
@@ -96,6 +89,5 @@ pft_plot(serial, type = "trajectory",
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=pft_interpret]{pft_interpret()}} and \code{\link[=pft_compare]{pft_compare()}} for the input data
-shape.
+\code{\link[=pft_interpret]{pft_interpret()}} for the input data shape.
 }

@@ -53,7 +53,6 @@ Each reference function emits `*_pred`, `*_lln`, `*_uln`. If a `<measure>_measur
 | Function | Purpose | Source |
 |---|---|---|
 | `pft_interpret()` | Single-call wrapper combining every primitive below | Stanojevic 2022 |
-| `pft_compare()` | GLI 2012 vs GLI Global 2022 side-by-side reclassification | Quanjer 2012 / Bowerman 2023 |
 | `pft_classify()` | Normal / Non-specific / Obstructed / Restricted / Mixed | Stanojevic 2022 Fig 8, Tables 5/8 |
 | `pft_volume_subpattern()` | Six lung-volume sub-patterns (Hyperinflation, Simple/Complex restriction, etc.) | Stanojevic 2022 Fig 10 |
 | `pft_severity()` | normal / mild / moderate / severe per measure z-score | Stanojevic 2022 |
@@ -65,9 +64,9 @@ Each reference function emits `*_pred`, `*_lln`, `*_uln`. If a `<measure>_measur
 | `pft_dlco_hb_correct()` | Hemoglobin correction for DLCO/TLCO | Cotes 1972 / Stanojevic 2017 |
 | `pft_quality()` | Spirometry quality grade (A-F) from a set of maneuvers | Graham 2019 |
 | `pft_gold()` | COPD severity (GOLD 1-4) from FEV1 % predicted | GOLD reports |
-| `pft_cohort_summary()` | Population-level z-score / pattern / PRISm summary; stratified via `by =`; reclassification confusion matrix | — |
+| `pft_cohort_summary()` | Population-level z-score / pattern / PRISm summary; stratified via `by =` | — |
 | `pft_validate()` | QC checks on PFT inputs (FEV1 > FVC, out-of-range demographics, etc.) | — |
-| `pft_plot()` | Clinical-style figures: `lollipop` (default), `histogram`, `trajectory`, `bdr`, `compare` | — |
+| `pft_plot()` | Clinical-style figures: `lollipop` (default), `histogram`, `trajectory`, `bdr` | — |
 | `pft_long()` / `pft_glance()` | Long-form pivot + per-patient summary; `broom::tidy`/`glance` dispatch | — |
 
 All functions take a data frame and return a data frame, so they
@@ -140,24 +139,6 @@ pft_plot(result, type = "lollipop")   # per-patient z-score figure
 ```
 
 ## Common workflows
-
-### Equation-migration audit (GLI 2012 → GLI Global 2022)
-
-```r
-cohort <- data.frame(
-  sex    = c("M", "F", "M", "F"),
-  age    = c(45, 60, 30, 55),
-  height = c(178, 165, 175, 160),
-  race   = c("AfrAm", "Caucasian", "AfrAm", "NEAsia"),
-  fev1_measured    = c(2.5, 1.8, 4.0, 1.5),
-  fvc_measured     = c(3.8, 2.4, 5.2, 2.5),
-  fev1fvc_measured = c(0.66, 0.75, 0.77, 0.60),
-  tlc_measured     = c(6.0, 4.5, 6.8, 4.0)
-)
-cmp <- pft_compare(cohort)
-summary(cmp)        # cohort-level reclassification report
-pft_plot(cmp, type = "compare")  # 2012 → 2022 arrow plot
-```
 
 ### Cohort analysis with broom-style tidiers
 

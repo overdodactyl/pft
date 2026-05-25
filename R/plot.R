@@ -5,8 +5,7 @@
 #' `type = "lollipop"` mode draws a single-patient z-score figure (one
 #' row per measure, points at the patient's z-score, shaded reference
 #' bands for Stanojevic 2022 severity). Other modes cover cohorts,
-#' longitudinal series, bronchodilator response, and equation
-#' comparison:
+#' longitudinal series, and bronchodilator response:
 #'
 #' * `"lollipop"` -- single-patient z-score figure (default). Errors if
 #'   `nrow(data) != 1`.
@@ -19,20 +18,14 @@
 #'   `<measure>_pre` to `<measure>_post` for each spirometry measure
 #'   with a `_pre` / `_post` pair, with the Stanojevic 2022 +10 % of
 #'   predicted significance threshold overlaid.
-#' * `"compare"` -- equation reclassification. For each spirometry
-#'   measure with both `<measure>_zscore` and `<measure>_zscore_2022`
-#'   columns (the output shape of [pft_compare()]), draws a segment
-#'   from the 2012 z-score to the 2022 z-score, coloured by whether
-#'   the row crossed the LLN.
 #'
 #' Requires the `ggplot2` package (a Suggested dependency).
 #'
-#' @param data A data frame produced by [pft_interpret()],
-#'   [pft_compare()], or any of the reference functions with
-#'   measured values supplied. Shape requirements depend on `type` --
-#'   see the per-mode notes above.
+#' @param data A data frame produced by [pft_interpret()] or any of the
+#'   reference functions with measured values supplied. Shape
+#'   requirements depend on `type` -- see the per-mode notes above.
 #' @param type One of `"lollipop"` (default), `"histogram"`,
-#'   `"trajectory"`, `"bdr"`, `"compare"`.
+#'   `"trajectory"`, `"bdr"`.
 #' @param time For `type = "trajectory"`: the column name (bare or
 #'   string) giving the time axis. Required for trajectory mode;
 #'   ignored otherwise.
@@ -43,8 +36,7 @@
 #'
 #' @return A `ggplot` object.
 #'
-#' @seealso [pft_interpret()] and [pft_compare()] for the input data
-#'   shape.
+#' @seealso [pft_interpret()] for the input data shape.
 #'
 #' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
 #' # Single-patient lollipop (default).
@@ -82,7 +74,7 @@
 #' @export
 pft_plot <- function(data,
                       type = c("lollipop", "histogram",
-                                 "trajectory", "bdr", "compare"),
+                                 "trajectory", "bdr"),
                       time = NULL,
                       patient_id = NULL) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
@@ -99,8 +91,7 @@ pft_plot <- function(data,
     lollipop    = pft_plot_lollipop(data),
     histogram   = pft_plot_histogram(data),
     trajectory  = pft_plot_trajectory(data, time_q, patient_id_q),
-    bdr         = pft_plot_bdr(data),
-    compare     = pft_plot_compare(data)
+    bdr         = pft_plot_bdr(data)
   )
 }
 
@@ -353,74 +344,3 @@ pft_plot_bdr <- function(data) {
 }
 
 
-# Mode: equation-comparison (2012 vs 2022) reclassification arrows. ---------
-pft_plot_compare <- function(data) {
-  # Identify spirometry measures with both _zscore and _zscore_2022.
-  z12 <- grep("_zscore$", colnames(data), value = TRUE)
-  z22 <- grep("_zscore_[0-9]+$", colnames(data), value = TRUE)
-  if (length(z22) == 0) {
-    stop("pft_plot(type = \"compare\") requires _zscore_<year> companion ",
-         "columns (the output shape of pft_compare()). None found.",
-         call. = FALSE)
-  }
-
-  measures <- intersect(
-    sub("_zscore$", "", z12),
-    sub("_zscore_[0-9]+$", "", z22)
-  )
-  if (length(measures) == 0) {
-    stop("pft_plot(type = \"compare\") requires matched _zscore and ",
-         "_zscore_<year> columns. None matched.", call. = FALSE)
-  }
-
-  parts <- list()
-  for (m in measures) {
-    parts[[length(parts) + 1]] <- data.frame(
-      patient   = seq_len(nrow(data)),
-      measure   = m,
-      zscore12  = data[[paste0(m, "_zscore")]],
-      zscore22  = data[[grep(paste0("^", m, "_zscore_[0-9]+$"),
-                              colnames(data), value = TRUE)[1]]],
-      stringsAsFactors = FALSE
-    )
-  }
-  plot_df <- do.call(rbind, parts)
-  plot_df <- plot_df[!is.na(plot_df$zscore12) & !is.na(plot_df$zscore22), ]
-  plot_df$lln_crossed <- (plot_df$zscore12 < -1.645) !=
-                         (plot_df$zscore22 < -1.645)
-
-  bands <- severity_bands()
-  ggplot2::ggplot(plot_df, ggplot2::aes(x = measure,
-                                          y = zscore12, yend = zscore22,
-                                          colour = lln_crossed,
-                                          group = patient)) +
-    ggplot2::geom_rect(
-      data = bands,
-      ggplot2::aes(ymin = ymin, ymax = ymax, fill = fill),
-      xmin = -Inf, xmax = Inf, alpha = 0.25, inherit.aes = FALSE
-    ) +
-    ggplot2::scale_fill_identity() +
-    ggplot2::geom_hline(yintercept = 0, linetype = "dashed",
-                         colour = "gray40") +
-    ggplot2::geom_hline(yintercept = -1.645, linetype = "dotted",
-                         colour = "gray30") +
-    ggplot2::geom_segment(
-      ggplot2::aes(xend = measure),
-      arrow = grid::arrow(length = grid::unit(0.07, "inches"),
-                          type = "closed"),
-      linewidth = 0.5,
-      position = ggplot2::position_jitter(width = 0.15, height = 0)
-    ) +
-    ggplot2::scale_colour_manual(
-      values = c(`TRUE` = "#d73027", `FALSE` = "gray30"),
-      labels = c(`TRUE` = "Crossed LLN", `FALSE` = "Same side of LLN"),
-      name = NULL
-    ) +
-    ggplot2::coord_flip(ylim = c(-6, 6)) +
-    ggplot2::labs(
-      x = NULL, y = "z-score",
-      title = "GLI 2012 -> GLI Global 2022 reclassification",
-      subtitle = "Dotted line: LLN. Coloured arrows cross the LLN."
-    ) +
-    ggplot2::theme_minimal(base_size = 12)
-}

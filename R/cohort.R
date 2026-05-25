@@ -43,14 +43,6 @@
 #'   Pass `by = "sex"` for per-sex summaries, `by = c("sex",
 #'   "age_band")` for two-way stratification, etc.
 #'
-#' @section Reclassification audit:
-#' When both `ats_classification` and `ats_classification_2022`
-#' columns are present in `data` (e.g., a [pft_compare()] output),
-#' the returned list gains a fourth `reclassification` component: a
-#' confusion-matrix tibble counting the 2012 -> 2022 transitions,
-#' a `n_reclassified` / `rate` summary row, and a `severity` tibble
-#' counting per-measure severity reclassification.
-#'
 #' @export
 pft_cohort_summary <- function(data, by = NULL) {
   # Cohort-wide path (existing behaviour preserved when by = NULL).
@@ -94,12 +86,6 @@ pft_cohort_summary <- function(data, by = NULL) {
   if (length(diff_parts)) {
     out$diffusion <- do.call(rbind, diff_parts)
   }
-
-  # Reclassification audit, available cohort-wide when both 2012 and
-  # 2022 classifications are present (typically a pft_compare()
-  # output).
-  recl <- cohort_reclassification(data)
-  if (!is.null(recl)) out$reclassification <- recl
   out
 }
 
@@ -159,55 +145,5 @@ cohort_summary_one <- function(data) {
                                      n = as.integer(t),
                                      proportion = as.numeric(t) / sum(t))
   }
-
-  recl <- cohort_reclassification(data)
-  if (!is.null(recl)) out$reclassification <- recl
   out
-}
-
-
-# Internal: reclassification audit. Returns NULL when both 2012 and
-# 2022 classification columns are not present; otherwise a list of
-# tibbles (overall counts, the pattern confusion matrix, per-measure
-# severity reclassification).
-cohort_reclassification <- function(data) {
-  if (!all(c("ats_classification", "ats_classification_2022") %in%
-            colnames(data))) {
-    return(NULL)
-  }
-
-  a <- data$ats_classification
-  b <- data$ats_classification_2022
-  ok <- !is.na(a) & !is.na(b)
-
-  overall <- tibble::tibble(
-    n              = sum(ok),
-    n_reclassified = sum(a[ok] != b[ok]),
-    rate           = if (sum(ok) > 0) mean(a[ok] != b[ok]) else NA_real_
-  )
-
-  tbl <- as.data.frame(table(`2012` = a[ok], `2022` = b[ok]),
-                        stringsAsFactors = FALSE)
-  names(tbl) <- c("classification_2012", "classification_2022", "n")
-  confusion <- tibble::as_tibble(tbl[tbl$n > 0, , drop = FALSE])
-
-  # Per-measure severity reclassification, if available.
-  sev_rows <- list()
-  for (m in c("fev1", "fvc", "fev1fvc")) {
-    a_col <- paste0(m, "_severity")
-    b_col <- paste0(m, "_severity_2022")
-    if (a_col %in% colnames(data) && b_col %in% colnames(data)) {
-      a_s <- data[[a_col]]; b_s <- data[[b_col]]
-      ok  <- !is.na(a_s) & !is.na(b_s)
-      sev_rows[[length(sev_rows) + 1]] <- tibble::tibble(
-        measure        = m,
-        n              = sum(ok),
-        n_reclassified = sum(a_s[ok] != b_s[ok]),
-        rate           = if (sum(ok) > 0) mean(a_s[ok] != b_s[ok]) else NA_real_
-      )
-    }
-  }
-  severity <- if (length(sev_rows)) do.call(rbind, sev_rows) else tibble::tibble()
-
-  list(overall = overall, confusion = confusion, severity = severity)
 }

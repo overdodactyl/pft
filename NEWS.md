@@ -1,16 +1,18 @@
 # pft (development version)
 
+## Breaking changes
+
+* `pft_compare()`, `print.pft_compare()`, `summary.pft_compare()`, and
+  the `pft_plot(type = "compare")` mode have been removed. The
+  GLI 2012 vs GLI Global 2022 reclassification analysis can still be
+  reproduced by calling `pft_interpret(data, year = 2012)` and
+  `pft_interpret(data, year = 2022)` and computing deltas on the
+  resulting columns directly. Removed for being outside the package's
+  core ATS/ERS reference-value + interpretation mission.
+
 ## New features
 
-* `pft_compare(data)` runs the spirometry + interpretation pipeline
-  under GLI 2012 and GLI Global 2022 on the same input and emits per-row
-  reclassification deltas (`<measure>_zscore_delta`,
-  `<measure>_severity_changed`, `ats_pattern_changed`, etc.).
-  `summary.pft_compare()` prints a cohort reclassification report.
-* `pft_cohort_summary()` gains a `by =` stratification argument and,
-  when both GLI 2012 and GLI Global 2022 columns are present, a
-  `reclassification` component containing the 2012 → 2022 confusion
-  matrix.
+* `pft_cohort_summary()` gains a `by =` stratification argument.
 * `pft_long()` and `pft_glance()` pivot a `pft_result` to long form
   and per-patient summary. `tidy.pft_result()` /
   `glance.pft_result()` S3 methods dispatch to them when `broom` is
@@ -31,13 +33,12 @@
   Cotes 1972 / Stanojevic 2017 hemoglobin correction. Reference Hb
   is 146 g/L (males ≥ 15) or 134 g/L (females, males < 15). Hb input
   in g/L by default; g/dL auto-converted with a warning.
-* `pft_plot()` gains four new modes — `histogram` (cohort z-score
+* `pft_plot()` gains three new modes — `histogram` (cohort z-score
   distribution by measure), `trajectory` (longitudinal z-score over
-  time, accepts numeric / Date / POSIXct), `bdr` (pre/post arrows),
-  `compare` (GLI 2012 → GLI Global 2022 reclassification segments) —
-  alongside the existing single-patient `lollipop`. Backward-compatible:
-  `pft_plot(result)` with no `type` argument still produces the
-  lollipop.
+  time, accepts numeric / Date / POSIXct), and `bdr` (pre/post
+  arrows) — alongside the existing single-patient `lollipop`.
+  Backward-compatible: `pft_plot(result)` with no `type` argument
+  still produces the lollipop.
 
 ## Bug fixes
 

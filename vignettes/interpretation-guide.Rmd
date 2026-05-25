@@ -50,9 +50,8 @@ pft_severity_2005(c(85, 65, 55, 40, 30))
 ```
 
 The same `standard = c("2022", "2005")` argument flows through
-`pft_classify()`, `pft_compare()`, and `pft_interpret()` so a whole
-report can be re-rendered against either standard without changing
-input data.
+`pft_classify()` and `pft_interpret()` so a whole report can be
+re-rendered against either standard without changing input data.
 
 # Pattern decision tree
 
@@ -104,20 +103,12 @@ The two standards differ in three ways:
 | Pattern flowchart     | Fig 8 / Table 5    | Fig 2             |
 
 The 2022 standard is the recommended default and is what
-`pft_interpret()` applies by default. Use the 2005 path when:
-
-* Reproducing a historical report or matching an EMR template that
-  was built against the older flowchart.
-* Performing a reclassification audit -- running the same cohort
-  through both standards highlights patients whose label changed
-  with the migration. `pft_compare()` produces the side-by-side
-  result; `pft_cohort_summary()` then aggregates it.
-
-```{r, eval = FALSE}
-cohort_compare <- pft_compare(my_cohort)         # runs both
-summary(cohort_compare)                          # cohort report
-pft_cohort_summary(cohort_compare)$reclassification
-```
+`pft_interpret()` applies by default. Use the 2005 path when
+reproducing a historical report or matching an EMR template that
+was built against the older flowchart -- run `pft_interpret(data,
+standard = "2005")` to get the predecessor severity and BDR
+outputs alongside `pft_classify(standard = "2005")`'s pattern
+labels.
 
 # Case studies
 

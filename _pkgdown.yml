@@ -65,8 +65,6 @@ reference:
       clinical-style visualisation.
     contents:
       - pft_interpret
-      - pft_compare
-      - summary.pft_compare
       - pft_validate
       - pft_plot
 

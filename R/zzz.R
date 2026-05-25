@@ -3,9 +3,8 @@
 # ggplot2 aesthetic references; this is the standard suppression pattern.
 utils::globalVariables(c(
   "measure", "zscore", "ymin", "ymax", "fill",
-  # bdr / compare / trajectory modes
-  "patient", "patient_id", "significant", "time",
-  "zscore12", "zscore22", "lln_crossed"
+  # bdr / trajectory modes
+  "patient", "patient_id", "significant", "time"
 ))
 
 .onAttach <- function(libname, pkgname) {
