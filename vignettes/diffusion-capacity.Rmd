@@ -13,13 +13,11 @@ library(pft)
 ```
 
 Diffusion measurements (DLCO in traditional units, TLCO in SI)
-assess gas-exchange capacity at the alveolar-capillary membrane and
-are typically added to spirometry and volumes when the differential
-includes interstitial lung disease, pulmonary vascular disease,
-emphysematous parenchymal loss, or anemia. The sections below cover
-reference values, hemoglobin correction, the six Hughes & Pride
-clinical categories, and the alveolar-volume distinction between
-parenchymal and extra-parenchymal restriction.
+quantify gas-exchange capacity at the alveolar-capillary membrane.
+The sections below cover the reference values pft computes
+(`pft_diffusion()`, GLI 2017), the hemoglobin correction
+(`pft_dlco_hb_correct()`), and the Hughes & Pride categorical
+classifier (`pft_diffusion_interpret()`).
 
 # 1. Reference values
 
@@ -69,11 +67,10 @@ pft_dlco_hb_correct(dlco = 20.0, hemoglobin = 110, sex = "M", age = 45)
 pft_dlco_hb_correct(dlco = 25.0, hemoglobin = 180, sex = "M", age = 45)
 ```
 
-The function also accepts Hb in g/dL (auto-detected when values are <
-30) and converts internally. **Apply the correction before
-computing z-scores** when comparing across patients whose Hb varies;
-the GLI 2017 reference values assume Hb is at the sex-/age-specific
-standard.
+Pass `hemoglobin` in g/L (the package does not detect or convert
+g/dL inputs). **Apply the correction before computing z-scores**
+when comparing across patients whose Hb varies; the GLI 2017
+reference values assume Hb is at the sex-/age-specific standard.
 
 # 3. Clinical sub-pattern (Hughes & Pride 2012)
 
@@ -121,23 +118,18 @@ r <- pft_interpret(patient2)
 r[, c("ats_classification", "diffusion_category")]
 ```
 
-# 4. VA: distinguishing parenchymal from extra-parenchymal restriction
+# 4. How VA shapes the classifier output
 
-Alveolar volume (VA) carries diagnostic weight on its own. In
-restriction, VA tracks total alveolar gas exchange capacity:
+Alveolar volume (VA) is the axis that splits restriction into the
+classifier's two volume-loss categories:
 
-* **Low VA, low KCO** -> parenchymal restriction (the alveoli that
-  *are* working are also impaired): suspect interstitial lung
-  disease, advanced fibrosis, or a chronic process that has
-  degraded both volume and gas exchange.
-* **Low VA, normal-or-high KCO** -> extra-parenchymal restriction
-  (fewer alveoli, but each functions normally per unit volume):
-  suspect chest-wall or neuromuscular causes, post-surgical loss of
-  lung tissue, or atelectasis.
+* **Low VA, low KCO** -> labelled **Mixed** (both alveolar volume
+  and per-alveolus gas exchange reduced).
+* **Low VA, normal-or-high KCO** -> labelled **Volume loss** (fewer
+  alveoli, each exchanging gas normally per unit volume).
 
-The Hughes & Pride classifier encodes this distinction: low-DLCO +
-low-VA + low-KCO is **Mixed**, low-DLCO + low-VA + normal-KCO is
-**Volume loss**.
+These are descriptive labels for the z-score pattern; clinical
+interpretation of what underlies the pattern is the reader's job.
 
 # 5. Cohort-level diffusion summaries
 
@@ -161,23 +153,6 @@ cohort <- data.frame(
 pft_interpret(cohort) |>
   count(sex, diffusion_category)
 ```
-
-# When NOT to order a diffusion test
-
-Diffusion measurement adds time and cost to a PFT session. Typical
-indications per the standard:
-
-* Suspected interstitial lung disease (any pattern with restriction).
-* Suspected emphysema or chronic parenchymal damage (obstructed
-  pattern with no clear hyperinflation).
-* Pulmonary vascular disease evaluation.
-* Pre-operative risk stratification for lung resection.
-* Drug-toxicity monitoring (bleomycin, amiodarone, methotrexate).
-
-Diffusion is *not* generally recommended for routine spirometry
-follow-up of stable COPD or asthma; the marginal information
-typically isn't worth the test burden. The standard's recommendation
-is "order when the result would change management".
 
 # See also
 
