@@ -25,6 +25,39 @@
 # coefficients. GLI splines shipped with this package are not at L = 0,
 # so the branch is defensive rather than load-bearing for built-in
 # references. Either output is NA wherever measured, M, S, or L is NA.
+# Vectorised linear interpolation of a GLI spline table against a vector
+# of ages. `sp` is one entry from `spirometry_splines`, `volume_splines`,
+# or `transfer_splines` (a list with $age, $Mspline, $Sspline, $Lspline,
+# all parallel column vectors). Returns one Mspline / Sspline / Lspline
+# value per input age, plus a `valid` logical mask flagging rows whose
+# age fell inside the spline's range.
+#
+# Replaces the per-row `which.min(!(age_i <= sp$age)) - 1L` lookup that
+# dominated the LMS-fit cost. `findInterval()` is a compiled C routine;
+# `rightmost.closed = TRUE` makes the upper-bound age (e.g. age = 95
+# against a 5..95 spline) interpolate to the last spline row, matching
+# the old code's behaviour at the upper edge.
+vec_spline_interp <- function(age, sp) {
+  idx   <- findInterval(age, sp$age, rightmost.closed = TRUE)
+  valid <- idx >= 1L & idx <= length(sp$age) - 1L
+  n     <- length(age)
+  out   <- list(
+    Mspline = rep(NA_real_, n),
+    Sspline = rep(NA_real_, n),
+    Lspline = rep(NA_real_, n),
+    valid   = valid
+  )
+  if (!any(valid)) return(out)
+
+  iv     <- idx[valid]
+  age_v  <- age[valid]
+  w      <- (age_v - sp$age[iv]) / (sp$age[iv + 1L] - sp$age[iv])
+  out$Mspline[valid] <- sp$Mspline[iv] + w * (sp$Mspline[iv + 1L] - sp$Mspline[iv])
+  out$Sspline[valid] <- sp$Sspline[iv] + w * (sp$Sspline[iv + 1L] - sp$Sspline[iv])
+  out$Lspline[valid] <- sp$Lspline[iv] + w * (sp$Lspline[iv + 1L] - sp$Lspline[iv])
+  out
+}
+
 bind_lms_outputs <- function(data, M, S, L, lower, upper, measures,
                              suffix = "") {
   results <- data

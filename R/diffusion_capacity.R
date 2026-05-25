@@ -68,73 +68,64 @@ pft_diffusion <- function(data, SI.units = FALSE,
   age_vec    <- data[[cols$age]]
   height_vec <- data[[cols$height]]
   n <- length(sex_vec)
+  n_measures <- 5L
 
-  index.spline <- matrix(NA,nrow=n,ncol=5)
-  Mspline <- matrix(NA,nrow=n,ncol=5)
-  Sspline <- matrix(NA,nrow=n,ncol=5)
-  Lspline <- matrix(NA,nrow=n,ncol=5)
+  # Stanojevic 2017 transfer-table column order for males / females.
+  male_indices   <- c(1, 3, 5, 7, 9)
+  female_indices <- c(2, 4, 6, 8, 10)
 
-  M.vector <- matrix(NA,nrow=n,ncol=5)
-  S.vector <- matrix(NA,nrow=n,ncol=5)
-  L.vector <- matrix(NA,nrow=n,ncol=5)
+  M     <- matrix(NA_real_, n, n_measures)
+  S     <- matrix(NA_real_, n, n_measures)
+  L     <- matrix(NA_real_, n, n_measures)
+  lower <- matrix(NA_real_, n, n_measures)
+  upper <- matrix(NA_real_, n, n_measures)
 
-  Lower.vector <- matrix(NA,nrow=n,ncol=5)
-  Upper.vector <- matrix(NA,nrow=n,ncol=5)
+  demo_ok <- !is.na(sex_vec) & !is.na(age_vec) & !is.na(height_vec)
+  m_rows  <- which(demo_ok & sex_vec == "M")
+  f_rows  <- which(demo_ok & sex_vec == "F")
 
-  for (i in seq_len(n)) {
+  fit_group <- function(rows, g) {
+    if (length(rows) == 0) return(NULL)
+    age      <- age_vec[rows]
+    log_age  <- log(age)
+    log_h    <- log(height_vec[rows])
+    sp       <- transfer_splines[[g]]
+    si       <- vec_spline_interp(age, sp)
+    if (!any(si$valid)) return(NULL)
 
-    # Skip rows with missing demographics; outputs stay NA via the
-    # pre-allocated NA matrices above.
-    if (is.na(sex_vec[i]) || is.na(age_vec[i]) || is.na(height_vec[i])) {
-      next
-    }
+    keep      <- si$valid
+    log_age_v <- log_age[keep]
+    log_h_v   <- log_h[keep]
 
-    g.index <- if (sex_vec[i] == "M") c(1,3,5,7,9) else c(2,4,6,8,10)
-    age_i    <- age_vec[i]
-    height_i <- height_vec[i]
+    Mv <- exp(transfer_coeff$Median1[g] +
+                transfer_coeff$Median2[g] * log_h_v +
+                transfer_coeff$Median3[g] * log_age_v +
+                si$Mspline[keep])
+    Sv <- exp(transfer_coeff$S1[g] +
+                transfer_coeff$S2[g] * log_age_v +
+                si$Sspline[keep])
+    Lv <- rep(transfer_coeff$L[g], length(log_age_v))
 
-    for (j in 1:5) {
+    list(
+      rows  = rows[keep],
+      M     = Mv,
+      S     = Sv,
+      L     = Lv,
+      lower = exp(log(Mv) + log(1 - 1.645 * Lv * Sv) / Lv),
+      upper = exp(log(Mv) + log(1 + 1.645 * Lv * Sv) / Lv)
+    )
+  }
 
-      # Select index spline
-      if (age_i == 5) {
-
-        index.spline[i,j] <- 1
-
-      } else {
-
-        index.spline[i,j] <- which.min(!(age_i <= transfer_splines[[g.index[j]]]$age)) - 1
-
-      }
-
-      # Skip computation if age is outside acceptable range
-      if (index.spline[i,j] == 0) {
-        next
-      }
-
-      interp.factor <-
-        (age_i - transfer_splines[[g.index[j]]]$age[index.spline[i,j]]) /
-        (transfer_splines[[g.index[j]]]$age[index.spline[i,j]+1] -
-           transfer_splines[[g.index[j]]]$age[index.spline[i,j]])
-
-      Mspline[i,j] <- transfer_splines[[g.index[j]]]$Mspline[index.spline[i,j]]+interp.factor*(transfer_splines[[g.index[j]]]$Mspline[index.spline[i,j]+1]-transfer_splines[[g.index[j]]]$Mspline[index.spline[i,j]])
-
-      Sspline[i,j] <- transfer_splines[[g.index[j]]]$Sspline[index.spline[i,j]]+interp.factor*(transfer_splines[[g.index[j]]]$Sspline[index.spline[i,j]+1]-transfer_splines[[g.index[j]]]$Sspline[index.spline[i,j]])
-
-      Lspline[i,j] <- transfer_splines[[g.index[j]]]$Lspline[index.spline[i,j]]+interp.factor*(transfer_splines[[g.index[j]]]$Lspline[index.spline[i,j]+1]-transfer_splines[[g.index[j]]]$Lspline[index.spline[i,j]])
-
-      M.vector[i,j] <- exp(transfer_coeff$Median1[g.index[j]]+
-                             transfer_coeff$Median2[g.index[j]]*log(height_i)+
-                             transfer_coeff$Median3[g.index[j]]*log(age_i)+Mspline[i,j])
-
-      S.vector[i,j] <- exp(transfer_coeff$S1[g.index[j]]+
-                             transfer_coeff$S2[g.index[j]]*log(age_i)+
-                             Sspline[i,j])
-
-      L.vector[i,j] <- transfer_coeff$L[g.index[j]]
-
-      Lower.vector[i,j] <- exp(log(M.vector[i,j])+log(1-1.645*L.vector[i,j]*S.vector[i,j])/L.vector[i,j])
-      Upper.vector[i,j] <- exp(log(M.vector[i,j])+log(1+1.645*L.vector[i,j]*S.vector[i,j])/L.vector[i,j])
-
+  for (j in seq_len(n_measures)) {
+    for (grp in list(list(rows = m_rows, g = male_indices[j]),
+                      list(rows = f_rows, g = female_indices[j]))) {
+      r <- fit_group(grp$rows, grp$g)
+      if (is.null(r)) next
+      M[r$rows, j]     <- r$M
+      S[r$rows, j]     <- r$S
+      L[r$rows, j]     <- r$L
+      lower[r$rows, j] <- r$lower
+      upper[r$rows, j] <- r$upper
     }
   }
 
@@ -142,20 +133,20 @@ pft_diffusion <- function(data, SI.units = FALSE,
   # KCO_Tr, VA. Pick the 3 measures that match the requested unit system
   # plus VA (unit-independent).
   if (SI.units) {
-    measures <- c("tlco", "kco_si", "va")
-    cols     <- c(1, 3, 5)
+    measures  <- c("tlco", "kco_si", "va")
+    keep_cols <- c(1, 3, 5)
   } else {
-    measures <- c("dlco", "kco_tr", "va")
-    cols     <- c(2, 4, 5)
+    measures  <- c("dlco", "kco_tr", "va")
+    keep_cols <- c(2, 4, 5)
   }
 
   bind_lms_outputs(
     data,
-    M = M.vector[, cols, drop = FALSE],
-    S = S.vector[, cols, drop = FALSE],
-    L = L.vector[, cols, drop = FALSE],
-    lower = Lower.vector[, cols, drop = FALSE],
-    upper = Upper.vector[, cols, drop = FALSE],
+    M = M[, keep_cols, drop = FALSE],
+    S = S[, keep_cols, drop = FALSE],
+    L = L[, keep_cols, drop = FALSE],
+    lower = lower[, keep_cols, drop = FALSE],
+    upper = upper[, keep_cols, drop = FALSE],
     measures = measures
   )
 }

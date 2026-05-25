@@ -64,86 +64,86 @@ pft_volumes <- function(data,
   age_vec    <- data[[cols$age]]
   height_vec <- data[[cols$height]]
   n <- length(sex_vec)
+  n_measures <- 7L
 
-  index.spline <- matrix(NA, nrow = n, ncol = 7)
-  Mspline <- matrix(NA, nrow = n, ncol = 7)
-  Sspline <- matrix(NA, nrow = n, ncol = 7)
-  Lspline <- matrix(NA, nrow = n, ncol = 7)
+  # Hall 2021 spline-table column order for males / females
+  male_indices   <- c(1, 3, 5, 7,  9, 11, 13)
+  female_indices <- c(2, 4, 6, 8, 10, 12, 14)
 
-  M.vector <- matrix(NA, nrow = n, ncol = 7)
-  S.vector <- matrix(NA, nrow = n, ncol = 7)
-  L.vector <- matrix(NA, nrow = n, ncol = 7)
+  # Hall 2021 covariate-form table per measure j (1..7):
+  #   FRC (j=1):  age.covarM = log(age),  height.covarM = log(height)
+  #   TLC (j=2):  age.covarM = log(age),  height.covarM = log(height)
+  #   RV  (j=3):  age.covarM = age,       height.covarM = height
+  #   RV/TLC(j=4):age.covarM = age,       height.covarM = height
+  #   ERV (j=5):  age.covarM = age,       height.covarM = log(height)
+  #   IC  (j=6):  age.covarM = age,       height.covarM = log(height)
+  #   VC  (j=7):  age.covarM = age,       height.covarM = log(height)
+  # S-side: age.covarS = log(age) only for j=1, otherwise age.
+  m_age_is_log    <- c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE)
+  m_height_is_log <- c(TRUE, TRUE, FALSE, FALSE, TRUE,  TRUE,  TRUE)
+  s_age_is_log    <- c(TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE)
 
-  Lower.vector <- matrix(NA, nrow = n, ncol = 7)
-  Upper.vector <- matrix(NA, nrow = n, ncol = 7)
+  M     <- matrix(NA_real_, n, n_measures)
+  S     <- matrix(NA_real_, n, n_measures)
+  L     <- matrix(NA_real_, n, n_measures)
+  lower <- matrix(NA_real_, n, n_measures)
+  upper <- matrix(NA_real_, n, n_measures)
 
-  for (i in seq_len(n)) {
+  demo_ok <- !is.na(sex_vec) & !is.na(age_vec) & !is.na(height_vec)
+  m_rows  <- which(demo_ok & sex_vec == "M")
+  f_rows  <- which(demo_ok & sex_vec == "F")
 
-    # Skip rows with missing demographics; outputs stay NA via the
-    # pre-allocated NA matrices above.
-    if (is.na(sex_vec[i]) || is.na(age_vec[i]) || is.na(height_vec[i])) {
-      next
-    }
+  fit_group <- function(rows, g, j) {
+    if (length(rows) == 0) return(NULL)
+    age    <- age_vec[rows]
+    height <- height_vec[rows]
+    sp     <- volume_splines[[g]]
+    si     <- vec_spline_interp(age, sp)
+    if (!any(si$valid)) return(NULL)
 
-    g.index <- if (sex_vec[i] == "M") c(1,3,5,7,9,11,13) else c(2,4,6,8,10,12,14)
+    keep   <- si$valid
+    age_v  <- age[keep]
+    h_v    <- height[keep]
+    age_m  <- if (m_age_is_log[j])    log(age_v) else age_v
+    h_m    <- if (m_height_is_log[j]) log(h_v)   else h_v
+    age_s  <- if (s_age_is_log[j])    log(age_v) else age_v
 
-    age_i    <- age_vec[i]
-    height_i <- height_vec[i]
+    Mv <- exp(volume_coeff$Median1[g] +
+                volume_coeff$Median2[g] * age_m +
+                volume_coeff$Median3[g] * h_m +
+                si$Mspline[keep])
+    Sv <- exp(volume_coeff$S1[g] +
+                volume_coeff$S2[g] * age_s +
+                si$Sspline[keep])
+    Lv <- rep(volume_coeff$L[g], length(age_v))
 
-    for (j in 1:7) {
+    list(
+      rows  = rows[keep],
+      M     = Mv,
+      S     = Sv,
+      L     = Lv,
+      lower = exp(log(Mv) + log(1 - 1.645 * Lv * Sv) / Lv),
+      upper = exp(log(Mv) + log(1 + 1.645 * Lv * Sv) / Lv)
+    )
+  }
 
-      # Handle spline indexing for end cases
-      if (age_i == 5) {
-
-        index.spline[i,j] <- 1
-
-      } else {
-
-        index.spline[i,j] <- which.min(!(age_i <= volume_splines[[g.index[j]]]$age)) - 1
-
-      }
-
-      # Skip computation if age is outside acceptable range
-      if (index.spline[i,j] == 0) {
-        next
-      }
-
-      interp.factor <-
-        (age_i - volume_splines[[g.index[j]]]$age[index.spline[i,j]]) /
-        (volume_splines[[g.index[j]]]$age[index.spline[i,j] + 1] -
-           volume_splines[[g.index[j]]]$age[index.spline[i,j]])
-
-      Mspline[i,j] <- volume_splines[[g.index[j]]]$Mspline[index.spline[i,j]] + interp.factor * (volume_splines[[g.index[j]]]$Mspline[index.spline[i,j] + 1] - volume_splines[[g.index[j]]]$Mspline[index.spline[i,j]])
-
-      Sspline[i,j] <- volume_splines[[g.index[j]]]$Sspline[index.spline[i,j]] + interp.factor * (volume_splines[[g.index[j]]]$Sspline[index.spline[i,j] + 1] - volume_splines[[g.index[j]]]$Sspline[index.spline[i,j]])
-
-      Lspline[i,j] <- volume_splines[[g.index[j]]]$Lspline[index.spline[i,j]] + interp.factor * (volume_splines[[g.index[j]]]$Lspline[index.spline[i,j] + 1] - volume_splines[[g.index[j]]]$Lspline[index.spline[i,j]])
-
-      age.covarM    <- if (j %in% c(1,2)) log(age_i)    else age_i
-      height.covarM <- if (j %in% c(3,4)) height_i      else log(height_i)
-
-      M.vector[i,j] <- exp(volume_coeff$Median1[g.index[j]] +
-                             volume_coeff$Median2[g.index[j]] * age.covarM +
-                             volume_coeff$Median3[g.index[j]] * height.covarM + Mspline[i,j])
-
-      age.covarS <- if (j == 1) log(age_i) else age_i
-
-      S.vector[i,j] <- exp(volume_coeff$S1[g.index[j]]+
-                             volume_coeff$S2[g.index[j]]*age.covarS+
-                             Sspline[i,j])
-
-      L.vector[i,j] <- volume_coeff$L[g.index[j]]
-
-      Lower.vector[i,j] <- exp(log(M.vector[i,j])+log(1-1.645*L.vector[i,j]*S.vector[i,j])/L.vector[i,j])
-      Upper.vector[i,j] <- exp(log(M.vector[i,j])+log(1+1.645*L.vector[i,j]*S.vector[i,j])/L.vector[i,j])
-
+  for (j in seq_len(n_measures)) {
+    for (grp in list(list(rows = m_rows, g = male_indices[j]),
+                      list(rows = f_rows, g = female_indices[j]))) {
+      r <- fit_group(grp$rows, grp$g, j)
+      if (is.null(r)) next
+      M[r$rows, j]     <- r$M
+      S[r$rows, j]     <- r$S
+      L[r$rows, j]     <- r$L
+      lower[r$rows, j] <- r$lower
+      upper[r$rows, j] <- r$upper
     }
   }
 
   bind_lms_outputs(
     data,
-    M = M.vector, S = S.vector, L = L.vector,
-    lower = Lower.vector, upper = Upper.vector,
+    M = M, S = S, L = L,
+    lower = lower, upper = upper,
     measures = c("frc", "tlc", "rv", "rv_tlc", "erv", "ic", "vc")
   )
 }

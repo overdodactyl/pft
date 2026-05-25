@@ -154,76 +154,89 @@ pft_spirometry <- function(data, year = 2012,
 spirometry_lms_fit <- function(sex_vec, age_vec, height_vec, race_vec = NULL,
                                 splines, coeff_m, coeff_s, coeff_l,
                                 male_indices, female_indices, race_levels) {
-  n <- length(sex_vec)
+  n          <- length(sex_vec)
   n_measures <- length(male_indices)
-  use_race <- !is.null(race_levels)
+  use_race   <- !is.null(race_levels)
 
-  shape <- c(n, n_measures)
-  M     <- matrix(NA_real_, nrow = shape[1], ncol = shape[2])
-  S     <- matrix(NA_real_, nrow = shape[1], ncol = shape[2])
-  L     <- matrix(NA_real_, nrow = shape[1], ncol = shape[2])
-  lower <- matrix(NA_real_, nrow = shape[1], ncol = shape[2])
-  upper <- matrix(NA_real_, nrow = shape[1], ncol = shape[2])
+  M     <- matrix(NA_real_, n, n_measures)
+  S     <- matrix(NA_real_, n, n_measures)
+  L     <- matrix(NA_real_, n, n_measures)
+  lower <- matrix(NA_real_, n, n_measures)
+  upper <- matrix(NA_real_, n, n_measures)
 
-  for (i in seq_len(n)) {
+  # Build the race-dummy matrix once. A row whose race is NA or doesn't
+  # match any of `race_levels` has row sum NA or 0 respectively; both
+  # are flagged invalid so those patients return NA without dragging
+  # any sums into the regression.
+  if (use_race) {
+    race_mat   <- 1 * outer(race_vec, race_levels, "==")
+    row_sums   <- rowSums(race_mat)
+    race_valid <- !is.na(row_sums) & row_sums == 1
+  } else {
+    race_mat   <- NULL
+    race_valid <- rep(TRUE, n)
+  }
 
-    if (is.na(sex_vec[i]) || is.na(age_vec[i]) || is.na(height_vec[i])) {
-      next
-    }
+  demo_ok <- !is.na(sex_vec) & !is.na(age_vec) & !is.na(height_vec) &
+               race_valid
 
-    g_index <- if (sex_vec[i] == "M") male_indices else female_indices
+  m_rows <- which(demo_ok & sex_vec == "M")
+  f_rows <- which(demo_ok & sex_vec == "F")
+
+  # Inner per-group fit. `rows` is the indices in the full result
+  # matrix that this call writes to; `g` indexes into the parallel
+  # `splines` / `coeff_*` tables (male-indices for M, female-indices
+  # for F).
+  fit_group <- function(rows, g) {
+    if (length(rows) == 0) return(NULL)
+    age      <- age_vec[rows]
+    log_age  <- log(age)
+    log_h    <- log(height_vec[rows])
+
+    sp <- splines[[g]]
+    si <- vec_spline_interp(age, sp)
+    if (!any(si$valid)) return(NULL)
+
+    keep <- si$valid
+    log_age_v <- log_age[keep]
+    log_h_v   <- log_h[keep]
+
+    m_lin <- coeff_m[1, g] + log_h_v   * coeff_m[2, g] +
+                              log_age_v * coeff_m[3, g]
+    s_lin <- coeff_s[1, g] + log_age_v * coeff_s[2, g]
 
     if (use_race) {
-      race_dummies <- as.numeric(race_vec[i] == race_levels)
-      if (sum(race_dummies) == 0 || is.na(sum(race_dummies))) next
-      n_race <- length(race_levels)
+      n_race  <- length(race_levels)
+      race_kv <- race_mat[rows[keep], , drop = FALSE]
+      m_lin   <- m_lin + as.vector(race_kv %*% coeff_m[4:(3 + n_race), g])
+      s_lin   <- s_lin + as.vector(race_kv %*% coeff_s[3:(2 + n_race), g])
     }
 
-    age_i    <- age_vec[i]
-    log_age  <- log(age_i)
-    log_height <- log(height_vec[i])
+    Mv <- exp(m_lin + si$Mspline[keep])
+    Sv <- exp(s_lin + si$Sspline[keep])
+    Lv <- coeff_l[1, g] + log_age_v * coeff_l[2, g] + si$Lspline[keep]
 
-    for (j in seq_len(n_measures)) {
-      sp <- splines[[g_index[j]]]
+    write_rows <- rows[keep]
+    list(
+      rows  = write_rows,
+      M     = Mv,
+      S     = Sv,
+      L     = Lv,
+      lower = exp(log(Mv) + log(1 - 1.645 * Lv * Sv) / Lv),
+      upper = exp(log(Mv) + log(1 + 1.645 * Lv * Sv) / Lv)
+    )
+  }
 
-      # Spline-table index lookup. The first spline-table age is the
-      # lower bound of support; we set index to 1 exactly there and skip
-      # if the patient's age is below it.
-      idx <- if (age_i == sp$age[1]) {
-        1L
-      } else {
-        which.min(!(age_i <= sp$age)) - 1L
-      }
-      if (idx == 0) next
-
-      # Linear interpolation between adjacent spline-table rows.
-      interp <- (age_i - sp$age[idx]) / (sp$age[idx + 1] - sp$age[idx])
-      Mspline <- sp$Mspline[idx] + interp * (sp$Mspline[idx + 1] - sp$Mspline[idx])
-      Sspline <- sp$Sspline[idx] + interp * (sp$Sspline[idx + 1] - sp$Sspline[idx])
-      Lspline <- sp$Lspline[idx] + interp * (sp$Lspline[idx + 1] - sp$Lspline[idx])
-
-      # M = exp(intercept + log(height)*b1 + log(age)*b2 + race + Mspline)
-      m_lin <- coeff_m[1, g_index[j]] +
-               log_height * coeff_m[2, g_index[j]] +
-               log_age    * coeff_m[3, g_index[j]]
-      if (use_race) {
-        m_lin <- m_lin + sum(race_dummies * coeff_m[4:(3 + n_race), g_index[j]])
-      }
-      M[i, j] <- exp(m_lin + Mspline)
-
-      # S = exp(intercept + log(age)*b1 + race + Sspline)
-      s_lin <- coeff_s[1, g_index[j]] + log_age * coeff_s[2, g_index[j]]
-      if (use_race) {
-        s_lin <- s_lin + sum(race_dummies * coeff_s[3:(2 + n_race), g_index[j]])
-      }
-      S[i, j] <- exp(s_lin + Sspline)
-
-      # L = intercept + log(age)*b1 + Lspline (no race dummies in L)
-      L[i, j] <- coeff_l[1, g_index[j]] + log_age * coeff_l[2, g_index[j]] + Lspline
-
-      # 5th and 95th percentile limits from the LMS distribution
-      lower[i, j] <- exp(log(M[i, j]) + log(1 - 1.645 * L[i, j] * S[i, j]) / L[i, j])
-      upper[i, j] <- exp(log(M[i, j]) + log(1 + 1.645 * L[i, j] * S[i, j]) / L[i, j])
+  for (j in seq_len(n_measures)) {
+    for (grp in list(list(rows = m_rows, g = male_indices[j]),
+                      list(rows = f_rows, g = female_indices[j]))) {
+      r <- fit_group(grp$rows, grp$g)
+      if (is.null(r)) next
+      M[r$rows, j]     <- r$M
+      S[r$rows, j]     <- r$S
+      L[r$rows, j]     <- r$L
+      lower[r$rows, j] <- r$lower
+      upper[r$rows, j] <- r$upper
     }
   }
 
