@@ -268,6 +268,17 @@ pft_plot_trajectory <- function(data, time_q, patient_id_q) {
     ) +
     ggplot2::theme_minimal(base_size = 12)
 
+  # Use an explicit date / datetime scale when the time column is one
+  # of those types. ggplot's auto-detection usually picks the right
+  # scale, but being explicit guards against subclasses (e.g. hms) and
+  # makes the axis-label format reliable.
+  if (inherits(plot_df$time, "Date")) {
+    p <- p + ggplot2::scale_x_date()
+  } else if (inherits(plot_df$time, "POSIXct") ||
+             inherits(plot_df$time, "POSIXlt")) {
+    p <- p + ggplot2::scale_x_datetime()
+  }
+
   if (has_pid) {
     p <- p + ggplot2::aes(group = interaction(measure, patient_id)) +
       ggplot2::facet_wrap(~ patient_id)

@@ -68,6 +68,28 @@ test_that("pft_plot(type = 'trajectory') accepts a numeric time column", {
   expect_true(grepl("trajectory", p$labels$title))
 })
 
+test_that("pft_plot(type = 'trajectory') accepts Date and POSIXct time columns", {
+  skip_if_not_installed("ggplot2")
+  n <- nrow(result_cohort)
+
+  d_date <- result_cohort
+  d_date$visit_date <- as.Date("2020-01-01") + seq(0, by = 365, length.out = n)
+  p_date <- pft_plot(d_date, type = "trajectory", time = visit_date)
+  expect_s3_class(p_date, "ggplot")
+  expect_s3_class(p_date$data$time, "Date")
+  # Explicit scale_x_date should be on the plot's scales list.
+  expect_true(any(vapply(p_date$scales$scales,
+                         function(s) inherits(s, "ScaleContinuousDate"),
+                         logical(1))))
+
+  d_dt <- result_cohort
+  d_dt$visit_dt <- as.POSIXct("2020-01-01", tz = "UTC") +
+                     seq(0, by = 86400 * 365, length.out = n)
+  p_dt <- pft_plot(d_dt, type = "trajectory", time = visit_dt)
+  expect_s3_class(p_dt, "ggplot")
+  expect_s3_class(p_dt$data$time, "POSIXct")
+})
+
 test_that("pft_plot trajectory errors on unknown time column", {
   skip_if_not_installed("ggplot2")
   expect_error(pft_plot(result_cohort, type = "trajectory",
