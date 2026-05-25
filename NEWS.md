@@ -132,6 +132,37 @@ error on multi-row input. Callers that were using the lollipop need
 no changes.
 
 Test count: 1195 -> 1208 (+13).
+## pft_decline() — longitudinal slope fitting
+
+`pft_decline(data, by, measure, time)` fits a per-patient linear
+regression of `measure` (typically a z-score or percent-predicted
+column) on `time` and returns a per-patient tibble of slopes with
+95 % confidence intervals. This is the natural follow-up to
+`pft_change()` (two-point conditional change z-score) for cohorts
+with three or more serial measurements -- the per-patient slope is
+the input clinicians actually use for transplant-listing, BOS
+staging, IPF progression, or CF exacerbation alerts.
+
+* Two model modes: `"ols"` (default; per-patient `lm()`) and
+  `"mixed"` (single `lme4::lmer()` with random intercept + slope
+  per patient; partial-pools toward the cohort-wide slope).
+* `time` accepts numeric or Date / POSIXct columns; the latter are
+  internally converted to years-from-earliest so slopes are
+  per-year by default.
+* Optional `flag_threshold` argument marks patients whose slope is
+  more negative than `-abs(flag_threshold)`; the threshold is
+  intentionally user-supplied (decline-rate thresholds vary by
+  disease and unit system -- CF 10 % FEV1 / year; ISHLT 10 %
+  sustained drop for BOS; OMERACT / ATS IPF 5 % FVC over 6 months).
+* `min_points` (default 3) sets the minimum non-NA observations
+  per patient required to attempt a fit; under-threshold patients
+  return `NA` slope but their `n_points` count is still reported.
+* `lme4` added to `Suggests` (only needed for `model = "mixed"`).
+* New tests in `tests/testthat/test-decline.R` (19 expectations)
+  including hand-calculated slope reproduction for known
+  trajectories.
+
+Test count: 1195 -> 1214 (+19, +1 skipped lme4 test).
 
 ## New interpretation primitives (audit follow-up)
 

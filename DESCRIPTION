@@ -37,6 +37,7 @@ Suggests:
     dplyr,
     ggplot2,
     knitr,
+    lme4,
     rmarkdown,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
