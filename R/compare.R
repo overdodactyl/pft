@@ -95,7 +95,7 @@ pft_compare <- function(data,
   height_q <- rlang::enquo(height)
   race_q   <- rlang::enquo(race)
 
-  # 1. Full GLI 2012 interpretation (spirometry + volumes + diffusion +
+  # GLI 2012 path: full interpretation (spirometry + volumes + diffusion +
   # severity + pattern + PRISm + volume sub-pattern + BDR).
   result <- pft_interpret(
     data, year = 2012, SI.units = SI.units, standard = standard,
@@ -106,15 +106,32 @@ pft_compare <- function(data,
     class(result) <- setdiff(class(result), "pft_result")
   }
 
-  # 2. Append GLI Global 2022 spirometry columns (fev1_pred_2022,
-  # fev1_lln_2022, fev1_zscore_2022, fev1_pctpred_2022, etc.).
+  # GLI 2022 path: append the race-neutral spirometry equations and every
+  # downstream interpretation that depends on FEV1/FVC LLN.
+  result <- append_2022_interpretation(result, standard, sex_q, age_q, height_q)
+
+  # Reclassification deltas and human-readable change labels.
+  result <- compute_compare_deltas(result)
+
+  new_pft_compare(result)
+}
+
+
+# Internal: append the GLI Global 2022 spirometry equations and every
+# downstream interpretation that depends on FEV1/FVC LLN. Operates on a
+# data frame that has already been through pft_interpret(year = 2012);
+# the 2022 columns are emitted with a _2022 suffix so the original 2012
+# results stay intact.
+append_2022_interpretation <- function(result, standard,
+                                        sex_q, age_q, height_q) {
+  # 2022 spirometry: fev1_pred_2022, fev1_lln_2022, fev1_zscore_2022, ...
   result <- pft_spirometry(
     result, year = 2022,
     sex = !!sex_q, age = !!age_q, height = !!height_q
   )
 
-  # 3. 2022 severity per spirometry measure. Pellegrino 2005 takes %
-  # predicted; Stanojevic 2022 takes z-score. Mirror that here.
+  # 2022 severity. Pellegrino 2005 takes percent predicted; Stanojevic
+  # 2022 takes z-score. Mirror the 2012 codepath.
   if (standard == "2022") {
     for (m in c("fev1", "fvc", "fev1fvc")) {
       z_col <- paste0(m, "_zscore_2022")
@@ -132,8 +149,8 @@ pft_compare <- function(data,
     }
   }
 
-  # 4. 2022 pattern classification, when measured + 2022 LLNs + TLC LLN
-  # are available. Synthesize the unsuffixed shape pft_classify() wants.
+  # 2022 pattern classification, when measured + 2022 LLNs + TLC LLN are
+  # available. Synthesise the unsuffixed shape pft_classify() expects.
   spiro_lln_2022 <- paste0(c("fev1", "fvc", "fev1fvc"), "_lln_2022")
   spiro_meas     <- paste0(c("fev1", "fvc", "fev1fvc"), "_measured")
   if (all(spiro_meas %in% colnames(result)) &&
@@ -150,13 +167,12 @@ pft_compare <- function(data,
       tlc_lln     = result$tlc_lln
     )
     cls_out <- pft_classify(cls_df, standard = standard)
-    result$ats_classification_2022     <- cls_out$ats_classification
+    result$ats_classification_2022      <- cls_out$ats_classification
     result$ats_pattern_combination_2022 <- cls_out$ats_pattern_combination
   }
 
-  # 5. 2022 PRISm screen (Stanojevic 2022 Table 5).
-  prism_required <- c(spiro_meas, spiro_lln_2022)
-  if (all(prism_required %in% colnames(result))) {
+  # 2022 PRISm (Stanojevic 2022 Table 5).
+  if (all(c(spiro_meas, spiro_lln_2022) %in% colnames(result))) {
     prism_df <- data.frame(
       fev1        = result$fev1_measured,
       fev1_lln    = result$fev1_lln_2022,
@@ -168,8 +184,8 @@ pft_compare <- function(data,
     result$prism_2022 <- pft_prism(prism_df)$prism
   }
 
-  # 6. 2022 volume sub-pattern (uses fev1fvc_lln_2022; everything else
-  # is shared with the 2012 path).
+  # 2022 volume sub-pattern (uses fev1fvc_lln_2022; TLC / RV_TLC are
+  # equation-independent).
   vsp_required <- c("tlc_measured", "tlc_lln", "tlc_uln",
                     "fev1fvc_measured", "fev1fvc_lln_2022",
                     "rv_tlc_measured", "rv_tlc_uln")
@@ -191,10 +207,9 @@ pft_compare <- function(data,
       pft_volume_subpattern(vsp_df)$volume_subpattern
   }
 
-  # 7. 2022 BDR (uses fev1_pred_2022 etc.). Only Stanojevic 2022 BDR
-  # requires the predicted; Pellegrino 2005 doesn't, but the 2005 BDR
-  # is equation-independent and already in the 2012 result -- no
-  # _2022 companion is meaningful for it.
+  # 2022 BDR (uses fev1_pred_2022 etc.). Only Stanojevic 2022 BDR needs
+  # a predicted-value denominator; Pellegrino 2005 doesn't, and the 2005
+  # BDR is equation-independent and already in the 2012 result.
   if (standard == "2022") {
     for (m in c("fev1", "fvc", "fev1fvc")) {
       pre       <- paste0(m, "_pre")
@@ -209,7 +224,13 @@ pft_compare <- function(data,
     }
   }
 
-  # 8. Compute deltas / reclassification flags.
+  result
+}
+
+
+# Internal: numeric and categorical reclassification deltas between the
+# 2012 and 2022 columns appended by append_2022_interpretation().
+compute_compare_deltas <- function(result) {
   for (m in c("fev1", "fvc", "fev1fvc")) {
     z12 <- paste0(m, "_zscore")
     z22 <- paste0(m, "_zscore_2022")
@@ -240,8 +261,7 @@ pft_compare <- function(data,
     result$volume_subpattern_changed <-
       not_equal_with_na(result$volume_subpattern, result$volume_subpattern_2022)
   }
-
-  new_pft_compare(result)
+  result
 }
 
 
