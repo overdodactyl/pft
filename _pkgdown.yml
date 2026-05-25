@@ -24,6 +24,7 @@ reference:
       - pft_volumes
       - pft_diffusion
       - pft_required_columns
+      - pft_schema
 
   - title: Interpretation primitives
     desc: >

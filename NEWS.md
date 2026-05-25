@@ -1,5 +1,34 @@
 # pft (development version)
 
+## Output-column introspection: pft_schema()
+
+`pft_schema(year, SI.units, standard)` returns a tibble enumerating
+every column that the `pft_*` pipeline can produce for a given
+configuration. Each row carries the `column` name, the underlying
+`measure` key, the `statistic` kind (`pred` / `lln` / `uln` /
+`zscore` / `pctpred` / `severity` / BDR variants / whole-patient
+interpretation columns), the `equation` source, the `units`, and two
+booleans (`requires_measured`, `requires_pre_post`) flagging which
+columns appear only when corresponding optional inputs were supplied.
+
+This is the symmetric counterpart to `pft_required_columns()` (which
+documents inputs) and is the authoritative source of truth for the
+output column-naming scheme on a given pipeline configuration. It
+unblocks downstream consumers (Shiny apps, EMR integrations,
+`tidymodels` recipes, the planned `pft_to_fhir()` LOINC adapter) that
+need to know "what columns will I get back?" without running a
+sample interpretation and grepping the result.
+
+The documented schema is verified against reality in
+`test-schema.R`: every "required" column the schema lists must
+actually appear in `pft_interpret()` output under the same
+configuration, and the year-suffix scheme (`_2022` for GLI Global
+spirometry; unsuffixed for GLI 2012 / 2021 / 2017) is enforced both
+ways (no leakage of 2012 columns into a 2022 pipeline and vice
+versa).
+
+Test count: 1235 -> 1266 (+31).
+
 ## Tidiers — broom integration and long-form pivot
 
 `pft_long()` reshapes a `pft_result` (or any compatible wide data frame
