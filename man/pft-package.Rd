@@ -14,8 +14,8 @@ correction). On top of those, the package computes z-scores and
 percent predicted, severity grading, ATS pattern classification,
 bronchodilator response per the 2022 criterion, PRISm screening,
 conditional change scores for serial measurements, GOLD COPD
-severity grading, Graham 2019 spirometry quality grades, cohort
-summaries, input QC, and ggplot2-based visualisation.
+severity grading, Graham 2019 spirometry quality grades, and a
+ggplot2-based clinical lollipop figure.
 }
 \section{Input data format}{
 
@@ -36,8 +36,8 @@ names are preserved in the output.
 Optional \verb{<measure>_measured}, \verb{<measure>_pre}, and
 \verb{<measure>_post} columns unlock z-score, percent-predicted, and
 bronchodilator-response outputs respectively; these are looked up
-by literal name (not overridable). See
-\code{vignette("input-format")} for a walkthrough.
+by literal name (not overridable). See \code{vignette("input-format")}
+for a walkthrough.
 }
 
 \section{Conventions used throughout}{

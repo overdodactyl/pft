@@ -8,8 +8,8 @@
 #' percent predicted, severity grading, ATS pattern classification,
 #' bronchodilator response per the 2022 criterion, PRISm screening,
 #' conditional change scores for serial measurements, GOLD COPD
-#' severity grading, Graham 2019 spirometry quality grades, cohort
-#' summaries, input QC, and ggplot2-based visualisation.
+#' severity grading, Graham 2019 spirometry quality grades, and a
+#' ggplot2-based clinical lollipop figure.
 #'
 #' @section Input data format:
 #' Every reference function (`pft_spirometry()`, `pft_volumes()`,

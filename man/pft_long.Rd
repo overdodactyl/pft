@@ -46,5 +46,6 @@ pft_long(result)
 
 }
 \seealso{
-\code{\link[=pft_interpret]{pft_interpret()}} to produce the wide-form input.
+\code{\link[=pft_interpret]{pft_interpret()}}
+to produce the wide-form input.
 }
