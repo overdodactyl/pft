@@ -32,27 +32,21 @@ The original data frame with a single appended column:
 
 \describe{
 \item{\code{"Normal"}}{All three z-scores above LLN.}
-\item{\code{"Parenchymal"}}{Low DLCO, low KCO, normal VA. Suggests
-gas-exchange impairment proportional to alveolar volume --
-interstitial lung disease, emphysema (parenchymal destruction
-without volume change), anemia, COHb.}
-\item{\code{"Volume loss"}}{Low DLCO, low VA, normal or elevated KCO.
-Suggests reduced number of functioning alveoli with preserved
-per-alveolus exchange -- extra-parenchymal restriction (chest
-wall, neuromuscular, post-lobectomy, atelectasis).}
-\item{\code{"Mixed"}}{Low DLCO, low VA, low KCO. Combined volume loss
-and gas-exchange impairment.}
+\item{\code{"Parenchymal"}}{Low DLCO, low KCO, normal VA.}
+\item{\code{"Volume loss"}}{Low DLCO, low VA, normal or elevated KCO.}
+\item{\code{"Mixed"}}{Low DLCO, low VA, low KCO.}
 \item{\code{"Vascular (suggested)"}}{Low DLCO, normal VA, low or
-elevated KCO. Pattern characteristic of pulmonary vascular
-disease (PE, PAH) where alveolar volume is preserved but
-capillary bed exchange is impaired.}
+elevated KCO.}
 \item{\code{"Elevated KCO"}}{Normal DLCO with elevated KCO (z >
-+1.645). Hyperventilation, polycythemia, or recovery from
-anemia.}
++1.645).}
 \item{\code{"Other"}}{Combination not matching any of the above
 patterns (e.g., low VA in isolation).}
 \item{\code{NA}}{Required z-score columns missing.}
 }
+
+The category labels describe the z-score pattern only; differential
+diagnosis is left to the clinician (see the Hughes & Pride 2012
+source paper for clinical interpretation).
 }
 \description{
 Takes per-patient \code{dlco_zscore}, \code{va_zscore}, and \code{kco_zscore}

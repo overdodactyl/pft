@@ -14,10 +14,11 @@ Character vector the same length as \code{zscore} with values
 \code{"normal"}, \code{"mild"}, \code{"moderate"}, \code{"severe"}, or \code{NA}.
 }
 \description{
-Assigns one of four severity categories to a z-score per the
-Stanojevic et al. ERS/ATS 2022 interpretation standard. The same
-three-level (mild/moderate/severe) grading applies uniformly to
-spirometry, lung-volume, and diffusion measures.
+Assigns one of four severity categories
+(\code{"normal"}, \code{"mild"}, \code{"moderate"}, \code{"severe"}) to a z-score per
+the Stanojevic et al. ERS/ATS 2022 interpretation standard. The
+same grading applies uniformly to spirometry, lung-volume, and
+diffusion measures.
 
 Boundary conventions (matching the function's implementation):\tabular{ll}{
    Grade \tab z-score \cr

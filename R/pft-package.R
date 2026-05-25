@@ -129,7 +129,5 @@
 #' Run [citation()] (i.e. `citation("pft")`) to retrieve a `bibentry`
 #' for the package alongside the source reference standards.
 #'
-#' @docType package
-#' @aliases pft pft-package
 #' @keywords internal
 "_PACKAGE"

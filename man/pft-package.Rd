@@ -2,8 +2,8 @@
 % Please edit documentation in R/pft-package.R
 \docType{package}
 \name{pft-package}
-\alias{pft-package}
 \alias{pft}
+\alias{pft-package}
 \title{pft: Pulmonary Function Test Interpretation per ERS/ATS 2022}
 \description{
 \code{pft} implements the Stanojevic 2022 ERS/ATS interpretive standard

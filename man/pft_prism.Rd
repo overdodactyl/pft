@@ -38,8 +38,7 @@ pattern when TLC is not available: a low FEV1, a low FVC, and a
 preserved (normal) FEV1/FVC ratio. The 2022 ERS/ATS interpretation
 standard (Stanojevic et al.) classifies it in Table 5 with row
 "Non-specific pattern" (FEV1 reduced, FVC reduced, FEV1/FVC
-normal). The pattern is associated with elevated all-cause
-mortality and progression to chronic respiratory disease.
+normal).
 
 Typically called via \code{\link[=pft_interpret]{pft_interpret()}} as part of the one-call
 workflow; exported for callers who want to apply the screen to
