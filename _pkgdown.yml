@@ -39,10 +39,12 @@ reference:
       - pft_prism
       - pft_change
       - pft_decline
+      - pft_decline_grouped
       - pft_fev1q
       - pft_lung_age
       - pft_dlco_hb_correct
       - pft_diffusion_interpret
+      - pft_clinical_guidance
 
   - title: Predecessor 2005 standard
     desc: >
@@ -76,6 +78,7 @@ reference:
       - pft_normalize_units
       - pft_plot
       - pft_report
+      - pft_full_report
 
   - title: Tidiers
     desc: >
@@ -102,6 +105,12 @@ articles:
       - pft
       - input-format
       - glossary
+  - title: Clinical workflows
+    navbar: Clinical workflows
+    contents:
+      - interpretation-guide
+      - longitudinal-analysis
+      - diffusion-capacity
 
 navbar:
   structure:
