@@ -3,6 +3,7 @@
 S3method(as.data.frame,pft_result)
 S3method(as_tibble,pft_result)
 S3method(broom::tidy,pft_result)
+S3method(dplyr::dplyr_reconstruct,pft_result)
 S3method(plot,pft_result)
 S3method(print,pft_result)
 S3method(summary,pft_result)

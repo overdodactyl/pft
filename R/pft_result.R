@@ -10,6 +10,16 @@ new_pft_result <- function(x) {
 
 #' @export
 print.pft_result <- function(x, ...) {
+  # If the column shape no longer resembles a pft_interpret() output
+  # (e.g. after a dplyr verb like select() that dropped the _pred /
+  # _zscore columns, or count() / summarise() that collapsed the
+  # frame), fall back to the standard tibble print so the user sees
+  # the actual data instead of a malformed clinical report.
+  has_pft_cols <- any(grepl("_pred(?:_[0-9]+)?$", colnames(x))) ||
+                  any(grepl("_zscore(?:_[0-9]+)?$", colnames(x)))
+  if (!has_pft_cols) {
+    return(NextMethod())
+  }
   if (nrow(x) == 0) {
     cat("<pft_result> (empty)\n")
     return(invisible(x))
@@ -259,3 +269,26 @@ pft_long <- function(x, ...) {
 
 #' @exportS3Method broom::tidy pft_result
 tidy.pft_result <- function(x, ...) pft_long(x, ...)
+
+
+# dplyr S3 method. Called by dplyr verbs (filter, mutate, select,
+# summarise, count, ...) to decide what class the result should
+# carry. Keep the pft_result class only when the column shape still
+# looks like a pft_interpret() output (presence of `_pred` or
+# `_zscore` columns); otherwise demote to a plain tibble so that
+# print.pft_result doesn't try to render a non-PFT shape as a
+# clinical report. Registered conditionally so the package does not
+# hard-depend on dplyr.
+
+#' @exportS3Method dplyr::dplyr_reconstruct pft_result
+dplyr_reconstruct.pft_result <- function(data, template) {
+  class(data) <- setdiff(class(data), "pft_result")
+  has_pft_cols <- any(grepl("_pred(?:_[0-9]+)?$", colnames(data))) ||
+                  any(grepl("_zscore(?:_[0-9]+)?$", colnames(data)))
+  if (has_pft_cols) return(new_pft_result(data))
+  # Demote to a plain tibble. Some dplyr verbs (summarise, count) hand
+  # us a bare data.frame here -- normalise so the caller still gets a
+  # tibble.
+  if (!inherits(data, "tbl_df")) data <- tibble::as_tibble(data)
+  data
+}
