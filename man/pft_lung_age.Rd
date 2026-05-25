@@ -8,7 +8,7 @@ pft_lung_age(
   data,
   measure = c("fev1", "fvc"),
   year = 2012,
-  age_range = c(3, 95),
+  age_range = c(20, 95),
   sex = sex,
   age = age,
   height = height,
@@ -31,9 +31,15 @@ over the full GLI range and are not supported.}
 or \code{2022} (race-neutral).}
 
 \item{age_range}{Numeric length-2 search interval for the
-inversion. Default \code{c(3, 95)} matches the GLI 2012 / GLI Global
-2022 supported range; tighten to \code{c(18, 95)} for adult-only
-workflows.}
+inversion. Default \code{c(20, 95)} covers the monotonically-
+declining adult portion of the GLI predicted curve (above the
+~age-20 peak), which is the region where "lung age" has a
+well-defined interpretation. Widening to include children
+admits a second branch of the GLI curve (the growth phase
+below age 20, where predicted FEV1 rises with age); the
+inversion is then non-unique and the function will return \code{NA}
+when the measured value cannot be bracketed in the chosen
+range.}
 
 \item{sex, age, height, race}{Column references. See \code{\link[=pft_spirometry]{pft_spirometry()}}.}
 }
