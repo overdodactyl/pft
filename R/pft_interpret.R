@@ -194,6 +194,15 @@ pft_interpret <- function(data, year = 2012, SI.units = FALSE,
       pft_volume_subpattern(vsp_data)$volume_subpattern
   }
 
+  # 3.9 Diffusion clinical-category classifier (Hughes & Pride 2012;
+  # adopted by Stanojevic 2017). Runs whenever the diffusion z-score
+  # columns are present (traditional or SI units), consuming the
+  # same data the rest of the package already computes.
+  if (all(c("dlco_zscore", "va_zscore", "kco_tr_zscore") %in% colnames(data)) ||
+      all(c("tlco_zscore", "va_zscore", "kco_si_zscore") %in% colnames(data))) {
+    data <- pft_diffusion_interpret(data)
+  }
+
   # 4. PRISm screen, if the spirometry-only inputs are resolvable.
   #    Per Stanojevic 2022 Table 5, PRISm requires low FEV1, low FVC,
   #    AND normal FEV1/FVC -- so fvc / fvc_lln are needed too.
@@ -209,6 +218,15 @@ pft_interpret <- function(data, year = 2012, SI.units = FALSE,
       fev1fvc_lln = data$fev1fvc_lln
     )
     data$prism <- pft_prism(prism_data)$prism
+  }
+
+  # 4.5. Combined pattern-severity label (Stanojevic 2022 practical
+  # reporting convention), when both the pattern and the relevant
+  # per-measure severities are available.
+  if ("ats_classification" %in% colnames(data) &&
+      (any(c("fev1_severity", "fev1_severity_2022") %in% colnames(data)) ||
+       any(c("fvc_severity",  "fvc_severity_2022")  %in% colnames(data)))) {
+    data <- pft_pattern_severity(data)
   }
 
   # 5. Bronchodilator response, for any spirometry measure with
