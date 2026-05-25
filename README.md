@@ -45,7 +45,9 @@ single-patient and cohort figures.
 | `pft_volumes()` | FRC, TLC, RV, RV/TLC, ERV, IC, VC | GLI 2021 static lung volumes (Hall) |
 | `pft_diffusion()` | TLCO/DLCO, KCO, VA (SI or traditional units) | GLI 2017 TLCO (Stanojevic, corrected 2020) |
 
-Each reference function emits `*_pred`, `*_lln`, `*_uln`. If a `<measure>_measured` column is also present, `*_zscore` and `*_pctpred` are appended automatically.
+Each reference function emits `<measure>_pred`, `<measure>_lln`, `<measure>_uln`. If a `<measure>_measured` column is also present, `<measure>_zscore` and `<measure>_pctpred` are appended automatically.
+
+Spirometry outputs additionally carry a four-digit GLI-year suffix (e.g. `fev1_pred_2012`, `fev1_pred_2022`) so a single result frame can hold the GLI 2012 and GLI Global 2022 columns side-by-side, and so the suffix isn't ambiguous when the default `year` changes in a future release. Lung-volume (Hall 2021) and diffusion (GLI 2017) outputs stay unsuffixed because only one standard currently ships for each — the same suffixing convention will be adopted there if competing standards emerge.
 
 ### Interpretation functions
 
