@@ -23,7 +23,9 @@ classifier (`pft_diffusion_interpret()`).
 
 `pft_diffusion()` implements the GLI 2017 standard (Stanojevic et al.
 ERJ 2017, with the 2020 author correction applied) for adults and
-children aged 4-85 years. By default it emits **traditional units**
+children aged 5-90 years (the GLI calculator caps at 85; the
+underlying spline tables extend to 90). By default it emits
+**traditional units**
 (DLCO, KCO, VA in mL/min/mmHg, mL/min/mmHg/L, and L respectively);
 `SI.units = TRUE` switches to SI units (TLCO and KCO in mmol/min/kPa
 and mmol/min/kPa/L). VA is the same column either way.

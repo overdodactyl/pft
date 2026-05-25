@@ -8,7 +8,8 @@ pft_diffusion(data, SI.units = FALSE, sex = sex, age = age, height = height)
 }
 \arguments{
 \item{data}{A data frame containing columns for sex ("M","F"),
-age (in years, in the range 4-85, per GLI 2017) and height (in centimeters).
+age (in years, in the range 5-90 per the GLI 2017 spline
+tables) and height (in centimeters).
 If \code{data} also contains a \verb{<measure>_measured} column for any of
 the active measures (\code{tlco}, \code{kco_si}, \code{va} under SI units;
 \code{dlco}, \code{kco_tr}, \code{va} under traditional), the measured value is

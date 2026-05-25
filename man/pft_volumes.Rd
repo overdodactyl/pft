@@ -8,7 +8,8 @@ pft_volumes(data, sex = sex, age = age, height = height)
 }
 \arguments{
 \item{data}{A data frame containing columns for sex ("M","F"),
-age (in years, range 5 - 80) and height (in centimeters). If \code{data}
+age (in years, in the range 5-80 per the GLI 2021 spline tables)
+and height (in centimeters). If \code{data}
 also contains any of \code{frc_measured}, \code{tlc_measured}, \code{rv_measured},
 \code{rv_tlc_measured}, \code{erv_measured}, \code{ic_measured}, \code{vc_measured},
 the corresponding measured value is used to compute a z-score and

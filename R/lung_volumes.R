@@ -5,7 +5,8 @@
 #' for lung volume measures including FRC, TLC, RV, ERV, IC, and VC.
 #'
 #' @param data A data frame containing columns for sex ("M","F"),
-#'   age (in years, range 5 - 80) and height (in centimeters). If `data`
+#'   age (in years, in the range 5-80 per the GLI 2021 spline tables)
+#'   and height (in centimeters). If `data`
 #'   also contains any of `frc_measured`, `tlc_measured`, `rv_measured`,
 #'   `rv_tlc_measured`, `erv_measured`, `ic_measured`, `vc_measured`,
 #'   the corresponding measured value is used to compute a z-score and

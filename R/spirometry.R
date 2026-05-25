@@ -6,7 +6,9 @@
 #'
 #' @param data A data frame containing columns for sex ("M","F"),
 #'    race ("AfrAm","NEAsia","SEAsia","Other/mixed", "Caucasian"),
-#'    age (in years, in the range 3-95), and height (in centimeters).
+#'    age (in years, in the range 3-95 for FEV1 / FVC / FEV1/FVC and
+#'    3-90 for FEF25-75 / FEF75 per the GLI spline tables), and
+#'    height (in centimeters).
 #'    Rows with `NA` in sex, age, or height (or, for GLI 2012, in race)
 #'    are returned with `NA` reference values. Race is ignored when
 #'    year = 2022 (GLI Global equations are race-neutral).
