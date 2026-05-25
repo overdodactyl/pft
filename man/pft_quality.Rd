@@ -67,7 +67,6 @@ European Respiratory Society Technical Statement. Am J Respir Crit
 Care Med. 2019;200(8):e70-e88. \doi{10.1164/rccm.201908-1590ST}.
 }
 \seealso{
-\code{\link[=pft_validate]{pft_validate()}} for input-level QC; \code{\link[=pft_interpret]{pft_interpret()}} for
-the downstream interpretation once acceptable maneuvers have been
-selected.
+\code{\link[=pft_interpret]{pft_interpret()}} for the downstream interpretation once
+acceptable maneuvers have been selected.
 }

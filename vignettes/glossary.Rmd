@@ -228,7 +228,3 @@ framework) is set to `NA`.
 silently producing all-NA output. Either supply a `race` column or
 call `pft_spirometry(data, year = 2022)` for the race-neutral
 equations.
-
-**Pre-flight QC**: call `pft_validate()` on a fresh data frame to
-get a row-level breakdown of input issues *before* running the
-reference functions.

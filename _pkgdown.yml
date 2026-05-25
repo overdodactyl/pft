@@ -63,7 +63,6 @@ reference:
       clinical-style visualisation.
     contents:
       - pft_interpret
-      - pft_validate
       - pft_plot
 
   - title: Tidiers

@@ -118,50 +118,6 @@ patient %>%
   pft_spirometry(year = 2022)
 ```
 
-# Pre-flight QC
-
-Before running the reference functions on a fresh cohort, call
-`pft_validate()` to get a row-level breakdown of input issues
-(missing demographics, unrecognised sex/race values, implausible
-heights or ages, swapped pre/post measurements). It appends two
-columns, `qc_pass` (logical) and `qc_issues` (semicolon-separated
-list of failed checks), and never modifies the original data.
-
-Here is a small cohort with one healthy row and three deliberately
-bad rows demonstrating the most common data-entry mistakes:
-
-```{r}
-cohort <- data.frame(
-  patient_id    = 1:4,
-  sex           = c("M", "X",  "F",  "M"),     # row 2: bad sex
-  age           = c(45,  60,   55,   45),
-  height        = c(178, 165,  300,  178),     # row 3: implausible height
-  race          = c("Caucasian", "Caucasian",
-                    "AfrAm",     "Caucasian"),
-  fev1_measured = c(3.2, 1.8,   2.0, 4.5),     # row 4: FEV1 > FVC
-  fvc_measured  = c(4.5, 2.4,   2.8, 4.0),
-  fev1_pre      = c(2.5, NA,    NA,  NA),
-  fev1_post     = c(3.0, NA,    NA,  NA)
-)
-# Add a swapped pre/post in a fifth row.
-cohort <- rbind(cohort, data.frame(
-  patient_id = 5, sex = "F", age = 60, height = 165, race = "Caucasian",
-  fev1_measured = 1.5, fvc_measured = 2.0,
-  fev1_pre = 3.0, fev1_post = 1.0                # row 5: post << pre
-))
-
-pft_validate(cohort)[, c("patient_id", "qc_pass", "qc_issues")]
-```
-
-`qc_pass` lets you split good and bad rows downstream:
-
-```{r, eval = FALSE}
-ok <- pft_validate(cohort) |> subset(qc_pass)
-ok |> pft_interpret()
-```
-
-The checks performed are documented in `?pft_validate`.
-
 # Common errors
 
 **`required column(s) missing from input: 'race'`** -- you called
@@ -173,8 +129,8 @@ for the race-neutral equations.
 **Warning: `pft input normalization: ...`** -- one or more sex or
 race values were normalised (e.g. `"male"` → `"M"`) or set to NA
 because they didn't match any known canonical value. The warning is
-consolidated to one message per call. Check the cohort with
-`pft_validate()` to see which rows are affected.
+consolidated to one message per call and lists the offending values
+so you can locate the affected rows.
 
 **`year = 2012` running but all outputs NA** -- check whether the
 `race` column contains values outside the five GLI 2012 categories.

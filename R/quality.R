@@ -45,9 +45,8 @@
 #' European Respiratory Society Technical Statement. Am J Respir Crit
 #' Care Med. 2019;200(8):e70-e88. \doi{10.1164/rccm.201908-1590ST}.
 #'
-#' @seealso [pft_validate()] for input-level QC; [pft_interpret()] for
-#'   the downstream interpretation once acceptable maneuvers have been
-#'   selected.
+#' @seealso [pft_interpret()] for the downstream interpretation once
+#'   acceptable maneuvers have been selected.
 #'
 #' @examples
 #' pft_quality(c(3.20, 3.12, 3.10))              # Grade A (n>=3 within 0.150)

@@ -63,7 +63,6 @@ Each reference function emits `*_pred`, `*_lln`, `*_uln`. If a `<measure>_measur
 | `pft_dlco_hb_correct()` | Hemoglobin correction for DLCO/TLCO | Cotes 1972 / Stanojevic 2017 |
 | `pft_quality()` | Spirometry quality grade (A-F) from a set of maneuvers | Graham 2019 |
 | `pft_gold()` | COPD severity (GOLD 1-4) from FEV1 % predicted | GOLD reports |
-| `pft_validate()` | QC checks on PFT inputs (FEV1 > FVC, out-of-range demographics, etc.) | — |
 | `pft_plot()` | Single-patient z-score lollipop with severity bands | — |
 | `pft_long()` / `pft_glance()` | Long-form pivot + per-patient summary; `broom::tidy`/`glance` dispatch | — |
 
@@ -115,7 +114,7 @@ pft_classify(patient)
 
 ### End-to-end pipeline
 
-For the canonical "validate → interpret → visualise" workflow on a cohort:
+For the canonical "interpret → visualise" workflow on a cohort:
 
 ```r
 cohort <- data.frame(
@@ -128,12 +127,8 @@ cohort <- data.frame(
   tlc_measured  = c(7.0, 4.8)
 )
 
-cohort |>
-  pft_validate() |>      # QC the inputs (FEV1 > FVC, ranges, ...)
-  pft_interpret()  ->    # everything: spirometry + volumes + classify + severity
-  result
-
-pft_plot(result[1, ])   # per-patient z-score figure
+result <- pft_interpret(cohort)   # spirometry + volumes + classify + severity
+pft_plot(result[1, ])             # per-patient z-score figure
 ```
 
 ## Common workflows

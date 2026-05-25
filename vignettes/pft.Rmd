@@ -145,24 +145,7 @@ autocorrelation `r`. `|CCS| > 1.645` indicates an unusual change.
 pft_change(z1 = -0.5, z2 = -2.5, r = 0.7)
 ```
 
-# 8. Input QC
-
-`pft_validate()` flags biologically implausible inputs without
-erroring -- handy for screening a real-world cohort before
-interpretation.
-
-```{r}
-cohort <- data.frame(
-  sex    = c("M", "X", "F"),
-  age    = c(45, 30, 250),
-  height = c(178, 30, 165),
-  fev1_measured = c(2.5, 4.0, 2.0),
-  fvc_measured  = c(3.8, 3.5, 2.5)
-)
-pft_validate(cohort)[, c("qc_pass", "qc_issues")]
-```
-
-# 9. The one-call workflow
+# 8. The one-call workflow
 
 `pft_interpret()` auto-detects every available input and produces the
 full Stanojevic 2022-compliant interpretation in one call:
@@ -186,7 +169,7 @@ result[, c("fev1_pred", "fev1_zscore", "fev1_severity",
            "fev1_bdr_pct", "fev1_bdr_significant")]
 ```
 
-# 10. Visualisation
+# 9. Visualisation
 
 `pft_plot()` produces a clinical-style z-score lollipop figure with
 severity bands. Requires `ggplot2` (Suggests).
@@ -195,7 +178,7 @@ severity bands. Requires `ggplot2` (Suggests).
 pft_plot(result)
 ```
 
-# 11. Cohort analyses
+# 10. Cohort analyses
 
 Everything composes naturally in a pipeline. Apply `pft_interpret()`
 to a multi-row data frame and the output is the same data frame with
@@ -219,7 +202,7 @@ interpreted[, c("sex", "age",
                 "ats_classification", "prism")]
 ```
 
-# 12. Long-form tidiers for downstream analysis
+# 11. Long-form tidiers for downstream analysis
 
 `pft_long()` pivots a wide `pft_result` into one row per
 `(patient, measure)`, with the natural shape for `dplyr` /
@@ -236,7 +219,7 @@ The S3 methods `tidy.pft_result()` and `glance.pft_result()`
 dispatch to these when `broom` is installed, so
 `broom::tidy(interpreted)` works identically to `pft_long()`.
 
-# 13. Diffusion clinical category
+# 12. Diffusion clinical category
 
 When `pft_diffusion()` outputs are available (the default in
 `pft_interpret()` when demographics are supplied), the Hughes &

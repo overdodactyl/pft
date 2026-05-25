@@ -30,6 +30,12 @@
   list of column names per function — documentation written as code,
   which had to be hand-synced with the actual function signatures. The
   same content is now in `vignette("input-format")`.
+* `pft_validate()` has been removed. Most of its checks (sex coding,
+  age and height range, race level membership) duplicated warnings
+  already emitted by the reference functions' input normalisation,
+  and the rest (positive-value, FEV1 ≤ FVC) would surface naturally
+  as `NaN` z-scores from the LMS power transform. Callers can write
+  these checks inline against their cohort if they still want them.
 
 ## New features
 
@@ -191,10 +197,6 @@ extraction is documented in
   predicted, severity grading, ATS pattern, PRISm flag, and
   bronchodilator response. This is the recommended entry point for
   clinical-style reporting.
-* `pft_validate(data)` flags biologically implausible inputs (FEV1 >
-  FVC, out-of-range demographics, swapped pre/post columns, unknown
-  sex/race) without erroring. Returns the original data frame with
-  `qc_pass` and `qc_issues` columns appended.
 * `pft_plot(result)` generates a clinical-style z-score lollipop plot
   with severity-band shading. Requires `ggplot2` (Suggests).
 

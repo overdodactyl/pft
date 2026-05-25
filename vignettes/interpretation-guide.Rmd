@@ -181,5 +181,5 @@ the pattern itself isn't disease-specific.
   FEV1Q.
 * `vignette("diffusion-capacity")` -- DLCO interpretation, Hb
   correction, Hughes & Pride categories.
-* `vignette("input-format")` -- input contract and `pft_validate()`
-  worked examples.
+* `vignette("input-format")` -- input contract and column override
+  syntax.
