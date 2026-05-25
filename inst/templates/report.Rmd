@@ -53,20 +53,30 @@ measure_specs <- list(
   c("kco_tr",  "KCO (tr)"),
   c("va",      "VA")
 )
+# pft_spirometry(year = 2022) writes the GLI Global outputs with a
+# `_2022` suffix; prefer the suffixed column when present so the table
+# is populated under both year = 2017 and year = 2022.
+resolve_col <- function(key, role) {
+  c2 <- paste0(key, "_", role, "_2022")
+  c1 <- paste0(key, "_", role)
+  if (c2 %in% colnames(row)) c2
+  else if (c1 %in% colnames(row)) c1
+  else NA_character_
+}
 rows <- list()
 for (spec in measure_specs) {
   key <- spec[1]; label <- spec[2]
-  pred_col <- paste0(key, "_pred")
-  if (!(pred_col %in% colnames(row))) next
-  meas_col <- paste0(key, "_measured")
-  z_col    <- paste0(key, "_zscore")
-  sev_col  <- paste0(key, "_severity")
+  pred_col <- resolve_col(key, "pred")
+  if (is.na(pred_col)) next
+  meas_col <- paste0(key, "_measured")    # input column, never suffixed
+  z_col    <- resolve_col(key, "zscore")
+  sev_col  <- resolve_col(key, "severity")
   rows[[length(rows) + 1]] <- data.frame(
     Measure   = label,
     Predicted = formatC(row[[pred_col]], digits = 3, format = "fg"),
     Measured  = if (meas_col %in% colnames(row)) formatC(row[[meas_col]], digits = 3, format = "fg") else "-",
-    `Z-score` = if (z_col    %in% colnames(row)) formatC(row[[z_col]],    digits = 3, format = "fg") else "-",
-    Severity  = if (sev_col  %in% colnames(row)) as.character(row[[sev_col]]) else "-",
+    `Z-score` = if (!is.na(z_col))   formatC(row[[z_col]],   digits = 3, format = "fg") else "-",
+    Severity  = if (!is.na(sev_col)) as.character(row[[sev_col]]) else "-",
     check.names = FALSE,
     stringsAsFactors = FALSE
   )
