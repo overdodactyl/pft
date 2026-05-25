@@ -264,19 +264,6 @@ pft_cohort_summary(interpreted)
 pft_cohort_summary(interpreted, by = "sex")
 ```
 
-# 15. Multi-mode visualisation
-
-`pft_plot()` supports four modes:
-
-* `"lollipop"` (default, single patient; section 10 above)
-* `"histogram"` -- cohort z-score distribution per measure
-* `"trajectory"` -- longitudinal z-score per measure over time
-* `"bdr"` -- pre/post bronchodilator paired arrows
-
-```{r, eval = requireNamespace("ggplot2", quietly = TRUE)}
-pft_plot(interpreted, type = "histogram")
-```
-
 # Citations
 
 See `citation("pft")` for the package and underlying reference

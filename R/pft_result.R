@@ -142,7 +142,7 @@ as.data.frame.pft_result <- function(x, ...) {
 summary.pft_result <- function(object, ...) print(object, ...)
 
 #' @export
-plot.pft_result <- function(x, ...) pft_plot(x, ...)
+plot.pft_result <- function(x, ...) pft_plot(x)
 
 
 # Tidiers -------------------------------------------------------------------

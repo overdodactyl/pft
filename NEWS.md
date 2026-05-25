@@ -9,6 +9,11 @@
   `pft_interpret(data, year = 2022)` and computing deltas on the
   resulting columns directly. Removed for being outside the package's
   core ATS/ERS reference-value + interpretation mission.
+* `pft_plot()` has been simplified to the single-patient `lollipop`
+  figure; the `histogram`, `trajectory`, and `bdr` modes have been
+  removed. The signature is now `pft_plot(data)` with no `type`
+  argument. Cohort and longitudinal figures are easier to build
+  directly from `pft_long()` output piped into `ggplot2`.
 
 ## New features
 
@@ -33,12 +38,6 @@
   Cotes 1972 / Stanojevic 2017 hemoglobin correction. Reference Hb
   is 146 g/L (males ≥ 15) or 134 g/L (females, males < 15). Hb input
   in g/L by default; g/dL auto-converted with a warning.
-* `pft_plot()` gains three new modes — `histogram` (cohort z-score
-  distribution by measure), `trajectory` (longitudinal z-score over
-  time, accepts numeric / Date / POSIXct), and `bdr` (pre/post
-  arrows) — alongside the existing single-patient `lollipop`.
-  Backward-compatible: `pft_plot(result)` with no `type` argument
-  still produces the lollipop.
 
 ## Bug fixes
 

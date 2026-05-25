@@ -90,12 +90,12 @@ and adolescents" caveat.
 
 # 3. Plotting trajectories
 
-`pft_plot(type = "trajectory")` overlays z-scores over time with the
-2022 severity bands behind. It works on long-form data with a
-`time` column (numeric, Date, or POSIXct) and an optional
-`patient_id` column for faceting:
+`pft_plot()` itself only produces single-patient lollipop figures.
+For longitudinal trajectories, pipe a long-form `pft_long()` (or
+hand-built) table into `ggplot2` directly:
 
-```{r}
+```{r, eval = requireNamespace("ggplot2", quietly = TRUE)}
+library(ggplot2)
 serial <- data.frame(
   patient_id  = rep(1:2, each = 4),
   visit_date  = rep(as.Date(c("2020-01-15","2021-03-10",
@@ -103,8 +103,12 @@ serial <- data.frame(
   fev1_zscore = c(-0.5, -0.8, -1.2, -1.6,
                    0.2,  0.0, -0.3, -0.5)
 )
-pft_plot(serial, type = "trajectory",
-         time = visit_date, patient_id = patient_id)
+ggplot(serial, aes(visit_date, fev1_zscore,
+                   colour = factor(patient_id), group = patient_id)) +
+  geom_hline(yintercept = -1.645, linetype = "dotted") +
+  geom_line() + geom_point() +
+  labs(x = "Visit date", y = "FEV1 z-score", colour = "Patient") +
+  theme_minimal()
 ```
 
 # See also

@@ -2,60 +2,29 @@
 % Please edit documentation in R/plot.R
 \name{pft_plot}
 \alias{pft_plot}
-\title{Clinical visualisations for PFT results}
+\title{Clinical visualisation for a single PFT result}
 \usage{
-pft_plot(
-  data,
-  type = c("lollipop", "histogram", "trajectory", "bdr"),
-  time = NULL,
-  patient_id = NULL
-)
+pft_plot(data)
 }
 \arguments{
-\item{data}{A data frame produced by \code{\link[=pft_interpret]{pft_interpret()}} or any of the
-reference functions with measured values supplied. Shape
-requirements depend on \code{type} -- see the per-mode notes above.}
-
-\item{type}{One of \code{"lollipop"} (default), \code{"histogram"},
-\code{"trajectory"}, \code{"bdr"}.}
-
-\item{time}{For \code{type = "trajectory"}: the column name (bare or
-string) giving the time axis. Required for trajectory mode;
-ignored otherwise.}
-
-\item{patient_id}{For \code{type = "trajectory"}: optional column name
-giving the patient identifier when \code{data} contains more than one
-patient. If omitted, all rows are assumed to be from the same
-patient.}
+\item{data}{A single-row data frame produced by \code{\link[=pft_interpret]{pft_interpret()}},
+\code{\link[=pft_spirometry]{pft_spirometry()}}, \code{\link[=pft_volumes]{pft_volumes()}}, or \code{\link[=pft_diffusion]{pft_diffusion()}} with
+measured values supplied (i.e. at least one \verb{<measure>_zscore}
+column present). Errors if \code{nrow(data) != 1}.}
 }
 \value{
 A \code{ggplot} object.
 }
 \description{
-\code{pft_plot()} produces ggplot2 figures for PFT results. The default
-\code{type = "lollipop"} mode draws a single-patient z-score figure (one
-row per measure, points at the patient's z-score, shaded reference
-bands for Stanojevic 2022 severity). Other modes cover cohorts,
-longitudinal series, and bronchodilator response:
-\itemize{
-\item \code{"lollipop"} -- single-patient z-score figure (default). Errors if
-\code{nrow(data) != 1}.
-\item \code{"histogram"} -- cohort z-score distribution by measure. Faceted
-histogram of z-scores for every patient in \code{data}, one panel per
-measure, with severity bands.
-\item \code{"trajectory"} -- longitudinal z-score over time, one line per
-measure. Requires a \code{time} column (numeric or Date).
-\item \code{"bdr"} -- pre/post bronchodilator response. Paired arrows from
-\verb{<measure>_pre} to \verb{<measure>_post} for each spirometry measure
-with a \verb{_pre} / \verb{_post} pair, with the Stanojevic 2022 +10 \% of
-predicted significance threshold overlaid.
-}
+\code{pft_plot()} draws a single-patient z-score figure: one row per
+measure, points at the patient's z-score, shaded reference bands
+for the Stanojevic 2022 severity grades (severe / moderate / mild /
+normal / elevated).
 
 Requires the \code{ggplot2} package (a Suggested dependency).
 }
 \examples{
 \dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
-# Single-patient lollipop (default).
 patient <- data.frame(
   sex = "M", age = 45, height = 178, race = "Caucasian",
   fev1_measured    = 2.5,
@@ -64,28 +33,6 @@ patient <- data.frame(
   tlc_measured     = 6.0
 )
 pft_plot(pft_interpret(patient))
-
-# Cohort histogram (z-score distribution by measure).
-cohort <- data.frame(
-  sex = c("M","F","M","F","M"),
-  age = c(45, 60, 30, 55, 70),
-  height = c(178, 165, 175, 160, 170),
-  race = "Caucasian",
-  fev1_measured = c(2.5, 1.8, 4.0, 1.5, 2.2),
-  fvc_measured  = c(3.8, 2.4, 5.2, 2.5, 3.5)
-)
-pft_plot(pft_interpret(cohort), type = "histogram")
-
-# Longitudinal trajectory across visit dates.
-serial <- data.frame(
-  patient_id  = rep(1:2, each = 4),
-  visit_date  = rep(as.Date(c("2020-01-15","2021-03-10",
-                               "2022-05-20","2023-07-30")), 2),
-  fev1_zscore = c(-0.5, -0.8, -1.2, -1.6,
-                   0.2,  0.0, -0.3, -0.5)
-)
-pft_plot(serial, type = "trajectory",
-         time = visit_date, patient_id = patient_id)
 \dontshow{\}) # examplesIf}
 }
 \seealso{

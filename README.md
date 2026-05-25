@@ -66,7 +66,7 @@ Each reference function emits `*_pred`, `*_lln`, `*_uln`. If a `<measure>_measur
 | `pft_gold()` | COPD severity (GOLD 1-4) from FEV1 % predicted | GOLD reports |
 | `pft_cohort_summary()` | Population-level z-score / pattern / PRISm summary; stratified via `by =` | — |
 | `pft_validate()` | QC checks on PFT inputs (FEV1 > FVC, out-of-range demographics, etc.) | — |
-| `pft_plot()` | Clinical-style figures: `lollipop` (default), `histogram`, `trajectory`, `bdr` | — |
+| `pft_plot()` | Single-patient z-score lollipop with severity bands | — |
 | `pft_long()` / `pft_glance()` | Long-form pivot + per-patient summary; `broom::tidy`/`glance` dispatch | — |
 
 All functions take a data frame and return a data frame, so they
@@ -135,7 +135,7 @@ cohort |>
   pft_interpret()  ->    # everything: spirometry + volumes + classify + severity
   result
 
-pft_plot(result, type = "lollipop")   # per-patient z-score figure
+pft_plot(result[1, ])   # per-patient z-score figure
 ```
 
 ## Common workflows
