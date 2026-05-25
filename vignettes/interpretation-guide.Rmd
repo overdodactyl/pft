@@ -112,7 +112,7 @@ labels.
 
 # Worked examples
 
-## Example 1: moderate obstruction (COPD-like spirometry)
+## Example 1: low FEV1/FVC with low FEV1
 
 ```{r}
 copd <- data.frame(
@@ -134,7 +134,7 @@ staging (FEV1 % predicted) classifies this as **GOLD 2**:
 pft_gold(r$fev1_pctpred_2022, fev1fvc = r$fev1fvc_measured)
 ```
 
-## Example 2: restriction with preserved vs reduced KCO
+## Example 2: low TLC with preserved KCO
 
 ```{r}
 preserved_kco <- data.frame(
@@ -151,9 +151,7 @@ r[, c("ats_classification", "diffusion_category",
 
 The package labels this row as **Restricted** with a **Volume loss**
 diffusion category (low DLCO, low VA, preserved KCO) and a
-**Simple restriction** volume sub-pattern. Lowering KCO into the
-abnormal range with the same FVC / TLC inputs would flip the
-diffusion category to **Mixed**.
+**Simple restriction** volume sub-pattern.
 
 ## Example 3: PRISm without TLC
 
