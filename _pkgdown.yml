@@ -65,6 +65,7 @@ reference:
       clinical-style visualisation, and HTML report rendering.
     contents:
       - pft_interpret
+      - pft_compare
       - pft_validate
       - pft_plot
       - pft_report
