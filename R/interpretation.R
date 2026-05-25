@@ -1,10 +1,11 @@
 #' @title Grade severity of lung function impairment from a z-score
 #'
 #' @description
-#' Assigns one of four severity categories to a z-score per the
-#' Stanojevic et al. ERS/ATS 2022 interpretation standard. The same
-#' three-level (mild/moderate/severe) grading applies uniformly to
-#' spirometry, lung-volume, and diffusion measures.
+#' Assigns one of four severity categories
+#' (`"normal"`, `"mild"`, `"moderate"`, `"severe"`) to a z-score per
+#' the Stanojevic et al. ERS/ATS 2022 interpretation standard. The
+#' same grading applies uniformly to spirometry, lung-volume, and
+#' diffusion measures.
 #'
 #' Boundary conventions (matching the function's implementation):
 #'
