@@ -110,8 +110,8 @@ obstruction and restriction.
 
 **Non-specific pattern** — Low FVC with normal FEV1/FVC and normal
 TLC. By definition not restrictive (TLC is normal) and not obstructive
-(FEV1/FVC is normal). May reflect early restrictive disease,
-neuromuscular weakness, suboptimal effort, or air trapping.
+(FEV1/FVC is normal). The label is descriptive only; Stanojevic 2022
+Table 5 enumerates clinical contexts.
 
 **PRISm** — Preserved Ratio Impaired Spirometry. Low FEV1 with
 FEV1/FVC at or above LLN. A spirometry-only screening label (no TLC

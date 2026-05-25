@@ -162,7 +162,7 @@ patient <- data.frame(
 )
 result <- pft_interpret(patient)
 
-# A clinically useful subset of the ~60 columns generated:
+# A high-level subset of the ~60 columns generated:
 result[, c("fev1_pred", "fev1_zscore", "fev1_severity",
            "fvc_zscore", "fvc_severity",
            "ats_classification", "prism",

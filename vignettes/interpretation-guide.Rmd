@@ -1,8 +1,8 @@
 ---
-title: "Interpreting pft results: from z-score to clinical action"
+title: "Interpretation reference: severity bands, patterns, and standards"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Interpreting pft results: from z-score to clinical action}
+  %\VignetteIndexEntry{Interpretation reference: severity bands, patterns, and standards}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -13,11 +13,11 @@ library(pft)
 ```
 
 Where the Getting-started vignette covers *how* to compute reference
-values and z-scores, this one covers *what to do with them*: the
-severity bands, the pattern decision tree, the differences between
-the 2022 Stanojevic and 2005 Pellegrino standards, and worked case
-studies mapping common z-score / pattern combinations to the next
-clinical step.
+values and z-scores, this one covers the interpretive primitives
+that consume them: the severity bands, the pattern decision tree,
+the differences between the 2022 Stanojevic and 2005 Pellegrino
+standards, and worked examples showing what `pft_interpret()`
+produces for a few representative input shapes.
 
 # Severity bands
 
@@ -110,9 +110,9 @@ standard = "2005")` to get the predecessor severity and BDR
 outputs alongside `pft_classify(standard = "2005")`'s pattern
 labels.
 
-# Case studies
+# Worked examples
 
-## Case 1: moderate obstruction (typical COPD work-up)
+## Example 1: moderate obstruction (COPD-like spirometry)
 
 ```{r}
 copd <- data.frame(
@@ -134,28 +134,28 @@ staging (FEV1 % predicted) classifies this as **GOLD 2**:
 pft_gold(r$fev1_pctpred, fev1fvc = r$fev1fvc_measured)
 ```
 
-## Case 2: restriction with normal diffusion vs reduced diffusion
+## Example 2: restriction with preserved vs reduced KCO
 
 ```{r}
-extra_parenchymal <- data.frame(
+preserved_kco <- data.frame(
   sex = "F", age = 55, height = 160, race = "Caucasian",
   fev1_measured    = 1.2, fvc_measured     = 1.5,
   fev1fvc_measured = 0.80, tlc_measured    = 3.8,
   rv_tlc_measured  = 0.30, dlco_measured   = 22.0,
   va_measured      = 4.6,  kco_tr_measured = 4.5
 )
-r <- pft_interpret(extra_parenchymal)
+r <- pft_interpret(preserved_kco)
 r[, c("ats_classification", "diffusion_category",
        "volume_subpattern")]
 ```
 
-Restricted lungs with **Volume loss** diffusion pattern (low DLCO,
-low VA, preserved KCO) and a **Simple restriction** sub-pattern
-point toward extra-parenchymal restriction (chest wall, neuromuscular,
-post-lobectomy). Contrast with a parenchymal restriction case where
-KCO would also be low.
+The package labels this row as **Restricted** with a **Volume loss**
+diffusion category (low DLCO, low VA, preserved KCO) and a
+**Simple restriction** volume sub-pattern. Lowering KCO into the
+abnormal range with the same FVC / TLC inputs would flip the
+diffusion category to **Mixed**.
 
-## Case 3: PRISm without TLC
+## Example 3: PRISm without TLC
 
 When TLC isn't available, `pft_prism()` flags the spirometry-only
 non-specific picture: low FEV1, low FVC, preserved ratio.
@@ -170,10 +170,10 @@ r <- pft_interpret(no_tlc)
 r[, c("ats_classification", "prism")]
 ```
 
-The patient screens positive for **PRISm**. Stanojevic 2022 notes
-PRISm is associated with elevated all-cause mortality and progression
-to chronic respiratory disease; follow-up is recommended even though
-the pattern itself isn't disease-specific.
+The `prism` column is `TRUE`. Stanojevic 2022 notes PRISm has been
+associated with elevated all-cause mortality and progression to
+chronic respiratory disease in the literature; the label itself is
+spirometry-only and not disease-specific.
 
 # See also
 

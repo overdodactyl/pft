@@ -18,10 +18,9 @@ library(pft)
 set.seed(7)
 ```
 
-Most clinical PFT decisions rest on serial measurements rather than
-a single result; what matters is whether the patient is stable,
-declining, or recovering. `pft` provides two PFT-specific tools
-that operate on serial measurements:
+PFTs are often interpreted serially rather than from a single result.
+`pft` provides two PFT-specific tools defined by the Stanojevic 2022
+standard that operate on serial measurements:
 
 | Tool | Use case | Inputs |
 |------|----------|--------|
