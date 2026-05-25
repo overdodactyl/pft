@@ -329,6 +329,24 @@ traditional, with values in similar magnitudes) doesn't admit a
 safe heuristic.
 
 Test count: 1195 -> 1213 (+18).
+## plumber endpoint scaffold
+
+A starter `plumber.R` lands at `inst/plumber/plumber.R`. It exposes
+three HTTP endpoints:
+
+* `POST /interpret` — accepts a JSON object (single patient) or
+  array of objects (cohort) carrying the pft input contract, returns
+  the corresponding `pft_interpret()` result as a JSON array.
+* `POST /compare` — same input shape, returns a `pft_compare()`
+  result (GLI 2012 vs GLI Global 2022 reclassification).
+* `GET /schema` — returns the package's required and optional
+  input columns, for clients building forms / validators.
+
+Run with `plumber::plumb(system.file("plumber", "plumber.R",
+package = "pft"))$run(port = 8080)`. Not loaded automatically,
+not part of the exported API; intended as starter scaffolding for
+downstream institutional deployments that need an HTTP frontend
+to the package.
 
 ## New interpretation primitives (audit follow-up)
 
