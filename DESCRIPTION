@@ -22,8 +22,8 @@ Description: Computes predicted values and lower/upper limits of normal
     from spirometry and lung-volume measurements following the
     interpretation algorithm in Stanojevic et al. ERJ 2022.
 License: MIT + file LICENSE
-URL: https://github.com/YOUR-ORG/pft, https://YOUR-ORG.github.io/pft/
-BugReports: https://github.com/YOUR-ORG/pft/issues
+URL: https://github.com/overdodactyl/pft
+BugReports: https://github.com/overdodactyl/pft/issues
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
