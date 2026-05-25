@@ -33,6 +33,7 @@ Imports:
     rlang,
     tibble
 Suggests:
+    broom,
     dplyr,
     ggplot2,
     knitr,
