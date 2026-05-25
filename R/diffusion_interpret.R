@@ -34,27 +34,21 @@
 #'
 #' \describe{
 #'   \item{`"Normal"`}{All three z-scores above LLN.}
-#'   \item{`"Parenchymal"`}{Low DLCO, low KCO, normal VA. Suggests
-#'     gas-exchange impairment proportional to alveolar volume --
-#'     interstitial lung disease, emphysema (parenchymal destruction
-#'     without volume change), anemia, COHb.}
-#'   \item{`"Volume loss"`}{Low DLCO, low VA, normal or elevated KCO.
-#'     Suggests reduced number of functioning alveoli with preserved
-#'     per-alveolus exchange -- extra-parenchymal restriction (chest
-#'     wall, neuromuscular, post-lobectomy, atelectasis).}
-#'   \item{`"Mixed"`}{Low DLCO, low VA, low KCO. Combined volume loss
-#'     and gas-exchange impairment.}
+#'   \item{`"Parenchymal"`}{Low DLCO, low KCO, normal VA.}
+#'   \item{`"Volume loss"`}{Low DLCO, low VA, normal or elevated KCO.}
+#'   \item{`"Mixed"`}{Low DLCO, low VA, low KCO.}
 #'   \item{`"Vascular (suggested)"`}{Low DLCO, normal VA, low or
-#'     elevated KCO. Pattern characteristic of pulmonary vascular
-#'     disease (PE, PAH) where alveolar volume is preserved but
-#'     capillary bed exchange is impaired.}
+#'     elevated KCO.}
 #'   \item{`"Elevated KCO"`}{Normal DLCO with elevated KCO (z >
-#'     +1.645). Hyperventilation, polycythemia, or recovery from
-#'     anemia.}
+#'     +1.645).}
 #'   \item{`"Other"`}{Combination not matching any of the above
 #'     patterns (e.g., low VA in isolation).}
 #'   \item{`NA`}{Required z-score columns missing.}
 #' }
+#'
+#' The category labels describe the z-score pattern only; differential
+#' diagnosis is left to the clinician (see the Hughes & Pride 2012
+#' source paper for clinical interpretation).
 #'
 #' @section Column-name overrides:
 #' Each column-reference argument accepts three forms:

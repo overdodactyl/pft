@@ -91,15 +91,19 @@ pft_diffusion_interpret(mixed_cohort)
 
 The decision tree (Stanojevic 2017 / Hughes & Pride 2012):
 
-| Category               | DLCO | VA | KCO | Typical context |
-|------------------------|------|----|----|------------------|
-| **Normal**             | OK   | OK | OK | -- |
-| **Parenchymal**        | low  | OK | low | ILD, emphysema, anemia, COHb |
-| **Volume loss**        | low  | low | OK / high | Chest wall, neuromuscular, post-lobectomy, atelectasis |
-| **Mixed**              | low  | low | low | Combined volume loss + gas-exchange |
-| **Vascular (suggested)** | low | OK | low or high | PE, PAH (capillary bed impaired but alveolar volume preserved) |
-| **Elevated KCO**       | OK   | -- | high | Hyperventilation, polycythemia, recovery from anemia |
-| **Other**              | other combinations | | | -- |
+| Category               | DLCO | VA | KCO |
+|------------------------|------|----|-----|
+| **Normal**             | OK   | OK | OK |
+| **Parenchymal**        | low  | OK | low |
+| **Volume loss**        | low  | low | OK / high |
+| **Mixed**              | low  | low | low |
+| **Vascular (suggested)** | low | OK | low or high |
+| **Elevated KCO**       | OK   | -- | high |
+| **Other**              | other combinations | | |
+
+Categories label the z-score pattern only. Hughes & Pride 2012
+describes the differential diagnosis associated with each pattern;
+that interpretation is out of scope for the package.
 
 In `pft_interpret()` the classifier runs automatically whenever the
 diffusion z-score columns are present, so the
