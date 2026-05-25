@@ -116,14 +116,34 @@ test_that("Date time column is converted to years-from-earliest", {
 
 test_that("mixed-effects mode returns slopes for every patient", {
   skip_if_not_installed("lme4")
-  out <- pft_decline(serial, by = patient_id, measure = "fev1_zscore",
-                       time = year, model = "mixed")
-  expect_equal(nrow(out), 3)
+  # N = 3 is too few for lme4 to estimate a non-zero random-slope variance
+  # (boundary singular fit), so partial pooling collapses to a single
+  # fixed-effect slope. Use a larger synthetic cohort so the random-slope
+  # variance is estimable and per-patient slopes differ.
+  set.seed(42)
+  ids   <- paste0("P", 1:10)
+  true_slopes <- seq(0, -1.0, length.out = length(ids))
+  n_pts <- 7L
+  serial_big <- do.call(rbind, lapply(seq_along(ids), function(i) {
+    data.frame(
+      patient_id = ids[i],
+      year       = seq_len(n_pts),
+      fev1_zscore = -0.2 + true_slopes[i] * (seq_len(n_pts) - 1) +
+                      stats::rnorm(n_pts, sd = 0.05)
+    )
+  }))
+  out <- suppressWarnings(
+    pft_decline(serial_big, by = patient_id, measure = "fev1_zscore",
+                time = year, model = "mixed")
+  )
+  expect_equal(nrow(out), length(ids))
   expect_false(any(is.na(out$slope)))
-  # Partial pooling: per-patient slopes should be in the same direction
-  # as OLS but pulled toward the cohort slope.
-  expect_true(out$slope[out$patient_id == "P3"] <
-              out$slope[out$patient_id == "P2"])
+  # Partial pooling preserves the cohort-wide ranking: the fastest decliner
+  # (true slope -1.0) should have a more-negative fitted slope than the
+  # stable patient (true slope 0).
+  fastest <- out$slope[out$patient_id == ids[length(ids)]]
+  stable  <- out$slope[out$patient_id == ids[1]]
+  expect_true(fastest < stable)
 })
 
 
@@ -141,4 +161,29 @@ test_that("Unknown column raises a clear error", {
   expect_error(pft_decline(serial, by = patient_id, measure = "nope",
                             time = year),
                "not found")
+})
+
+test_that("mixed mode errors when fewer than 2 patients meet min_points", {
+  skip_if_not_installed("lme4")
+  # Only P1 has enough points; P2 and P3 are dropped by min_points filter.
+  d <- rbind(
+    serial[serial$patient_id == "P1", ],
+    serial[serial$patient_id == "P2", ][1, ],
+    serial[serial$patient_id == "P3", ][1, ]
+  )
+  expect_error(
+    pft_decline(d, by = patient_id, measure = "fev1_zscore",
+                time = year, model = "mixed"),
+    "at least 2 patients"
+  )
+})
+
+test_that("empty input with flag_threshold returns empty tibble with flag column", {
+  d <- serial
+  d$fev1_zscore <- NA_real_
+  out <- pft_decline(d, by = patient_id, measure = "fev1_zscore",
+                      time = year, flag_threshold = 0.25)
+  expect_equal(nrow(out), 0)
+  expect_true("decline_flag" %in% colnames(out))
+  expect_type(out$decline_flag, "logical")
 })

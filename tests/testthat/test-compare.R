@@ -172,3 +172,38 @@ test_that("print.pft_compare gives a one-line summary header", {
   expect_true(any(grepl("pft_compare", txt)))
   expect_true(any(grepl("ats_pattern reclassified", txt)))
 })
+
+
+# volume sub-pattern path requires the full RV/TLC inputs; test a cohort that
+# has them so the 2022 volume_subpattern columns and the corresponding
+# reclassification flag and summary entry are produced.
+cohort_with_rv_tlc <- data.frame(
+  sex    = c("M",       "F",         "M",       "F"),
+  age    = c(45,         60,          30,        55),
+  height = c(178,        165,         175,       160),
+  race   = c("AfrAm",    "Caucasian", "AfrAm",   "NEAsia"),
+  fev1_measured    = c(2.5, 1.8, 4.0, 1.5),
+  fvc_measured     = c(3.8, 2.4, 5.2, 2.5),
+  fev1fvc_measured = c(0.66, 0.75, 0.77, 0.60),
+  tlc_measured     = c(6.0, 4.5, 6.8, 4.0),
+  rv_measured      = c(1.8, 1.5, 1.9, 1.4),
+  rv_tlc_measured  = c(0.30, 0.33, 0.28, 0.35)
+)
+
+test_that("pft_compare with RV/TLC produces volume_subpattern reclassification", {
+  cmp <- pft_compare(cohort_with_rv_tlc)
+  expect_true("volume_subpattern"           %in% colnames(cmp))
+  expect_true("volume_subpattern_2022"      %in% colnames(cmp))
+  expect_true("volume_subpattern_changed"   %in% colnames(cmp))
+  expect_type(cmp$volume_subpattern_changed, "logical")
+})
+
+test_that("summary.pft_compare reports volume_subpattern reclassification", {
+  cmp <- pft_compare(cohort_with_rv_tlc)
+  txt <- capture.output({
+    out <- summary(cmp)
+  })
+  expect_true("volume_subpattern" %in% names(out))
+  expect_equal(nrow(out$volume_subpattern), 1)
+  expect_true(any(grepl("Volume sub-pattern reclassification", txt)))
+})

@@ -93,6 +93,19 @@ test_that("pft_schema marks BDR columns as requires_pre_post", {
   expect_setequal(unique(bdr$measure), c("fev1", "fvc", "fev1fvc"))
 })
 
+test_that("pft_schema(standard = '2005') emits bdr_abs rows and % of baseline units", {
+  s <- pft_schema(standard = "2005")
+  bdr_abs <- s[s$statistic == "bdr_abs", ]
+  expect_true(nrow(bdr_abs) > 0)
+  expect_setequal(unique(bdr_abs$measure), c("fev1", "fvc", "fev1fvc"))
+  # The fev1fvc ratio variant should have units "ratio"; the others "L".
+  expect_equal(bdr_abs$units[bdr_abs$measure == "fev1fvc"], "ratio")
+  expect_true(all(bdr_abs$units[bdr_abs$measure != "fev1fvc"] == "L"))
+  # bdr_pct units flip from "% of predicted" (2022) to "% of baseline" (2005).
+  bdr_pct <- s[s$statistic == "bdr_pct", ]
+  expect_true(all(bdr_pct$units == "% of baseline"))
+})
+
 test_that("pft_schema includes whole-patient interpretation columns", {
   s <- pft_schema()
   whole <- s[is.na(s$measure), ]

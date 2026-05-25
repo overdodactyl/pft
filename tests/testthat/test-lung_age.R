@@ -85,3 +85,16 @@ test_that("Rejects invalid age_range", {
   expect_error(pft_lung_age(d, age_range = c(50, 30)),
                 "increasing")
 })
+
+test_that("Rejects unsupported year", {
+  d <- data.frame(sex = "M", age = 45, height = 178, race = "Caucasian",
+                   fev1_measured = 2.5)
+  expect_error(pft_lung_age(d, year = 2099),
+               "must be 2012 or 2022")
+})
+
+test_that("Errors when measured column is absent", {
+  d <- data.frame(sex = "M", age = 45, height = 178, race = "Caucasian")
+  expect_error(pft_lung_age(d, measure = "fev1"),
+               "fev1_measured.*not found")
+})

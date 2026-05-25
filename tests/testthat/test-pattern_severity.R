@@ -94,3 +94,26 @@ test_that("pft_interpret() auto-runs pft_pattern_severity()", {
   expect_true("pattern_severity" %in% colnames(out))
   expect_true(!is.na(out$pattern_severity))
 })
+
+
+# worst_severity internal: NA propagation and unknown-grade handling -------
+
+test_that("worst_severity returns NA when both inputs are NA", {
+  expect_true(is.na(pft:::worst_severity(NA_character_, NA_character_)))
+})
+
+test_that("worst_severity returns the non-NA argument when the other is NA", {
+  expect_equal(pft:::worst_severity(NA_character_, "mild"), "mild")
+  expect_equal(pft:::worst_severity("severe", NA_character_), "severe")
+})
+
+test_that("worst_severity returns NA when a grade is not on the known scale", {
+  expect_true(is.na(pft:::worst_severity("mild", "very_bad")))
+  expect_true(is.na(pft:::worst_severity("not_a_grade", "moderate")))
+})
+
+test_that("worst_severity picks the worse on the canonical scale", {
+  expect_equal(pft:::worst_severity("mild", "severe"),  "severe")
+  expect_equal(pft:::worst_severity("moderate", "mild"), "moderate")
+  expect_equal(pft:::worst_severity("normal", "normal"), "normal")
+})

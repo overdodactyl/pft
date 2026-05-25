@@ -114,3 +114,40 @@ test_that("pft_plot rejects unknown type", {
   expect_error(pft_plot(result_single, type = "wonky"),
                "'arg' should be one of")
 })
+
+test_that("pft_plot(type = 'histogram') errors when no z-score columns", {
+  skip_if_not_installed("ggplot2")
+  d <- data.frame(sex = c("M","F"), age = c(45, 60),
+                  height = c(178, 165), race = "Caucasian")
+  out <- pft_spirometry(d)  # demographics only -> no zscore cols
+  expect_error(pft_plot(out, type = "histogram"), "No z-score")
+})
+
+test_that("pft_plot(type = 'trajectory') errors when no z-score columns", {
+  skip_if_not_installed("ggplot2")
+  d <- data.frame(sex = c("M","F"), age = c(45, 60),
+                  height = c(178, 165), race = "Caucasian",
+                  visit = c(1, 2))
+  out <- pft_spirometry(d)
+  expect_error(pft_plot(out, type = "trajectory", time = visit),
+               "No z-score")
+})
+
+test_that("pft_plot(type = 'trajectory') with patient_id facets by patient", {
+  skip_if_not_installed("ggplot2")
+  d <- data.frame(
+    patient_id = c("A", "A", "B", "B"),
+    visit      = c(1,  2,  1,  2),
+    sex        = c("M","M","F","F"),
+    age        = c(45, 46, 60, 61),
+    height     = c(178, 178, 165, 165),
+    race       = "Caucasian",
+    fev1_measured = c(2.5, 2.4, 1.8, 1.7)
+  )
+  out <- pft_interpret(d)
+  p <- pft_plot(out, type = "trajectory",
+                time = visit, patient_id = patient_id)
+  expect_s3_class(p, "ggplot")
+  # A faceted plot has non-null facet specification.
+  expect_false(inherits(p$facet, "FacetNull"))
+})

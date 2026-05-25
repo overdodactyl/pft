@@ -125,3 +125,31 @@ test_that("year=2022 without race column works (race-neutral)", {
   out <- pft_spirometry(d, year = 2022)
   expect_false(is.na(out$fev1_pred_2022))
 })
+
+
+# resolve_column_name: injection / fallback paths ---------------------------
+
+test_that("resolve_column_name accepts an injected character variable", {
+  d <- data.frame(Sex = c("M", "F"), age = c(45, 60), height = c(178, 165))
+  my_col <- "Sex"
+  out <- pft_spirometry(d, year = 2022, sex = !!my_col)
+  expect_equal(nrow(out), 2)
+  expect_false(any(is.na(out$fev1_pred_2022)))
+})
+
+test_that("resolve_column_name accepts an injected symbol variable", {
+  d <- data.frame(Sex = c("M", "F"), age = c(45, 60), height = c(178, 165))
+  my_col <- as.name("Sex")
+  out <- pft_spirometry(d, year = 2022, sex = !!my_col)
+  expect_equal(nrow(out), 2)
+  expect_false(any(is.na(out$fev1_pred_2022)))
+})
+
+test_that("resolve_column_name errors when expression resolves to nothing", {
+  d <- data.frame(sex = "M", age = 45, height = 178)
+  # An expression that throws inside eval_tidy and doesn't yield a symbol/string.
+  expect_error(
+    pft_spirometry(d, year = 2022, sex = !!list(1, 2)),
+    "could not resolve a column reference"
+  )
+})
