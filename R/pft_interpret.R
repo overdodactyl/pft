@@ -8,6 +8,9 @@
 #' anything it cannot do:
 #'
 #' \itemize{
+#'   \item If `fev1_measured` and `fvc_measured` are present but
+#'     `fev1fvc_measured` is not, the ratio is auto-derived. The same
+#'     applies to `frc_tlc_measured` from `frc_measured` / `tlc_measured`.
 #'   \item If sex / age / height (and race, for `year = 2012`) are present,
 #'     it computes spirometry reference values via [pft_spirometry()].
 #'   \item If sex / age / height are present, it computes lung-volume
@@ -102,6 +105,7 @@ pft_interpret <- function(data, year = 2012, SI.units = FALSE,
   height_q <- rlang::enquo(height)
   race_q   <- rlang::enquo(race)
 
+  data <- interpret_derive_ratios(data)
   data <- interpret_reference_values(data, year, SI.units,
                                       sex_q, age_q, height_q, race_q)
   data <- interpret_severity(data, standard)
@@ -121,6 +125,27 @@ pft_interpret <- function(data, year = 2012, SI.units = FALSE,
 # returns the data frame -- modified or untouched. Keeping these as
 # named functions makes pft_interpret() readable as a pipeline and lets
 # individual stages be tested in isolation if needed.
+
+# Stage 0: derive any ratios that are computable from already-supplied
+# measured columns. Adds fev1fvc_measured = fev1 / fvc and
+# frc_tlc_measured = frc / tlc when the user provided the numerator and
+# denominator but not the ratio. Skipped per column if the caller
+# already supplied that column. No new input requirements beyond what
+# the package already accepts.
+interpret_derive_ratios <- function(data) {
+  derivations <- list(
+    list(ratio = "fev1fvc_measured", num = "fev1_measured", den = "fvc_measured"),
+    list(ratio = "frc_tlc_measured", num = "frc_measured",  den = "tlc_measured")
+  )
+  for (d in derivations) {
+    if (!(d$ratio %in% colnames(data)) &&
+        d$num   %in% colnames(data) &&
+        d$den   %in% colnames(data)) {
+      data[[d$ratio]] <- data[[d$num]] / data[[d$den]]
+    }
+  }
+  data
+}
 
 # Stage 1: spirometry + volumes + diffusion reference values, conditional
 # on demographics being resolvable.
