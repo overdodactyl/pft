@@ -54,7 +54,7 @@ This formula was derived from a children/young-people cohort
 approach has \emph{"yet to be validated, extended to adults"} but
 permits its use as \emph{"a reasonable tool to facilitate
 interpretation"}). For adults the 2022 standard alternatively
-recommends FEV1Q (Box 3) -- not yet implemented in \code{pft}.
+recommends FEV1Q (Box 3); see \code{\link[=pft_fev1q]{pft_fev1q()}}.
 }
 \examples{
 # Stanojevic 2022 Box 2 worked example: a 14-year-old male whose

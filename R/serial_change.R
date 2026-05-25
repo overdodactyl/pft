@@ -23,7 +23,7 @@
 #' approach has *"yet to be validated, extended to adults"* but
 #' permits its use as *"a reasonable tool to facilitate
 #' interpretation"*). For adults the 2022 standard alternatively
-#' recommends FEV1Q (Box 3) -- not yet implemented in `pft`.
+#' recommends FEV1Q (Box 3); see [pft_fev1q()].
 #'
 #' @param z1,z2 Numeric vectors of FEV1 z-scores at time 1 and time 2.
 #' @param age_t1 Numeric. Patient age (in years) at the first
