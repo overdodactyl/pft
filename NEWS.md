@@ -1,793 +1,91 @@
 # pft (development version)
 
-## Highlights of this development cycle
+## New features
 
-A broad API-modernisation and clinical-depth pass, all built on
-top of the existing input contract (no new measurement modalities
-required):
+* `pft_compare(data)` runs the spirometry + interpretation pipeline
+  under GLI 2012 and GLI Global 2022 on the same input and emits per-row
+  reclassification deltas (`<measure>_zscore_delta`,
+  `<measure>_severity_changed`, `ats_pattern_changed`, etc.).
+  `summary.pft_compare()` prints a cohort reclassification report.
+* `pft_cohort_summary()` gains a `by =` stratification argument and,
+  when both GLI 2012 and GLI Global 2022 columns are present, a
+  `reclassification` component containing the 2012 → 2022 confusion
+  matrix.
+* `pft_long()` and `pft_glance()` pivot a `pft_result` to long form
+  and per-patient summary. `tidy.pft_result()` /
+  `glance.pft_result()` S3 methods dispatch to them when `broom` is
+  installed.
+* `pft_schema(year, SI.units, standard)` enumerates every output
+  column the pipeline can produce for a given configuration — the
+  symmetric counterpart to `pft_required_columns()`.
+* `pft_diffusion_interpret(data)` assigns a Hughes & Pride 2012
+  clinical category (Normal / Parenchymal / Volume loss / Mixed /
+  Vascular / Elevated KCO / Other) from DLCO, VA, KCO z-scores. Run
+  automatically by `pft_interpret()` when the diffusion z-scores are
+  present.
+* `pft_volume_subpattern(data)` differentiates the six Stanojevic
+  2022 Figure 10 lung-volume sub-patterns (Normal lung volumes /
+  Large lungs / Hyperinflation / Simple restriction / Complex
+  restriction / Mixed disorder). Auto-run by `pft_interpret()` when
+  the requisite ratio columns are present.
+* `pft_pattern_severity(data)` composes `ats_classification` with
+  per-measure severity into a single label like `"Moderate
+  Obstructed"` or `"Severe Mixed"`.
+* `pft_decline(data, by, measure, time)` fits per-patient slopes
+  for cohorts with 3+ serial measurements. `model = "ols"` (default)
+  fits per-patient `lm()`; `model = "mixed"` fits a single
+  `lme4::lmer()` with random intercept + slope per patient. `time`
+  accepts numeric, Date, or POSIXct columns.
+  `pft_decline_grouped()` fits a cohort-level slope per group via a
+  `time:group` interaction.
+* `pft_fev1q(fev1, sex, age)` implements the FEV1Q adult mortality
+  index from Stanojevic 2022 Box 3.
+* `pft_lung_age(data, measure)` solves for the age at which the
+  patient's measured FEV1 (or FVC) would equal the GLI predicted
+  value, via numeric inversion of `pft_spirometry()`.
+* `pft_dlco_hb_correct(dlco, hemoglobin, sex, age)` applies the
+  Cotes 1972 / Stanojevic 2017 hemoglobin correction. Reference Hb
+  is 146 g/L (males ≥ 15) or 134 g/L (females, males < 15). Hb input
+  in g/L by default; g/dL auto-converted with a warning.
+* `pft_normalize_units()` auto-detects height-in-inches
+  (`max(height) < 100`) and volume-in-millilitres
+  (`max(<measure>_measured) > 15`), converts in place, and emits a
+  single consolidated warning. Thresholds overridable via
+  `height_inches_max` and `volume_ml_min`.
+* `pft_plot()` gains four new modes — `histogram` (cohort z-score
+  distribution by measure), `trajectory` (longitudinal z-score over
+  time, accepts numeric / Date / POSIXct), `bdr` (pre/post arrows),
+  `compare` (GLI 2012 → GLI Global 2022 reclassification segments) —
+  alongside the existing single-patient `lollipop`. Backward-compatible:
+  `pft_plot(result)` with no `type` argument still produces the
+  lollipop.
 
-* **Equation-migration tooling** — `pft_compare()` runs GLI 2012
-  and GLI Global 2022 side-by-side and emits per-row
-  reclassification deltas; `pft_cohort_summary()` gains a `by =`
-  stratification argument and a `reclassification` confusion-
-  matrix component when both standards are present.
-* **Tidiers and introspection** — `pft_long()` / `pft_glance()`
-  (plus `broom::tidy()` / `broom::glance()` S3 dispatch) pivot a
-  `pft_result` to long form; `pft_schema()` documents every output
-  column the pipeline can produce for a given configuration.
-* **New interpretation outputs** — `pft_diffusion_interpret()`
-  assigns a Hughes & Pride 2012 clinical category from DLCO / VA /
-  KCO z-scores; `pft_pattern_severity()` composes
-  `ats_classification` with per-measure severity into a single
-  "Moderate Obstructed" label.
-* **Longitudinal and patient-communication outputs** —
-  `pft_decline()` fits per-patient OLS or mixed-effects slopes for
-  multi-timepoint data; `pft_lung_age()` solves for the
-  "equivalent" age via GLI inversion.
-* **Visualisation** — `pft_plot()` gains four new modes
-  (`histogram`, `trajectory`, `bdr`, `compare`) alongside the
-  existing single-patient `lollipop`.
-* **Ergonomics** — `pft_normalize_units()` auto-detects
-  inches-vs-cm and millilitres-vs-litres on input.
-* **Deployment scaffolding** — `inst/plumber/plumber.R` exposes
-  `/interpret`, `/compare`, and `/schema` HTTP endpoints.
-* **Maintenance** — minimum R version bumped from 2.10 to 4.0 to
-  match the actual transitive dependency floor.
+## Bug fixes
 
-Test count: 1195 -> 1424 (+229; +1 skipped lme4 test).
+* `pft_quality()` — child age cutoff corrected from `age < 6` to
+  `age <= 6` per Graham 2019 Table 10; a 6-year-old is now graded
+  as a child.
+* `pft_quality()` — child 10%-of-highest repeatability rule
+  (Graham 2019 Table 10 footnote) was not applied; now
+  `max(absolute, 0.10 * max(values))` for `age <= 6`.
+* `pft_quality()` — sessions with `n >= 2` acceptable maneuvers and
+  best-two diff above all A/C/D thresholds were graded F; now
+  correctly graded E ("usable but with poor repeatability"). Grade
+  U ("0 acceptable AND ≥ 1 usable") is not implemented because the
+  function takes only acceptable maneuvers.
+* `pft_gold()` — added optional `fev1fvc` argument enforcing the
+  GOLD "FEV1/FVC < 0.7" prerequisite (Figure 2.10 header). Default
+  preserves prior behaviour for existing callers; passing
+  `fev1fvc_measured` returns `NA` for non-obstructed rows instead
+  of a spurious GOLD grade.
+
+## Maintenance
+
+* Minimum R version bumped from 2.10 to 4.0 to match the actual
+  transitive dependency floor (`rlang`, `tibble`).
+* Test count: 1195 → 1424 (+229; +1 skipped `lme4` test).
 
 ---
-
-## Output-column introspection: pft_schema()
-
-`pft_schema(year, SI.units, standard)` returns a tibble enumerating
-every column that the `pft_*` pipeline can produce for a given
-configuration. Each row carries the `column` name, the underlying
-`measure` key, the `statistic` kind (`pred` / `lln` / `uln` /
-`zscore` / `pctpred` / `severity` / BDR variants / whole-patient
-interpretation columns), the `equation` source, the `units`, and two
-booleans (`requires_measured`, `requires_pre_post`) flagging which
-columns appear only when corresponding optional inputs were supplied.
-
-This is the symmetric counterpart to `pft_required_columns()` (which
-documents inputs) and is the authoritative source of truth for the
-output column-naming scheme on a given pipeline configuration. It
-unblocks downstream consumers (Shiny apps, EMR integrations,
-`tidymodels` recipes, the planned `pft_to_fhir()` LOINC adapter) that
-need to know "what columns will I get back?" without running a
-sample interpretation and grepping the result.
-
-The documented schema is verified against reality in
-`test-schema.R`: every "required" column the schema lists must
-actually appear in `pft_interpret()` output under the same
-configuration, and the year-suffix scheme (`_2022` for GLI Global
-spirometry; unsuffixed for GLI 2012 / 2021 / 2017) is enforced both
-ways (no leakage of 2012 columns into a 2022 pipeline and vice
-versa).
-
-## Tidiers — broom integration and long-form pivot
-
-`pft_long()` reshapes a `pft_result` (or any compatible wide data frame
-with `<measure>_pred[_<year>]` columns) into long form: one row per
-`(patient, measure, year)` with columns `pred`, `lln`, `uln`,
-`measured`, `zscore`, `pctpred`, `severity`. This is the natural shape
-for downstream `dplyr` / `ggplot2` faceting and cohort modelling, and
-it unblocks `tidymodels` `recipes::step_*` wrappers planned for a
-later release.
-
-`pft_glance()` returns a per-patient summary: top-level
-`ats_classification`, `ats_pattern_combination`, `prism`, and
-`volume_subpattern` when present, plus three derived statistics
-(`worst_zscore`, `n_below_lln`, `n_above_uln`) computed across all
-z-score columns in the input.
-
-S3 methods `tidy.pft_result()` and `glance.pft_result()` are
-registered with `broom::tidy()` and `broom::glance()` via roxygen2's
-`@exportS3Method` directive. They dispatch to `pft_long()` and
-`pft_glance()` respectively. Neither method requires `broom` to be
-installed unless the user actually calls `broom::tidy()` /
-`broom::glance()` on a `pft_result`.
-
-* `broom` added to `Suggests`.
-* `pft_long()` is year-suffix aware: a `pft_interpret(..., year = 2022)`
-  result produces long-form rows with `year = "2022"` populated.
-* `pft_glance()` is robust to missing high-level interpretation
-  columns (returns a `.patient`-only tibble when none of the
-  interpretation primitives ran).
-* New tests in `tests/testthat/test-pft_result_tidiers.R` (40 new
-  expectations).
-
-## Equation-migration audit: pft_compare()
-
-`pft_compare(data)` runs the spirometry + interpretation pipeline
-twice on the same input -- once under the race-stratified GLI 2012
-equations (Quanjer 2012) and once under the race-neutral GLI Global
-2022 equations (Bowerman 2023) -- and emits a single tibble with
-both sets of outputs plus per-row reclassification deltas. This is
-the analytical workhorse for institutions migrating to GLI 2022 and
-the canonical equity-audit tool for "how does this patient's
-interpretation change under the new equations?"
-
-Output contains the standard GLI 2012 columns (unsuffixed), the
-GLI Global 2022 companions (`fev1_zscore_2022`,
-`ats_classification_2022`, `volume_subpattern_2022`, etc.), the
-shared GLI 2021 lung-volume / GLI 2017 diffusion columns (not
-duplicated; not year-stratified), and per-row deltas:
-
-* `<measure>_zscore_delta` (numeric; 2022 minus 2012) for fev1,
-  fvc, fev1fvc.
-* `<measure>_severity_changed` (logical) for each spirometry
-  measure.
-* `ats_pattern_changed` (logical) and `ats_pattern_change`
-  (character, e.g., `"Non-specific -> Normal"` for reclassified
-  rows, `""` for unchanged rows, `NA` when either label is `NA`).
-* `prism_changed`, `volume_subpattern_changed` (logical).
-
-A `summary.pft_compare()` method prints a cohort-level
-reclassification report: mean z-score delta per measure, severity
-reclassification counts, ATS pattern reclassification counts plus a
-"most common transitions" table, and PRISm / volume-sub-pattern
-reclassification counts.
-
-The `_changed` flags propagate `NA` (rather than collapsing to
-`FALSE`) when either input label is `NA`, so downstream rates like
-`mean(ats_pattern_changed, na.rm = TRUE)` give an interpretable
-reclassification rate over patients where both pipelines actually
-produced a label.
-
-## pft_plot() gains four new visualisation modes
-
-`pft_plot(type = c("lollipop", "histogram", "trajectory", "bdr",
-"compare"))` now covers the full clinical-visualisation surface:
-
-* `"lollipop"` (default) — the existing single-patient z-score figure;
-  unchanged behaviour for previous callers.
-* `"histogram"` — cohort z-score distribution by measure. Faceted
-  histogram of z-scores for every patient in `data`, one panel per
-  measure, with severity bands as background shading.
-* `"trajectory"` — longitudinal z-score over time, one line per
-  measure. Requires a `time` column (numeric or Date). Optional
-  `patient_id` column for cohorts.
-* `"bdr"` — pre/post bronchodilator response. Paired arrows from
-  `<measure>_pre` to `<measure>_post` for fev1 / fvc / fev1fvc,
-  with rows colour-coded by the Stanojevic 2022 +10 % of predicted
-  significance threshold.
-* `"compare"` — equation reclassification. For each spirometry
-  measure with both `<measure>_zscore` and `<measure>_zscore_2022`
-  columns (the output shape of `pft_compare()`), draws a segment
-  from the 2012 z-score to the 2022 z-score, coloured by whether
-  the row crossed the LLN.
-
-Backward compatibility: `pft_plot(result)` with no `type` argument
-continues to produce the single-patient lollipop and continues to
-error on multi-row input. Callers that were using the lollipop need
-no changes.
-
-## pft_decline() — longitudinal slope fitting
-
-`pft_decline(data, by, measure, time)` fits a per-patient linear
-regression of `measure` (typically a z-score or percent-predicted
-column) on `time` and returns a per-patient tibble of slopes with
-95 % confidence intervals. This is the natural follow-up to
-`pft_change()` (two-point conditional change z-score) for cohorts
-with three or more serial measurements -- the per-patient slope is
-the input clinicians actually use for transplant-listing, BOS
-staging, IPF progression, or CF exacerbation alerts.
-
-* Two model modes: `"ols"` (default; per-patient `lm()`) and
-  `"mixed"` (single `lme4::lmer()` with random intercept + slope
-  per patient; partial-pools toward the cohort-wide slope).
-* `time` accepts numeric or Date / POSIXct columns; the latter are
-  internally converted to years-from-earliest so slopes are
-  per-year by default.
-* Optional `flag_threshold` argument marks patients whose slope is
-  more negative than `-abs(flag_threshold)`; the threshold is
-  intentionally user-supplied (decline-rate thresholds vary by
-  disease and unit system -- CF 10 % FEV1 / year; ISHLT 10 %
-  sustained drop for BOS; OMERACT / ATS IPF 5 % FVC over 6 months).
-* `min_points` (default 3) sets the minimum non-NA observations
-  per patient required to attempt a fit; under-threshold patients
-  return `NA` slope but their `n_points` count is still reported.
-* `lme4` added to `Suggests` (only needed for `model = "mixed"`).
-* New tests in `tests/testthat/test-decline.R` (19 expectations)
-  including hand-calculated slope reproduction for known
-  trajectories.
-
-## pft_lung_age() — algebraic inversion of GLI predicted spirometry
-
-`pft_lung_age(data, measure = "fev1")` solves for the age at which
-the patient's measured FEV1 (or FVC) would equal the GLI predicted
-value for someone of their height, sex, and (under GLI 2012) race.
-This is the standard patient-communication tool used in smoking
-cessation and asthma counseling ("your lungs are equivalent to a
-65-year-old's"); it compresses the LMS distribution into a single
-age scalar.
-
-Implementation is a numeric inversion of [pft_spirometry()] via
-[stats::uniroot()] -- no new reference data is involved, the same
-GLI 2012 / GLI Global 2022 splines and coefficients are walked in
-reverse.
-
-* Supports `measure = c("fev1", "fvc")`. Other measures (FEV1/FVC
-  ratio, FEF segments) are non-monotonic over the GLI range and are
-  not supported.
-* Default `age_range = c(20, 95)` covers the monotonically
-  declining adult portion of the GLI curve, where lung age has a
-  well-defined interpretation. Pediatric / young-adult callers can
-  widen the range explicitly, with the caveat that the inversion
-  becomes non-unique below the age-20 peak.
-* Output: `<measure>_lung_age` (numeric, years) and
-  `<measure>_lung_age_delta` (lung age minus chronological age).
-* Returns `NA` when the measured value cannot be bracketed in the
-  search range (e.g., a measured FEV1 higher than the GLI peak at
-  the patient's height / sex / race).
-* New tests in `tests/testthat/test-lung_age.R` (11 expectations)
-  including the identity test "measured = predicted at age X
-  recovers lung age X", monotonicity (lower FEV1 -> older lung),
-  and NA propagation for out-of-range measurements.
-
-## pft_pattern_severity() — composite "Moderate Obstructed" labels
-
-`pft_pattern_severity(data)` composes the existing
-`ats_classification` (Normal / Non-specific / Obstructed /
-Restricted / Mixed / PRISm) and per-measure severity (normal /
-mild / moderate / severe) columns into a single label like
-`"Moderate Obstructed"` or `"Severe Mixed"` for cohort reporting
-and clinic notes.
-
-Composition rule (Stanojevic 2022 practical reporting):
-
-* Obstructed -> FEV1 severity drives the qualifier.
-* Restricted -> FVC severity drives the qualifier.
-* Mixed -> worse of FEV1 and FVC severity.
-* Non-specific / PRISm -> FEV1 severity.
-* Normal -> `"Normal"` (no severity qualifier).
-* Obstructed / Restricted / Mixed with normal severity also drop
-  the qualifier (e.g., low FEV1/FVC with a normal FEV1 z-score
-  reports as `"Obstructed"`, not `"Normal Obstructed"`).
-
-`pft_interpret()` auto-runs the composer when both
-`ats_classification` and at least one severity column are present;
-the new `pattern_severity` column appears alongside the existing
-interpretation columns. Falls back to `_2022`-suffixed severity
-columns when the unsuffixed columns are absent.
-
-Operates on the package's existing wide-form output -- no new
-input data is required.
-
-## pft_diffusion_interpret() — clinical category from DLCO/VA/KCO z-scores
-
-`pft_diffusion_interpret(data)` consumes the diffusion z-score
-columns already produced by `pft_diffusion()` (either traditional
-units: `dlco_zscore` / `va_zscore` / `kco_tr_zscore`; or SI units:
-`tlco_zscore` / `va_zscore` / `kco_si_zscore`) and assigns a
-clinical interpretive category per the Hughes & Pride 2012
-framework adopted by the ERS/ATS Stanojevic 2017 task force.
-
-Categories:
-
-* `"Normal"` — all three z-scores above LLN.
-* `"Parenchymal"` — low DLCO + low KCO + normal VA (interstitial
-  lung disease, emphysema, anemia, COHb).
-* `"Volume loss"` — low DLCO + low VA + normal or elevated KCO
-  (extra-parenchymal restriction: chest wall, neuromuscular,
-  post-lobectomy, atelectasis).
-* `"Mixed"` — all three low (combined volume loss + exchange
-  impairment).
-* `"Vascular (suggested)"` — low DLCO + normal VA + low/elevated
-  KCO (pulmonary vascular disease pattern: PE, PAH).
-* `"Elevated KCO"` — normal DLCO + elevated KCO (hyperventilation,
-  polycythemia, anemia recovery).
-* `"Other"` — combinations not matching the above (e.g., low VA
-  in isolation).
-* `NA` — required z-score columns missing.
-
-`pft_interpret()` auto-runs the classifier when diffusion z-score
-columns are present in the data; the new `diffusion_category`
-column appears alongside the existing `ats_classification` and
-`volume_subpattern` columns. No new input data is required --
-the categorisation operates on z-scores `pft_diffusion()` already
-computes.
-
-Constants `DIFFUSION_LLN_Z` / `DIFFUSION_ULN_Z` in
-`R/constants.R` (aliased to the package's existing `LLN_Z` /
-`ULN_Z`) -- the boundary semantics match the rest of the package.
-
-## pft_cohort_summary() — `by =` stratification + reclassification audit
-
-Two enhancements to the existing cohort-summary helper:
-
-### Stratified summaries
-
-`pft_cohort_summary(result, by = c("sex", "age_band"))` faces each
-output component (`zscores`, `patterns`, `prism`) by the cross of
-the supplied columns. The cohort-wide default (`by = NULL`)
-preserves the existing return shape byte-for-byte; existing
-callers need no changes.
-
-### Reclassification audit
-
-When both `ats_classification` and `ats_classification_2022`
-columns are present in the input (the output shape of
-`pft_compare()` -- the GLI 2012 vs GLI Global 2022 side-by-side
-comparison), the returned list gains a new `reclassification`
-component containing:
-
-* `overall`: n, n_reclassified, rate (cohort-wide pattern change
-  rate).
-* `confusion`: the 2012 -> 2022 transition tibble, suitable for
-  `ggplot2::geom_tile()`.
-* `severity`: per-measure (fev1 / fvc / fev1fvc) severity
-  reclassification counts when the corresponding
-  `_severity_2022` columns are also present.
-
-Pure post-processing over existing outputs; no new input data is
-required.
-
-## pft_normalize_units() — auto-detect inches / millilitres on input
-
-Catches the two most common clinic / lab data-import bugs that
-yield silently wrong reference values: height in inches (instead
-of centimetres) and measured volumes in millilitres (instead of
-litres). When detected, the offending columns are converted in
-place and a single consolidated warning is emitted so the user
-can audit.
-
-Heuristics (conservative -- only trigger on unambiguous input):
-
-* `height`: `max(height, na.rm = TRUE) < 100` -> treat as inches,
-  multiply by 2.54.
-* Any `<measure>_measured` volume column (fev1, fvc, fef2575,
-  fef75, frc, tlc, rv, erv, ic, vc): `max > 15` -> treat as mL,
-  divide by 1000.
-
-Standalone helper -- intended to be piped before the main pipeline:
-
-    df |> pft_normalize_units() |> pft_interpret()
-
-Both thresholds are user-overridable via `height_inches_max` and
-`volume_ml_min`. Pass `height = NULL` or `volume_cols =
-character(0)` to skip either check.
-
-DLCO / TLCO are not auto-corrected: their unit landscape (SI vs
-traditional, with values in similar magnitudes) doesn't admit a
-safe heuristic.
-
-## plumber endpoint scaffold
-
-A starter `plumber.R` lands at `inst/plumber/plumber.R`. It exposes
-three HTTP endpoints:
-
-* `POST /interpret` — accepts a JSON object (single patient) or
-  array of objects (cohort) carrying the pft input contract, returns
-  the corresponding `pft_interpret()` result as a JSON array.
-* `POST /compare` — same input shape, returns a `pft_compare()`
-  result (GLI 2012 vs GLI Global 2022 reclassification).
-* `GET /schema` — returns the package's required and optional
-  input columns, for clients building forms / validators.
-
-Run with `plumber::plumb(system.file("plumber", "plumber.R",
-package = "pft"))$run(port = 8080)`. Not loaded automatically,
-not part of the exported API; intended as starter scaffolding for
-downstream institutional deployments that need an HTTP frontend
-to the package.
-## Minimum R version bumped to 4.0
-
-`DESCRIPTION` declared `R (>= 2.10)`, which is 12+ years stale and
-matches none of the actual transitive dependency floors (the
-`tidyverse`-aligned packages `rlang` and `tibble` long ago dropped
-support for pre-4.0 R). Bumped to `R (>= 4.0)` to match reality.
-
-## New interpretation primitives (audit follow-up)
-
-The just-completed source-paper verification audit documented
-several paper features that pft did not yet implement. The first
-three of those are now landing as direct follow-ups, each on its
-own feature branch with the same constants-sentinel + paper-anchored
-worked-example test pattern the audit established.
-
-### pft_fev1q()
-
-Computes FEV1Q per Stanojevic 2022 Box 3 (p. 13). FEV1Q expresses
-FEV1 in relation to a sex-specific 1st-percentile "bottom line"
-(0.5 L for males, 0.4 L for females) required for survival in adult
-lung-disease populations; values closer to 1 indicate greater risk
-of death. The 2022 standard suggests FEV1Q as the adult alternative
-to the conditional change score ([pft_change()]), which is derived
-from a children / young-people cohort.
-
-* `pft_fev1q(fev1, sex, age = NA_real_)` returns the FEV1Q ratio.
-* `age` is optional; when supplied, applies the paper's adult-only
-  caveat (`age < 18` -> `NA_real_`).
-* Reuses `normalize_sex_vec()` so "Male" / "female" / etc. work.
-* Constants `FEV1Q_DENOM_MALE` / `FEV1Q_DENOM_FEMALE` /
-  `FEV1Q_MIN_AGE` in `R/constants.R`, all pinned by sentinel tests.
-* Anchor test reproduces the Box 3 verbatim worked example:
-  `pft_fev1q(0.9, "F", age = 70) == 2.25`.
-* `papers/ats_2022_interpretation/verification.md` updated --
-  FEV1Q section flipped from "NOT IMPLEMENTED" to documented
-  implementation.
-
-Test count: 1123 -> 1146 (+23).
-
-### pft_dlco_hb_correct()
-
-Adjusts a measured DLCO or TLCO for the patient's hemoglobin per
-the Cotes 1972 correction documented in Stanojevic 2017 (p. 9,
-p. 11). The GLI 2017 reference equations are deliberately
-uncorrected for Hb (Table 4: "TLCO values should be uncorrected for
-Hb; Hb levels should be considered in the interpretation"); this
-helper provides the interpretive step, leaving `pft_diffusion()`
-untouched.
-
-* `pft_dlco_hb_correct(dlco, hemoglobin, sex, age = NA_real_)`.
-* Formula: `TLCO_corrected = TLCO_measured * (1.7 * Hb_ref) /
-  (Hb + 0.7 * Hb_ref)`. When `hemoglobin == Hb_ref` the correction
-  factor is exactly 1.
-* Reference Hb: 146 g/L (adult males >= 15), 134 g/L (females of
-  any age, males < 15) per Stanojevic 2017 p. 11.
-* Hb input in g/L by default. Values < 30 are auto-converted (with
-  a warning) on the assumption they were supplied in g/dL.
-* Sex soft-corrected via `normalize_sex_vec()`.
-* Constants `HB_REF_MALE_ADULT`, `HB_REF_FEMALE_CHILD`,
-  `HB_REF_MALE_ADULT_AGE`, `COTES_HB_K_NUM`, `COTES_HB_K_DENOM`
-  in `R/constants.R`, all pinned by sentinel tests.
-* Anchor test: anaemic adult male, Hb = 100 g/L, measured DLCO = 20
-  -> corrected DLCO = 20 x (1.7 x 146) / (100 + 0.7 x 146) =
-  24.55.
-* `papers/gli_2017_diffusion/verification.md` updated --
-  Hemoglobin correction moved out of the "not relevant" section
-  into a dedicated implementation section with paper-page anchors.
-
-Test count: 1146 -> 1170 (+24).
-
-### pft_volume_subpattern()
-
-Differentiates the six lung-volume sub-patterns described in
-Stanojevic 2022 Figure 10 (p. 21) and Table 7 (p. 22): **Normal
-lung volumes**, **Large lungs**, **Hyperinflation**, **Simple
-restriction**, **Complex restriction**, and **Mixed disorder**.
-`pft_classify()` collapses these into its five-band output for
-backward compatibility; the new sibling function recovers the
-finer-grained labels when lung-volume ratios are available.
-
-* `pft_volume_subpattern(data)` -- takes a data frame and appends a
-  `volume_subpattern` character column. Required columns: `tlc`,
-  `tlc_lln`, `tlc_uln`, `fev1fvc`, `fev1fvc_lln`, `rv_tlc`,
-  `rv_tlc_uln`. Optional: `frc_tlc`, `frc_tlc_uln` -- when supplied,
-  refines the elevated-volume OR-condition per Figure 10's
-  "FRC/TLC or RV/TLC > 95th percentile". When absent, only RV/TLC
-  is consulted (graceful degradation).
-* `pft_volumes()` already provides `rv_tlc_pred` / `rv_tlc_lln` /
-  `rv_tlc_uln` per Hall 2021 -- no new reference equations needed.
-  FRC/TLC has no Hall 2021 reference equation, hence the optional
-  treatment.
-* Boundary semantics ("< 5th percentile" / "> 95th percentile") use
-  strict `<` and `>` operators per Figure 10's wording. The exact-
-  at-threshold cases are pinned explicitly in the truth-table tests.
-* `pft_interpret()` auto-calls `pft_volume_subpattern()` when the
-  relevant `_measured` columns are present in the input. The new
-  `volume_subpattern` column appears in the output alongside the
-  existing `ats_classification` column.
-* Test count: 1170 -> 1195 (+25; 22 truth-table + 2 integration
-  + 1 column-preservation test).
-* `papers/ats_2022_interpretation/verification.md` updated --
-  dedicated "Lung-volume sub-patterns" section with the Figure 10
-  decision tree verbatim and the truth-table coverage.
-
-This is the third and last of the audit-follow-up implementations.
-
-## Source-paper verification audit
-
-A line-by-line re-audit of every constant and algorithm in the
-package against the original source publications. Triggered after
-the Pellegrino 2005 and Stanojevic 2022 sweeps uncovered 9 real bugs
-attributable to constants being implemented from training-data
-memory rather than from the published papers. Each audit lands a
-`papers/<dir>/verification.md` log: source citation, verbatim quotes
-for each constant, page numbers, exact mapping to package code,
-corrections (if any), and reproduction of any worked examples in the
-paper.
-
-### Quanjer 2012 (GLI 2012 spirometry)
-
-Documented in `papers/gli_2012/verification.md`. Audited the
-data-extraction layer (`data-raw/build_gli_2012.R`) and the
-runtime equation (`R/spirometry.R::spirometry_lms_fit()`) against
-both the published paper and the official ERS lookup-tables workbook.
-
-* Equation form (paper p. 1330) — confirmed: the package's
-  `log(M) = a + b*log(H) + c*log(A) + sum(d_g * group_g) + Mspline`
-  matches the workbook's restated formula exactly. The S equation
-  drops the height term (workbook line `S = exp(p0 + p1*ln(Age) + ...
-  + Sspline)`); L is `q0 + q1*ln(Age) + Lspline` with no race
-  dummies. LLN/ULN use the 1.645 multiplier per Cole 1988.
-* Coefficient extraction — every M, S, L coefficient cell read by
-  `build_gli_2012.R` was compared to the workbook source cell across
-  all 10 (measure × sex) sheets. All match at the script's 4-dp
-  precision.
-* Spline tables — 14 random (sheet × age × column) cells
-  spot-checked directly from the xls against the parsed
-  `spirometry_splines`. All match at machine precision. The two
-  workbook quirks the script handles (FEF2575 sheets using
-  `age|M|S|L` instead of `age|L|M|S`, and FEF2575-females shifting
-  the header to row 4) were confirmed.
-* Table 4 worked examples (paper p. 1335) — six Caucasian-male
-  predictions from the paper reproduce in the package within
-  ±0.02 L (volumes) / ±0.005 (ratio), inside the paper's 2-dp
-  reporting precision. Added as anchor tests in
-  `tests/testthat/test-spirometry.R`.
-* Table 3 % differences (paper p. 1331) — 24 cross-group cells
-  agree within ±1.63 pp; residual is consistent with 4-dp rounding
-  of the underlying d coefficients and not a build-script bug. The
-  package matches the canonical workbook exactly.
-* "Other/mixed" composite (paper p. 1330) — confirmed: M and F
-  values are identical for 4 of 5 measures and equal the cross-sex
-  cross-group average. FVC has a 0.0008 M-vs-F asymmetry that is a
-  workbook rounding artifact.
-* Age-range coverage — workbook covers 3-95 yrs for FEV1/FVC and
-  3-90 yrs for FEF25-75% / FEF75%, matching the existing
-  out-of-range NA tests.
-
-**No corrections required.** The data-extraction layer is faithful
-to the canonical source. The audit added the explicit
-paper-to-code traceability, 3 Table-4 anchor tests, and 139
-structural / sentinel-cell assertions guarding the sysdata layer
-against silent regressions.
-
-### Bowerman 2022 (GLI Global / "GLI 2022" spirometry)
-
-Documented in `papers/gli_2022/verification.md`. Audited the
-data-extraction layer (`data-raw/build_gli_2022.R`) and the
-runtime equation (`R/spirometry.R`, `year = 2022` codepath) against
-the Bowerman 2023 AJRCCM paper, its online supplement, and the
-official GLI Global lookup-tables workbook.
-
-* Equation form (paper p. 770) — confirmed:
-  `ln(Y) = a + b*ln(height) + c*ln(age) + spline_age`, race-neutral
-  (no race-dummy term). The package's runtime path for
-  `year = 2022` matches this form and uses the standard 1.645 LMS
-  multiplier for LLN/ULN, consistent with the paper's "fifth centile
-  of the normal distribution" wording on p. 771.
-* Coefficient extraction — 24 of 26 coefficients in the workbook
-  match supplement Table E2 (p. E3) exactly. Two Male FEV1/FVC
-  coefficients (M log-age and S intercept) differ by exactly 1 LSD
-  in the 6th decimal place between workbook and supplement — a
-  publication artifact between two canonical sources by the same
-  authors. Relative impact on predictions: ~7 × 10⁻⁶ (≈6 ppm). The
-  package uses the workbook values (canonical lookup-table source
-  used by gli-calculator.ersnet.org and rspiro); documented for
-  transparency, no code change applied.
-* Spline tables — 13 random (sheet × age × column) cells
-  spot-checked from the xlsx workbook against parsed
-  `spirometry_2022_splines`. All match at machine precision. The
-  2022 workbook spline column order (age, M, S, L) differs from the
-  2012 layout (age, L, M, S); `build_gli_2022.R` reads by position
-  and correctly handles the difference.
-* By-hand reproduction from supplement Table E2 — 72 demographic
-  combinations (sex × age × height × measure) computed by applying
-  supplement coefficients to workbook spline values and compared to
-  `pft_spirometry(year = 2022)`. 60 of 72 match exactly; the 12
-  Male FEV1/FVC predictions differ by ~10⁻⁶ relative due to the
-  workbook-vs-supplement coefficient divergence above.
-* Race-neutral design — confirmed: the `race` column on the input
-  data frame is ignored on the 2022 codepath, consistent with the
-  paper's inverse-probability-weighted single-equation approach
-  (p. 769-770).
-* Age-range coverage — workbook covers 3-95 yrs for all 6 sheets,
-  matching the existing column-contract tests.
-
-**No corrections required.** The audit added 12 Table-E2 anchor-test
-assertions and 104 structural / sentinel-cell assertions guarding
-the sysdata layer against silent regressions.
-
-### GOLD 2026 (COPD severity grading)
-
-Documented in `papers/gold_reports/verification.md`. Audited
-`R/clinical.R::pft_gold()` and `R/constants.R::GOLD_BOUNDARIES`
-against Figure 2.10 of the GOLD 2026 report ("GOLD Grades and
-Severity of Airflow Obstruction in COPD (based on
-post-bronchodilator FEV1)", content p. 38).
-
-* **Thresholds (30 / 50 / 80 % predicted) and boundary operators
-  (>= lower, < upper) match Figure 2.10 verbatim** across all four
-  grades. No change to `GOLD_BOUNDARIES` or to the grading logic.
-* **Airflow-obstruction prerequisite enforcement (new optional
-  argument).** Figure 2.10's header row explicitly states "In
-  patients with COPD (FEV1/FVC < 0.7):" and the surrounding text
-  (content p. 37) repeats the requirement. `pft_gold()` gains an
-  optional `fev1fvc` parameter that, when supplied, masks rows with
-  `fev1fvc >= 0.7` to `NA_character_`. The default (`NA_real_`)
-  preserves the pre-audit behavior, so existing callers are
-  unaffected. Recommended usage for routine clinical reporting:
-  pass the `fev1fvc_measured` column alongside `fev1_pctpred` so
-  non-obstructed patients are correctly returned NA rather than
-  receiving a spurious GOLD grade.
-* Constants-file comment updated to reference Figure 2.10 of the
-  GOLD 2026 report explicitly and to enumerate the four bands.
-* Test additions: 7 anchor / prerequisite tests covering
-  Figure 2.10 grades, the prerequisite-supplied path (including
-  the exact 0.70 boundary), vectorized mixed-prerequisite inputs,
-  NA-fev1fvc behavior (don't mask -- the prerequisite is unknown,
-  not failed), backwards compatibility when fev1fvc is omitted,
-  and all-NA fev1fvc as equivalent to omitting.
-
-No bugs found in the existing grading logic; the only audit
-change is the optional prerequisite parameter (added because
-Figure 2.10's explicit "In patients with COPD (FEV1/FVC < 0.7)"
-header row makes the prerequisite a canonical part of the GOLD
-specification).
-
-### Graham 2019 (ATS/ERS 2019 spirometry quality grading)
-
-Documented in `papers/graham_2019/verification.md`. Audited
-`R/clinical.R::pft_quality()` and the threshold constants in
-`R/constants.R` against Table 10 of the source standard.
-
-**This audit found 3 real bugs in the decision logic and 1 API
-limitation** — the first paper in this verification sweep to surface
-package-code corrections. Each is documented with its clinical
-impact and the verbatim Table 10 row that anchors the correct
-behavior.
-
-* **Bug fix (child age cutoff)**: pre-fix used `age < 6`, which
-  treated a 6-year-old as adult. Table 10 column header reads
-  "Age <= 6 yr"; a 6-year-old is a child. Edge-of-pediatric impact:
-  a 6.0-year-old previously received a 50% looser repeatability
-  threshold (0.150 L) than the standard specifies (0.100 L).
-* **Bug fix (child 10% rule)**: pre-fix ignored the Table 10
-  footnote: "Or 10% of the highest value, whichever is greater;
-  applies for age 6 years or younger only." For children of normal
-  developmental size, the effective threshold is now
-  `max(absolute, 0.10 * max(values))`, which relaxes the absolute
-  thresholds for children whose lung function approaches adult
-  scale. Pre-fix behaviour was overly strict for older / taller
-  children.
-* **Bug fix (Grade E vs F fall-through)**: pre-fix fell through to
-  `"F"` when `n >= 2` but the best-two repeatability exceeded all
-  of A/C/D thresholds. Table 10 grades these sessions as **E**
-  ("usable but with poor repeatability"). `"F"` is reserved for
-  "0 acceptable AND 0 usable" maneuvers. Test sessions with 2-3
-  acceptable maneuvers and diff > 0.250 L are now correctly graded
-  E, not F.
-* **API limitation (Grade U not implemented)**: Table 10
-  distinguishes **U** ("0 acceptable AND >= 1 usable") from **F**
-  ("0 acceptable AND 0 usable"). `pft_quality(values)` takes only
-  acceptable maneuvers and cannot distinguish U from F; the
-  function unconditionally returns F when no values are passed.
-  Documented in the function's docstring. Implementing U would
-  require an API extension (e.g., a separate `usable` argument);
-  marked as future work, not in scope for this audit.
-
-The threshold constants `QUALITY_THRESHOLD_ADULT` (0.150 / 0.200 /
-0.250 L) and `QUALITY_THRESHOLD_CHILD` (0.100 / 0.150 / 0.200 L) in
-`R/constants.R` were already correct against Table 10 verbatim and
-required no changes; the bugs were entirely in the decision logic
-that consumed them.
-
-Test additions: 4 regression tests (age=6 boundary, child 10% rule,
-n>=2 diff > 0.250 L returns E, full Table 10 truth table) plus an
-fp-boundary documentation test, totaling +19 assertions. The
-pre-existing child-threshold test was updated to use pediatric-scale
-values where the 10% rule does not override the absolute threshold,
-preserving the test's original "tighter for children" intent.
-
-### Stanojevic 2017 + 2020 correction (GLI 2017 carbon-monoxide transfer factor)
-
-Documented in `papers/gli_2017_diffusion/verification.md`. Audited
-the data-extraction layer (`data-raw/build_gli_2017_diffusion.R`)
-and the runtime equation (`R/diffusion_capacity.R::pft_diffusion()`)
-against the source paper (**post-2020 author correction**), its
-supplements, and the two official xlsx workbooks (SI and traditional
-units).
-
-* **The 2020 author correction is applied.** The 2017 paper was
-  amended in October 2020 after a sex-label error in one source
-  dataset was discovered; the correction updated **all coefficients
-  in Table 2** and **all spline lookup tables in the supplement
-  workbooks**. The package uses the post-correction values
-  throughout. Direct evidence: the supplement-1 PDF worked example
-  (p. 1) still uses the **original 2017** values, while the package
-  uses the **corrected** values printed in the article PDF's Table 2
-  (which has an explicit "this table has been amended" footnote).
-  Identified deltas for TLCO.M (the only measure where the
-  supplement explicitly documents the uncorrected originals):
-  Median1 +0.62936, Median2 -0.13280, Median3 +0.01550, S1 -0.00747,
-  S2 +0.00106, L +0.00769. Since TLCO/DLCO and KCO_SI/KCO_Tr share
-  most coefficients (differing only in Median1 by the unit
-  conversion factor), the same changes propagate across the
-  shared-coefficient measures.
-* Equation form (paper p. 6) — confirmed:
-  `ln(M) = a + b*ln(height) + c*ln(age) + Mspline`,
-  `ln(S) = p1 + p2*ln(age) + Sspline`, `L = constant`. All
-  log-transformed (no linear-vs-log conditional like Hall 2021).
-  Matches `R/diffusion_capacity.R` line-for-line.
-* Coefficient extraction — all 60 cells in `transfer_coeff` match
-  the corrected Table 2 verbatim (zero delta across all 10
-  measure-sex rows × 6 columns).
-* Spline tables — 14 random (sheet × age × column) cells
-  spot-checked across both xlsx workbooks (SI and traditional) vs
-  parsed `transfer_splines`. All match at machine precision. 12
-  sheets total, 341 rows each, age 5-90 yr at 0.25-yr knots.
-  Lspline identically zero across all sheets (L is constant per
-  measure).
-* Table 3 worked examples (paper p. 8) — three TLCO predictions
-  reproduce within ±0.2 L. The 178cm/64y M row is off by 0.17
-  (exceeding the paper's 1-dp precision), most likely because
-  Table 3 was not regenerated when Table 2 was amended in 2020
-  (Table 2's footnote calls out the amendment; Table 3's does not).
-* Unit conversion (paper p. 3): TLCO (traditional) =
-  2.986421 × TLCO (SI). Package's implicit ratio is 2.987 across
-  all demographics (a 5×10⁻⁴ rounding artifact in the corrected
-  Table 2 intercepts).
-
-**No corrections required.** The audit added 4 anchor-test
-assertions (3 Table 3 + 1 dedicated correction-applied check that
-explicitly distinguishes corrected-vs-uncorrected outputs) and 211
-structural / sentinel-cell assertions guarding the sysdata layer
-against silent regressions. The sysdata sentinels pin the
-*corrected* coefficient values explicitly so any future regression
-toward the 2017 originals fails loudly.
-
-### Hall 2021 (GLI 2021 static lung volumes)
-
-Documented in `papers/gli_2021_volumes/verification.md`. Audited the
-data-extraction layer (`data-raw/build_gli_2021_volumes.R`) and the
-runtime equation (`R/lung_volumes.R::pft_volumes()`) against Hall
-et al. ERJ 2021, the supplement workbook (14 spline lookup tables),
-and the supplement PDF (worked example p. 9, Table S4 VC
-predictions p. 8).
-
-* Conditional log-vs-linear covariate logic in `pft_volumes()` —
-  verified verbatim against Table 3 (paper p. 5). FRC and TLC use
-  `log(age)` and `log(height)`; **RV and RV/TLC use linear age AND
-  linear height**; ERV, IC, VC use linear age and `log(height)`.
-  FRC alone uses `log(age)` in the S equation; all others use
-  linear age. ERV / IC / VC have **no Sspline term**. The runtime
-  conditionals in `lung_volumes.R:122-129` match Table 3 row-for-row
-  across all 7 measures. This was flagged as the fragile part of
-  the volumes pipeline; it is correct.
-* Hand-keyed coefficient extraction — `build_gli_2021_volumes.R`
-  hand-keys 84 coefficient values (14 measure-sex rows × 6
-  columns) from Table 3, since the supplement workbook only
-  contains the spline lookup tables. All 84 values match the paper
-  verbatim at zero delta.
-* Spline tables — 14 random (sheet × age × column) cells
-  spot-checked from the xlsx against parsed `volume_splines`.
-  All match at machine precision. The workbook column order is
-  `age, Mspline, Sspline, Lspline` — a third distinct layout among
-  the three GLI workbooks audited (different from GLI 2012's
-  `age, L, M, S` and GLI 2022's `age, M, S, L`); the build script
-  handles it correctly. The ERV/IC/VC Sspline columns are NA in
-  the workbook (per Table 3's S-equation form); the build script
-  substitutes 0 so the runtime can unconditionally add the spline.
-* Worked example (supplement p. 9): Male 30y 178cm with FRC=3.7L.
-  Paper reports `frc_pred = 3.307587, frc_pctpred = 111.864,
-  frc_lln = 2.251922, frc_zscore = 0.5211515`. Package reproduces
-  `frc_pred` and `frc_pctpred` within ~10⁻⁵ (essentially exact).
-  `frc_lln` and `frc_zscore` differ from the paper-reported values
-  by ~5×10⁻⁴ — the paper's worked example contains a small internal
-  inconsistency (applying the LLN formula to the paper's own
-  reported intermediate S = 0.2190672 yields 2.25148, not the
-  paper's stated 2.251922). The package consistently applies
-  Table 3 coefficients end-to-end; the discrepancy is publication
-  rounding noise, not a code bug.
-* Table S4 VC predictions (supplement p. 8) — 8 cross-sex
-  cross-age predictions reproduce within ±5 mL, inside the paper's
-  2-dp printing precision.
-* Table S3 obesity-sensitivity table (supplement p. 7) does **not**
-  reproduce from the published Table 3 equations (ULN values are
-  3-6% lower in the package than in Table S3; RV pred is +20 mL
-  off). The canonical Table 3 equations, the FRC worked example,
-  and Table S4 all agree with each other; Table S3 alone disagrees.
-  Most likely a sensitivity-analysis draft figure that didn't track
-  the final coefficient values. Documented in
-  `verification.md`; not used as anchor tests.
-
-**No corrections required.** The audit added 13 anchor-test
-assertions (FRC worked example + Table S4 VC) and 187 structural /
-sentinel-cell assertions guarding the sysdata layer against silent
-regressions.
 
 ## Predecessor 2005 standard
 
