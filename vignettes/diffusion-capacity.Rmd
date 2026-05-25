@@ -12,14 +12,13 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(pft)
 ```
 
-Diffusion measurements (DLCO in traditional units; TLCO in SI) are
-ordered to assess gas-exchange capacity at the alveolar-capillary
-membrane. They are the most informative add-on to spirometry and
-volumes when the differential includes interstitial lung disease,
-pulmonary vascular disease, emphysematous parenchymal loss, or
-anemia. This vignette covers what `pft` computes for the diffusion
-module: reference values, hemoglobin correction, the six clinical
-sub-pattern categories, and the alveolar-volume distinction between
+Diffusion measurements (DLCO in traditional units, TLCO in SI)
+assess gas-exchange capacity at the alveolar-capillary membrane and
+are typically added to spirometry and volumes when the differential
+includes interstitial lung disease, pulmonary vascular disease,
+emphysematous parenchymal loss, or anemia. The sections below cover
+reference values, hemoglobin correction, the six Hughes & Pride
+clinical categories, and the alveolar-volume distinction between
 parenchymal and extra-parenchymal restriction.
 
 # 1. Reference values

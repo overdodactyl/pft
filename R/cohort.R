@@ -6,8 +6,8 @@
 #' Useful for cohort papers, screening reports, and quick QA looks.
 #'
 #' @param data A data frame produced by [pft_interpret()] or the
-#'   individual reference / interpretation functions. The summary is
-#'   robust to which columns are present and skips anything absent.
+#'   individual reference / interpretation functions. Columns that are
+#'   absent are skipped; only present columns contribute to the summary.
 #'
 #' @return A list with up to four components, each a tibble (omitted
 #'   when the corresponding input columns are absent):

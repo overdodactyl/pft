@@ -5,11 +5,9 @@
 #' on the same input data -- once under the GLI 2012 race-stratified
 #' equations (Quanjer 2012) and once under the GLI Global 2022
 #' race-neutral equations (Bowerman 2023) -- and emits a single tibble
-#' with both sets of outputs and per-row reclassification deltas. This
-#' is the analytical workhorse for equation-migration audits and equity
-#' analyses, and the recommended workflow for any institution that is
-#' (or has recently completed) the transition from GLI 2012 to GLI
-#' Global 2022.
+#' with both sets of outputs and per-row reclassification deltas. Use
+#' it when migrating cohorts from GLI 2012 to GLI Global 2022 and you
+#' need to report how labels shifted.
 #'
 #' Lung volumes (GLI 2021) and diffusion (GLI 2017) are *not*
 #' year-stratified and are computed once. Only spirometry-derived

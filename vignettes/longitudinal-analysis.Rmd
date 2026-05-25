@@ -18,10 +18,9 @@ library(pft)
 set.seed(7)
 ```
 
-Serial PFTs are how pulmonary disease is actually managed: a single
-result is rarely enough; what matters is whether the patient is
-stable, declining, or recovering. `pft` provides three complementary
-tools for this:
+Most clinical PFT decisions rest on serial measurements rather than
+a single result; what matters is whether the patient is stable,
+declining, or recovering. `pft` provides four tools for this:
 
 | Tool | Use case | Inputs |
 |------|----------|--------|
@@ -29,8 +28,6 @@ tools for this:
 | `pft_decline()` | Per-patient slope fit from 3+ time points | Long-form data: patient ID, measure, time |
 | `pft_decline_grouped()` | Cohort-level slope per group (disease, smoking status) | Same + a grouping covariate |
 | `pft_fev1q()` | Adult mortality index, alternative to CCS in adults | FEV1 (litres) + sex |
-
-This vignette walks through each.
 
 # 1. Two-point conditional change score: `pft_change()`
 

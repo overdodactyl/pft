@@ -8,8 +8,8 @@ pft_cohort_summary(data, by = NULL)
 }
 \arguments{
 \item{data}{A data frame produced by \code{\link[=pft_interpret]{pft_interpret()}} or the
-individual reference / interpretation functions. The summary is
-robust to which columns are present and skips anything absent.}
+individual reference / interpretation functions. Columns that are
+absent are skipped; only present columns contribute to the summary.}
 
 \item{by}{Optional character vector of column names to stratify
 the summary by. Each output component (\code{zscores}, \code{patterns},

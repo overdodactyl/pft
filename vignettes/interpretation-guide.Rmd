@@ -12,13 +12,12 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(pft)
 ```
 
-The Getting-started vignette focused on *how* to compute reference
-values and z-scores. This vignette is about *what to do with them*:
-the severity bands, the pattern decision tree, the difference between
+Where the Getting-started vignette covers *how* to compute reference
+values and z-scores, this one covers *what to do with them*: the
+severity bands, the pattern decision tree, the differences between
 the 2022 Stanojevic and 2005 Pellegrino standards, and worked case
-studies that map common z-score / pattern combinations to typical
-next steps. This is reference material for clinicians and researchers
-reading a pft report.
+studies mapping common z-score / pattern combinations to the next
+clinical step.
 
 # Severity bands
 
@@ -122,8 +121,8 @@ The two standards differ in three ways:
 | Bronchodilator response | > 10 % predicted | >= 12 % AND >= 200 mL |
 | Pattern flowchart     | Fig 8 / Table 5    | Fig 2             |
 
-The 2022 standard is the recommended default and is the one used by
-`pft_interpret()` out of the box. Use the 2005 path when:
+The 2022 standard is the recommended default and is what
+`pft_interpret()` applies by default. Use the 2005 path when:
 
 * Reproducing a historical report or matching an EMR template that
   was built against the older flowchart.

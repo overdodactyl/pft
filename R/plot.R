@@ -1,13 +1,12 @@
 #' @title Clinical visualisations for PFT results
 #'
 #' @description
-#' `pft_plot()` produces clinical-style visualisations of PFT results.
-#' The default `type = "lollipop"` mode is the canonical single-patient
-#' z-score figure (one row per measure, points at the patient's z-score,
-#' shaded reference bands for Stanojevic 2022 severity). Four additional
-#' modes cover the cohort, longitudinal, bronchodilator-response, and
-#' equation-comparison visualisations that come up routinely in
-#' clinic-style reporting:
+#' `pft_plot()` produces ggplot2 figures for PFT results. The default
+#' `type = "lollipop"` mode draws a single-patient z-score figure (one
+#' row per measure, points at the patient's z-score, shaded reference
+#' bands for Stanojevic 2022 severity). Other modes cover cohorts,
+#' longitudinal series, bronchodilator response, equation comparison,
+#' and flow-volume envelopes:
 #'
 #' * `"lollipop"` -- single-patient z-score figure (default). Errors if
 #'   `nrow(data) != 1`.

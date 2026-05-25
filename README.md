@@ -26,17 +26,16 @@ remotes::install_github("YOUR-ORG/pft")
 
 ## What it does
 
-`pft` is a comprehensive R toolkit for ERS/ATS 2022-compliant
-pulmonary function test interpretation. It covers the full Stanojevic
-2022 interpretive standard end-to-end: reference values across
-spirometry (GLI 2012 + GLI Global 2022), static lung volumes
-(GLI 2021), and diffusion capacity (GLI 2017 TLCO); plus z-scores,
+`pft` implements the Stanojevic 2022 ERS/ATS interpretive standard
+for pulmonary function tests. Reference values come from the GLI
+family of equations (GLI 2012 and GLI Global 2022 spirometry,
+GLI 2021 static lung volumes, GLI 2017 TLCO with the 2020 author
+correction). On top of those, the package computes z-scores and
 percent predicted, ATS pattern classification, severity grading,
-bronchodilator response, PRISm screening, conditional change scores
-and longitudinal slope fitting for serial measurements, side-by-side
-race-stratified vs race-neutral reclassification audits, diffusion
-clinical-category interpretation, lung age, and clinical-style
-visualisation across single-patient and cohort modes.
+bronchodilator response, PRISm, conditional change scores and
+longitudinal slopes, GLI 2012 vs GLI Global 2022 reclassification,
+the Hughes & Pride diffusion category, lung age, and ggplot2-based
+single-patient and cohort figures.
 
 ### Reference value functions
 
@@ -77,7 +76,8 @@ Each reference function emits `*_pred`, `*_lln`, `*_uln`. If a `<measure>_measur
 | `pft_report()` | One-call HTML clinical report for a patient or cohort | — |
 | `pft_long()` / `pft_glance()` | Long-form pivot + per-patient summary; `broom::tidy`/`glance` dispatch | — |
 
-All functions are data-frame in, data-frame out — composable with `dplyr`.
+All functions take a data frame and return a data frame, so they
+compose with `dplyr` pipelines.
 
 ## Quick start
 

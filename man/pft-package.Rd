@@ -6,17 +6,17 @@
 \alias{pft}
 \title{pft: Pulmonary Function Test Interpretation per ERS/ATS 2022}
 \description{
-\code{pft} is a comprehensive R toolkit implementing the full ERS/ATS 2022
-interpretive strategy for pulmonary function testing, end-to-end:
-reference values across spirometry (GLI 2012 and the race-neutral
-GLI Global 2022 equations), static lung volumes (GLI 2021), and
-diffusion capacity (GLI 2017 TLCO, including the 2020 author
-correction); z-scores, percent predicted, and severity grading;
-ATS pattern classification; bronchodilator response, PRISm screening,
-conditional change scores for serial measurements; COPD GOLD severity
-grading; per-maneuver spirometry quality grades (Graham 2019);
-cohort-level summaries; input QC; clinical-style visualisation; and
-rmarkdown-based clinical reports.
+\code{pft} implements the Stanojevic 2022 ERS/ATS interpretive standard
+for pulmonary function tests. Reference values come from the GLI
+family of equations (GLI 2012 and GLI Global 2022 spirometry,
+GLI 2021 static lung volumes, GLI 2017 TLCO with the 2020 author
+correction). On top of those, the package computes z-scores and
+percent predicted, severity grading, ATS pattern classification,
+bronchodilator response per the 2022 criterion, PRISm screening,
+conditional change scores for serial measurements, GOLD COPD
+severity grading, Graham 2019 spirometry quality grades, cohort
+summaries, input QC, ggplot2-based visualisation, and rmarkdown
+clinical reports.
 }
 \section{Input data format}{
 
@@ -162,7 +162,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Pat Johnson \email{johnson.pat@mayo.edu}
+\strong{Maintainer}: Pat Johnson \email{johnson.pat@mayo.edu} (\href{https://orcid.org/0000-0001-8365-1375}{ORCID})
 
 Authors:
 \itemize{

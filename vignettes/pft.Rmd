@@ -16,15 +16,14 @@ knitr::opts_chunk$set(
 )
 ```
 
-`pft` is an R toolkit for **ERS/ATS 2022-compliant pulmonary function
-test (PFT) interpretation**. It implements the full Stanojevic et al.
-ERJ 2022 interpretive strategy: reference values, z-scores, percent
-predicted, ATS pattern classification, severity grading, bronchodilator
-response, PRISm screening, and conditional change scores -- all from a
-data-frame-pipeline API.
+`pft` implements the Stanojevic et al. ERJ 2022 ERS/ATS interpretive
+strategy for pulmonary function tests: reference values, z-scores,
+percent predicted, ATS pattern classification, severity grading,
+bronchodilator response, PRISm screening, and conditional change
+scores, all from a data-frame-pipeline API.
 
-This vignette walks through the full workflow on a single patient and
-then on a small cohort.
+The sections below run the pipeline on a single patient and then on
+a small cohort.
 
 ```{r}
 library(pft)
