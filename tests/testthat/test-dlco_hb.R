@@ -69,16 +69,6 @@ test_that("vectorised inputs", {
   expect_equal(out[2], 25)
 })
 
-test_that("g/dL auto-conversion: warns and multiplies by 10", {
-  expect_warning(
-    out <- pft_dlco_hb_correct(20, hemoglobin = 14.6,
-                                sex = "M", age = 40),
-    "g/dL"
-  )
-  # 14.6 g/dL -> 146 g/L -> no correction.
-  expect_equal(out, 20)
-})
-
 test_that("soft-corrected sex variants work", {
   expect_equal(
     pft_dlco_hb_correct(20, hemoglobin = 100,

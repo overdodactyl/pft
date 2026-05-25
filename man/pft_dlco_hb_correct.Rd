@@ -10,10 +10,9 @@ pft_dlco_hb_correct(dlco, hemoglobin, sex, age = NA_real_)
 \item{dlco}{Numeric vector of measured DLCO or TLCO values, any unit
 system (the correction is multiplicative and unit-agnostic).}
 
-\item{hemoglobin}{Numeric vector of measured hemoglobin in g/L. If
-values appear to be in g/dL (any non-NA value below 30), the
-function warns and multiplies by 10 to convert. Routine clinical
-adult Hb in g/L is 120-160; in g/dL it is 12-16.}
+\item{hemoglobin}{Numeric vector of measured hemoglobin in g/L
+(routine clinical adult range 120-160 g/L). Pass g/L directly;
+the function does not detect or convert g/dL inputs.}
 
 \item{sex}{Character vector ("M"/"F"). Soft-corrected via
 the internal \code{normalize_sex_vec()} helper so "Male", "female",

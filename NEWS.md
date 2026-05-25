@@ -19,6 +19,13 @@
   diffusion-category frequencies) are easier expressed as plain
   `dplyr::group_by() |> summarise()` calls on a `pft_interpret()`
   result, optionally piped through `pft_long()` first.
+* `pft_dlco_hb_correct()` no longer inspects its `hemoglobin`
+  argument for likely-g/dL inputs (the previous behaviour was to
+  warn and multiply by 10 when any value was below 30). Unit
+  detection is out of scope for the package; pass g/L directly.
+  Callers that were relying on the auto-conversion will now get
+  numerically wrong corrections instead of a warning, so audit any
+  upstream code that produced this argument.
 
 ## New features
 
