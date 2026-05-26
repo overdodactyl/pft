@@ -76,7 +76,7 @@ SEVERITY_2005_BOUNDARIES <- c(
 #
 # Figure 2.10 specifies the prerequisite "In patients with COPD
 # (FEV1/FVC < 0.7)"; the package's pft_gold() applies this as an
-# optional `fev1fvc` parameter (see R/clinical.R).
+# optional `fev1fvc` parameter (see R/gold.R).
 GOLD_BOUNDARIES <- c(
   "GOLD 4" = 30,
   "GOLD 3" = 50,
