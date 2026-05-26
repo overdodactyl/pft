@@ -1,8 +1,9 @@
 # Contributing to pft
 
-Thanks for taking the time to contribute. `pft` is a clinical R package
+Thanks for taking the time to contribute. `pft` is an R package
 implementing ATS/ERS-published reference equations and interpretation
-algorithms; contributions are welcome but bear that scope in mind.
+algorithms for research and education use; contributions are welcome
+but bear that scope in mind.
 
 ## What to contribute
 
