@@ -198,6 +198,10 @@ Useful links:
 
 Authors:
 
-- Zach Quicksall
+- Scott Helgeson ([ORCID](https://orcid.org/0000-0001-7590-2293))
 
-- Jairo Pena
+Other contributors:
+
+- Zach Quicksall \[contributor\]
+
+- Jairo Pena \[contributor\]

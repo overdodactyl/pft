@@ -1,9 +1,13 @@
 # Clinical visualisation for a single PFT result
 
 `pft_plot()` draws a single-patient z-score figure: one row per measure,
-points at the patient's z-score, shaded reference bands for the
-Stanojevic 2022 severity grades (severe / moderate / mild / normal /
-elevated).
+points at the patient's z-score, shaded reference bands for the four
+Stanojevic 2022 severity grades returned by
+[`pft_severity()`](https://overdodactyl.github.io/pft/reference/pft_severity.md):
+normal (z \>= -1.645), mild (-2.5 \<= z \< -1.645), moderate (-4 \<= z
+\< -2.5), and severe (z \< -4). The normal band extends symmetrically
+above zero to the upper limit of normal; values above the ULN are shown
+but are not a 2022 severity grade.
 
 Requires the `ggplot2` package (a Suggested dependency).
 
