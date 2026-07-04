@@ -1,6 +1,22 @@
 # Changelog
 
-## pft (development version)
+## pft 0.1.0
+
+Initial public release. Baseline feature set implementing routine
+pulmonary function test interpretation under the ERS/ATS 2022 technical
+standard, with GLI-family reference equations (GLI-2012 and GLI Global
+2022 spirometry, GLI-2021 static lung volumes, GLI-2017 diffusion
+capacity with the 2020 author correction), the ERS/ATS 2022 pattern
+classifier, severity grading, bronchodilator response, PRISm
+identification, hemoglobin correction, the FEV1Q survival index, GOLD
+1-4 airflow-limitation grading, and Graham 2019 A-F spirometry
+acceptability grading. Pellegrino et al. 2005 legacy primitives are
+retained for cross-standard reclassification analyses. Detailed change
+log for the development history follows.
+
+------------------------------------------------------------------------
+
+### Development history (pre-0.1.0)
 
 ### Breaking changes
 

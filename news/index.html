@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,9 +49,13 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="pft-development-version">pft (development version)<a class="anchor" aria-label="anchor" href="#pft-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.1.0" id="pft-010">pft 0.1.0<a class="anchor" aria-label="anchor" href="#pft-010"></a></h2>
+<p>Initial public release. Baseline feature set implementing routine pulmonary function test interpretation under the ERS/ATS 2022 technical standard, with GLI-family reference equations (GLI-2012 and GLI Global 2022 spirometry, GLI-2021 static lung volumes, GLI-2017 diffusion capacity with the 2020 author correction), the ERS/ATS 2022 pattern classifier, severity grading, bronchodilator response, PRISm identification, hemoglobin correction, the FEV1Q survival index, GOLD 1-4 airflow-limitation grading, and Graham 2019 A-F spirometry acceptability grading. Pellegrino et al. 2005 legacy primitives are retained for cross-standard reclassification analyses. Detailed change log for the development history follows.</p>
+<hr><div class="section level3">
+<h3 id="development-history-pre-0-1-0">Development history (pre-0.1.0)<a class="anchor" aria-label="anchor" href="#development-history-pre-0-1-0"></a></h3>
+</div>
 <div class="section level3">
-<h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
+<h3 id="breaking-changes-0-1-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-1-0"></a></h3>
 <ul><li><p>The default <code>year</code> argument for <code><a href="../reference/pft_spirometry.html">pft_spirometry()</a></code>, <code><a href="../reference/pft_interpret.html">pft_interpret()</a></code>, <code><a href="../reference/pft_classify.html">pft_classify()</a></code>, <code><a href="../reference/pft_prism.html">pft_prism()</a></code>, and <code><a href="../reference/pft_volume_subpattern.html">pft_volume_subpattern()</a></code> is now <code>2022</code> (the GLI Global / race-neutral equations) — previously <code>2012</code>. This aligns the package with the current ERS/ATS 2022 technical-standard recommendation and removes the need for a <code>race</code> column when callers omit <code>year</code>. The combined effect with the always-suffixed output convention is that <code>pft_spirometry(d)</code> now emits <code>fev1_pred_2022</code> (was <code>fev1_pred</code>), and <code>pft_classify(d)</code> looks up <code>fev1_lln_2022</code> by default (was <code>fev1_lln</code>). To reproduce the previous behaviour pass <code>year = 2012</code> explicitly and include a <code>race</code> column.</p></li>
 <li>
 <p>Spirometry reference outputs from <code><a href="../reference/pft_spirometry.html">pft_spirometry()</a></code> / <code><a href="../reference/pft_interpret.html">pft_interpret()</a></code> now always carry a four-digit GLI-year suffix: <code>fev1_pred_2012</code>, <code>fev1_lln_2012</code>, <code>fev1_zscore_2012</code>, … for GLI 2012, and the existing <code>_2022</code> columns for GLI 2022. Previously the default</p>
@@ -80,7 +84,7 @@
 <li><p><code><a href="../reference/pft_interpret.html">pft_interpret()</a></code> no longer auto-derives <code>fev1fvc_measured</code> from <code>fev1_measured / fvc_measured</code> (and the analogous <code>frc_tlc_measured</code>). Trust-the-caller: supply the ratio column explicitly if you want pattern classification, PRISm, or the volume sub-pattern stages to run. Note that in ATS/ERS “best test” workflows the reported ratio comes from a single maneuver and may not equal <code>fev1 / fvc</code> constructed from best-of-N picks, so the caller’s explicit ratio is the safer source.</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
+<h3 id="new-features-0-1-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-0"></a></h3>
 <ul><li>
 <code><a href="../reference/pft_classify.html">pft_classify()</a></code>, <code><a href="../reference/pft_prism.html">pft_prism()</a></code>, <code><a href="../reference/pft_volume_subpattern.html">pft_volume_subpattern()</a></code>, and <code><a href="../reference/pft_diffusion_interpret.html">pft_diffusion_interpret()</a></code> now accept tidy-eval column-name overrides (bare name, string, or <code>!!var</code>) for every input column, matching the pattern already used by <code><a href="../reference/pft_spirometry.html">pft_spirometry()</a></code>, <code><a href="../reference/pft_volumes.html">pft_volumes()</a></code>, <code><a href="../reference/pft_diffusion.html">pft_diffusion()</a></code>, and <code><a href="../reference/pft_interpret.html">pft_interpret()</a></code>. Defaults are the canonical pft column names, so callers using the convention pass no extra arguments. The error message when a required column is absent now reads <code>"required column(s) missing from input: ..."</code> (was function-specific wording).</li>
 <li>
@@ -99,7 +103,7 @@
 <code>pft_dlco_hb_correct(dlco, hemoglobin, sex, age)</code> applies the Cotes 1972 / Stanojevic 2017 hemoglobin correction. Reference Hb is 146 g/L (males ≥ 15) or 134 g/L (females, males &lt; 15). Hb input must be in g/L; the function does not detect or convert g/dL (see the breaking change above).</li>
 </ul></div>
 <div class="section level3">
-<h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
+<h3 id="bug-fixes-0-1-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-1-0"></a></h3>
 <ul><li>
 <code><a href="../reference/pft_quality.html">pft_quality()</a></code> — child age cutoff corrected from <code>age &lt; 6</code> to <code>age &lt;= 6</code> per Graham 2019 Table 10; a 6-year-old is now graded as a child.</li>
 <li>
@@ -110,12 +114,12 @@
 <code><a href="../reference/pft_gold.html">pft_gold()</a></code> — added optional <code>fev1fvc</code> argument enforcing the GOLD “FEV1/FVC &lt; 0.7” prerequisite (Figure 2.10 header). Default preserves prior behaviour for existing callers; passing <code>fev1fvc_measured</code> returns <code>NA</code> for non-obstructed rows instead of a spurious GOLD grade.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="maintenance-development-version">Maintenance<a class="anchor" aria-label="anchor" href="#maintenance-development-version"></a></h3>
+<h3 id="maintenance-0-1-0">Maintenance<a class="anchor" aria-label="anchor" href="#maintenance-0-1-0"></a></h3>
 <ul><li>Minimum R version bumped from 2.10 to 4.0 to match the actual transitive dependency floor (<code>rlang</code>, <code>tibble</code>).</li>
 <li>Test count: 1195 → 1424 (+229).</li>
 </ul><hr></div>
 <div class="section level3">
-<h3 id="predecessor-standard-development-version">Predecessor 2005 standard<a class="anchor" aria-label="anchor" href="#predecessor-standard-development-version"></a></h3>
+<h3 id="predecessor-standard-0-1-0">Predecessor 2005 standard<a class="anchor" aria-label="anchor" href="#predecessor-standard-0-1-0"></a></h3>
 <p>Pellegrino 2005 interpretive primitives are now available so the package can serve a cross-standard reclassification analysis (comparing Stanojevic 2022 against the predecessor algorithm on the same cohort). All constants and decision logic are verified line-by- line against the source PDF (<code>papers/pellegrino_2005/</code>); the extraction is documented in <code>papers/pellegrino_2005/verification.md</code>.</p>
 <ul><li>
 <code><a href="../reference/pft_classify.html">pft_classify()</a></code> gains a <code>standard = c("2022", "2005")</code> argument. The 2022 path is the default and is unchanged. The 2005 path implements the Pellegrino et al. ERJ 2005 Figure 2 algorithm: it has four labels (Normal, Obstructed, Restricted, Mixed) – no Non-specific category, which was introduced after 2005. Cells that 2022 labels “Non-specific” are labeled “Restricted” under
@@ -129,13 +133,13 @@
 <code><a href="../reference/pft_interpret.html">pft_interpret()</a></code> gains a matching <code>standard = c("2022", "2005")</code> argument that dispatches all three primitives to the 2005 forms in one call. <code>year</code> (GLI equation year) and <code>standard</code> (interpretive rules) are independent – you can pair GLI 2022 race-neutral equations with the 2005 interpretive logic, or any other combination, for nuanced reclassification analyses.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="input-contract-development-version">Input contract<a class="anchor" aria-label="anchor" href="#input-contract-development-version"></a></h3>
+<h3 id="input-contract-0-1-0">Input contract<a class="anchor" aria-label="anchor" href="#input-contract-0-1-0"></a></h3>
 <ul><li>
 <code><a href="../reference/pft_spirometry.html">pft_spirometry()</a></code>, <code><a href="../reference/pft_volumes.html">pft_volumes()</a></code>, <code><a href="../reference/pft_diffusion.html">pft_diffusion()</a></code>, and <code><a href="../reference/pft_interpret.html">pft_interpret()</a></code> now accept tidyverse-style column references for the demographics inputs. Bare names (<code>sex = Sex</code>), strings (<code>sex = "Sex"</code>), and rlang injection (<code>sex = !!my_var</code>) are all supported. Defaults match the canonical column names, so existing code keeps working unchanged. The user’s original column names are preserved in the output.</li>
 <li>New “Input data format” vignette walks through the data-frame contract, units and types per column, the override syntax, and common errors.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="input-normalization-development-version">Input normalization<a class="anchor" aria-label="anchor" href="#input-normalization-development-version"></a></h3>
+<h3 id="input-normalization-0-1-0">Input normalization<a class="anchor" aria-label="anchor" href="#input-normalization-0-1-0"></a></h3>
 <ul><li>
 <strong>Bug fix (silent-wrong-sex):</strong> any <code>sex</code> value other than <code>"M"</code> was previously treated as <code>"F"</code> without warning, so a cohort with <code>"Male"</code> / <code>"Female"</code> / <code>"male"</code> etc. silently produced female predictions. <code><a href="../reference/pft_spirometry.html">pft_spirometry()</a></code>, <code><a href="../reference/pft_volumes.html">pft_volumes()</a></code>, and <code><a href="../reference/pft_diffusion.html">pft_diffusion()</a></code> now soft-correct common variants (<code>"male"</code> -&gt; <code>"M"</code>, <code>"Female"</code> -&gt; <code>"F"</code>, etc.) with a warning; truly unrecognised values (e.g. <code>"X"</code>, <code>"Unknown"</code>) are set to NA rather than mis-coded.</li>
 <li>
@@ -143,21 +147,21 @@
 <li>Missing <code>sex</code>, <code>age</code>, <code>height</code> columns (or <code>race</code> for GLI 2012) now error with a clear message listing the expected names, rather than silently producing all-NA output.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="reference-equations-development-version">Reference equations<a class="anchor" aria-label="anchor" href="#reference-equations-development-version"></a></h3>
+<h3 id="reference-equations-0-1-0">Reference equations<a class="anchor" aria-label="anchor" href="#reference-equations-0-1-0"></a></h3>
 <ul><li>All internal reference data is now built reproducibly from the official ERS / ATS source documents. <code>data-raw/build_gli_2012.R</code>, <code>build_gli_2022.R</code>, <code>build_gli_2021_volumes.R</code>, and <code>build_gli_2017_diffusion.R</code> each read the published lookup-table workbook (or, where unavailable, the equation table from the article PDF) and regenerate the corresponding <code>.RData</code> and CSV artifacts.</li>
 <li>
 <code>R/spirometry.R</code>, <code>R/lung_volumes.R</code>, <code>R/diffusion_capacity.R</code>, and <code>R/ats_classification.R</code> now carry <code>@references</code> to the source papers (and the 2020 author correction for the diffusion equations).</li>
 <li>Removed <code>data-raw/coeffs_spline_spiro.RData</code>: an orphan blob holding GLI 2012 polynomial coefficients for ages 25-95, which the package never used (the lookup-table approach in <code>R/spirometry.R</code> interpolates directly from spline values instead).</li>
 </ul></div>
 <div class="section level3">
-<h3 id="new-clinical-extensions-development-version">New clinical extensions<a class="anchor" aria-label="anchor" href="#new-clinical-extensions-development-version"></a></h3>
+<h3 id="new-clinical-extensions-0-1-0">New clinical extensions<a class="anchor" aria-label="anchor" href="#new-clinical-extensions-0-1-0"></a></h3>
 <ul><li>
 <code>pft_quality(values, age)</code> grades a set of acceptable spirometry maneuvers A-F per the Graham et al. ATS/ERS 2019 spirometry standardization update (<a href="doi:10.1164/rccm.201908-1590ST" class="uri">doi:10.1164/rccm.201908-1590ST</a>). Tighter repeatability thresholds applied for children under 6.</li>
 <li>
 <code>pft_gold(fev1_pctpred)</code> returns the GOLD COPD severity grade (1-4) from FEV1 % predicted.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="new-interpretation-primitives-development-version">New interpretation primitives<a class="anchor" aria-label="anchor" href="#new-interpretation-primitives-development-version"></a></h3>
+<h3 id="new-interpretation-primitives-0-1-0">New interpretation primitives<a class="anchor" aria-label="anchor" href="#new-interpretation-primitives-0-1-0"></a></h3>
 <ul><li>
 <code>pft_severity(zscore)</code> returns one of <code>"normal"</code>, <code>"mild"</code>, <code>"moderate"</code>, <code>"severe"</code> per the Stanojevic et al. ERJ 2022 z-score cut points (&gt;= -1.645, &gt; -2.5, &gt; -4, &lt;= -4).</li>
 <li>
@@ -168,26 +172,26 @@
 <code>pft_change(z1, z2, r)</code> computes the conditional change z-score recommended by Stanojevic 2022 for interpreting serial PFT measurements over time. Configurable autocorrelation <code>r</code>.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="workflow-wrappers-development-version">Workflow wrappers<a class="anchor" aria-label="anchor" href="#workflow-wrappers-development-version"></a></h3>
+<h3 id="workflow-wrappers-0-1-0">Workflow wrappers<a class="anchor" aria-label="anchor" href="#workflow-wrappers-0-1-0"></a></h3>
 <ul><li>
 <code>pft_interpret(data)</code> is a single-call workflow that auto-detects which inputs are present and emits a complete Stanojevic 2022-compliant interpretation: reference values, z-scores, percent predicted, severity grading, ATS pattern, PRISm flag, and bronchodilator response. This is the recommended entry point for clinical-style reporting.</li>
 <li>
 <code>pft_plot(result)</code> generates a clinical-style z-score lollipop plot with severity-band shading. Requires <code>ggplot2</code> (Suggests).</li>
 </ul></div>
 <div class="section level3">
-<h3 id="new-outputs-z-score-and-percent-predicted-development-version">New outputs: z-score and percent predicted<a class="anchor" aria-label="anchor" href="#new-outputs-z-score-and-percent-predicted-development-version"></a></h3>
+<h3 id="new-outputs-z-score-and-percent-predicted-0-1-0">New outputs: z-score and percent predicted<a class="anchor" aria-label="anchor" href="#new-outputs-z-score-and-percent-predicted-0-1-0"></a></h3>
 <ul><li>
 <code><a href="../reference/pft_spirometry.html">pft_spirometry()</a></code>, <code><a href="../reference/pft_volumes.html">pft_volumes()</a></code>, and <code><a href="../reference/pft_diffusion.html">pft_diffusion()</a></code> now optionally compute z-scores and percent predicted. Supply a <code>&lt;measure&gt;_measured</code> column in the input data frame (e.g. <code>fev1_measured</code>, <code>frc_measured</code>, <code>dlco_measured</code>) and the function appends <code>&lt;measure&gt;_zscore</code> and <code>&lt;measure&gt;_pctpred</code> columns alongside the existing <code>&lt;measure&gt;_pred</code> / <code>&lt;measure&gt;_lln</code> / <code>&lt;measure&gt;_uln</code>. Backwards compatible: callers who only supply demographics continue to get the three existing reference-value columns and nothing else.</li>
 <li>z-score uses the LMS formula <code>((measured/M)^L - 1) / (L*S)</code>; percent predicted is <code>(measured / M) * 100</code>. Both propagate <code>NA</code> from the measured value, the LMS parameters, or the LLN as expected.</li>
 <li>Z-score formula sanity (z = 0 at predicted, ~+/-1.645 at LLN/ULN) is tested for every measure across the three functions. The GLI 2022 oracle CSV at <code>tests/testthat/gli_2022_oracle.csv</code> covers z-score and percent predicted as well as predicted and LLN, validated at tolerance <code>1e-8</code>.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="reference-function-robustness-development-version">Reference-function robustness<a class="anchor" aria-label="anchor" href="#reference-function-robustness-development-version"></a></h3>
+<h3 id="reference-function-robustness-0-1-0">Reference-function robustness<a class="anchor" aria-label="anchor" href="#reference-function-robustness-0-1-0"></a></h3>
 <ul><li>
 <strong>Bug fix:</strong> <code><a href="../reference/pft_spirometry.html">pft_spirometry()</a></code>, <code><a href="../reference/pft_volumes.html">pft_volumes()</a></code>, and <code><a href="../reference/pft_diffusion.html">pft_diffusion()</a></code> previously crashed with a “missing value where TRUE/FALSE needed” error when any row had a missing value (<code>NA</code>) in <code>sex</code>, <code>age</code>, or <code>height</code>. They now skip such rows and emit <code>NA</code> for the reference values on that row, matching the behaviour already provided for missing <code>race</code> (spirometry) and for <code><a href="../reference/pft_classify.html">pft_classify()</a></code>. Real clinical PFT data routinely contains missing demographics; the prior behaviour required callers to filter <code>NA</code>s themselves.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="ats-classification-development-version">ATS classification<a class="anchor" aria-label="anchor" href="#ats-classification-development-version"></a></h3>
+<h3 id="ats-classification-0-1-0">ATS classification<a class="anchor" aria-label="anchor" href="#ats-classification-0-1-0"></a></h3>
 <ul><li>
 <strong>Bug fix (clinically meaningful):</strong> the <code>ANNN</code> and <code>NANN</code> pattern labels were inverted relative to Stanojevic et al. ERJ 2022 Figure 8. The classifier now correctly returns:
 <ul><li>
@@ -200,12 +204,12 @@
 <li>The classifier was expanded to all 16 combinations of (FEV1, FVC, FEV1/FVC, TLC) statuses, adding the new <code>ats_pattern_combination</code> output column. (Initial expansion: previous internal release; bug fixes: this release.)</li>
 </ul></div>
 <div class="section level3">
-<h3 id="tests-development-version">Tests<a class="anchor" aria-label="anchor" href="#tests-development-version"></a></h3>
+<h3 id="tests-0-1-0">Tests<a class="anchor" aria-label="anchor" href="#tests-0-1-0"></a></h3>
 <ul><li>Test coverage grew from 36 to 101 tests across all four test files. Additions include predicted-value (median) comparisons against the GLI web calculator ground truth, <code>NA</code>-propagation tests, out-of-range tests, structural / column-contract tests, and a clinical-scenario suite for <code>ats_classification</code> grounded in Stanojevic 2022 Figure 8 / Table 5 / Table 8.</li>
 <li>New GLI 2022 / “GLI Global” oracle: a frozen 30-row ground-truth fixture at <code>tests/testthat/gli_2022_oracle.csv</code> covering predicted, LLN, z-score, and percent predicted for FEV1, FVC, and FEV1/FVC. Regenerated via <code>data-raw/build_gli_2022_oracle.R</code> (see that script for provenance). Only the static CSV ships; no test-time dependency on any external package.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="documentation-development-version">Documentation<a class="anchor" aria-label="anchor" href="#documentation-development-version"></a></h3>
+<h3 id="documentation-0-1-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-1-0"></a></h3>
 <ul><li>New README with installation, usage, citations, and a research-use disclaimer.</li>
 <li>New <code>inst/CITATION</code> so <code>citation("pft")</code> returns the package and the underlying reference papers as <code>bibentry</code> objects.</li>
 <li>The MIT license file is now correctly declared in <code>DESCRIPTION</code> and shipped via <code>LICENSE</code> / <code>LICENSE.md</code>.</li>
@@ -213,7 +217,7 @@
 <code>notes/ats_classification_label_fix.md</code> records the rationale and clinical-review questions for the ATS pattern-label changes above.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="internal-development-version">Internal<a class="anchor" aria-label="anchor" href="#internal-development-version"></a></h3>
+<h3 id="internal-0-1-0">Internal<a class="anchor" aria-label="anchor" href="#internal-0-1-0"></a></h3>
 <ul><li>Project now uses <code>renv</code> for dependency management.</li>
 <li>Reference paper PDFs and supplement workbooks live under <code>papers/</code> but are excluded from git and from the <code>R CMD build</code> tarball (they are copyrighted publisher content).</li>
 <li>

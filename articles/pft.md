@@ -12,7 +12,7 @@ small cohort.
 ``` r
 
 library(pft)
-#> pft 0.1.0.9000 | Research and education use only. Not validated for diagnostic decision-making; all outputs require clinician interpretation. See citation("pft") for the source reference standards.
+#> pft 0.1.0 | Research and education use only. Not validated for diagnostic decision-making; all outputs require clinician interpretation. See citation("pft") for the source reference standards.
 ```
 
 ## 1. Reference values from demographics alone
@@ -324,7 +324,7 @@ citation("pft")
 #> you use, in addition to (or instead of) the pft package itself.
 #> 
 #>   Johnson P, Helgeson S (2026). _pft: Pulmonary Function Test
-#>   Interpretation per ERS/ATS 2022_. R package version 0.1.0.9000,
+#>   Interpretation per ERS/ATS 2022_. R package version 0.1.0,
 #>   <https://github.com/overdodactyl/pft>.
 #> 
 #> GLI 2012 spirometry equations (year = 2012):
