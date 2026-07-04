@@ -1,3 +1,18 @@
+# pft 1.0.1
+
+CRAN pretest fixes; no user-facing behaviour changes.
+
+* Replaced the Unicode superscript-minus characters in the
+  `pft_dlco_hb_correct()` docstring with ASCII (`^-1`), so the PDF
+  version of the reference manual builds under LaTeX without special
+  Unicode support.
+* Declared `R (>= 4.1)` in the `Depends` field to match the fact that
+  `pft_volume_subpattern()`'s example uses the base-R pipe (`|>`),
+  introduced in R 4.1.
+* Wrapped technical acronyms (`'ATS'`, `'ERS'`, `'GLI'`) in single
+  quotes in the DESCRIPTION `Description` field per CRAN convention.
+
+
 # pft 1.0.0
 
 Initial public release. Baseline feature set implementing routine

@@ -1,7 +1,7 @@
 Package: pft
 Type: Package
 Title: Pulmonary Function Test Interpretation per ERS/ATS 2022
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: c(
     person(given = "Pat",   family = "Johnson",   email = "johnson.pat@mayo.edu",
            role = c("aut", "cre"),
@@ -16,19 +16,20 @@ Authors@R: c(
     )
 Description: Computes predicted values and lower/upper limits of normal
     for pulmonary function tests according to American Thoracic Society
-    and European Respiratory Society reference standards. Supports
-    spirometry (GLI 2012, Quanjer et al. (2012) <doi:10.1183/09031936.00080312>;
-    and the race-neutral GLI 2022 / "GLI Global" equations, Bowerman
+    ('ATS') and European Respiratory Society ('ERS') reference
+    standards. Supports spirometry (Global Lung Function Initiative
+    'GLI' 2012, Quanjer et al. (2012) <doi:10.1183/09031936.00080312>;
+    and the race-neutral 'GLI' 2022 / 'GLI Global' equations, Bowerman
     et al. (2023) <doi:10.1164/rccm.202205-0963OC>), static lung
-    volumes (GLI 2021, Hall et al. (2021) <doi:10.1183/13993003.00289-2020>),
-    and the carbon monoxide transfer factor / diffusion capacity
-    (GLI 2017, Stanojevic et al. (2017) <doi:10.1183/13993003.00010-2017>,
-    including the 2020 author correction
-    <doi:10.1183/13993003.50010-2017>). Also assigns interpretive
-    pattern labels (Normal, Non-specific, Obstructed, Restricted,
-    Mixed) from spirometry and lung-volume measurements following the
-    ERS/ATS 2022 interpretation algorithm, Stanojevic et al. (2022)
-    <doi:10.1183/13993003.01499-2021>.
+    volumes ('GLI' 2021, Hall et al. (2021)
+    <doi:10.1183/13993003.00289-2020>), and the carbon monoxide
+    transfer factor / diffusion capacity ('GLI' 2017, Stanojevic et al.
+    (2017) <doi:10.1183/13993003.00010-2017>, including the 2020
+    author correction <doi:10.1183/13993003.50010-2017>). Also assigns
+    interpretive pattern labels (Normal, Non-specific, Obstructed,
+    Restricted, Mixed) from spirometry and lung-volume measurements
+    following the 'ERS'/'ATS' 2022 interpretation algorithm,
+    Stanojevic et al. (2022) <doi:10.1183/13993003.01499-2021>.
 License: MIT + file LICENSE
 URL: https://github.com/overdodactyl/pft
 BugReports: https://github.com/overdodactyl/pft/issues
@@ -37,7 +38,7 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Depends:
-    R (>= 4.0)
+    R (>= 4.1)
 Imports:
     rlang,
     tibble

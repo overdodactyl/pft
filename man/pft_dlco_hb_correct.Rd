@@ -44,7 +44,7 @@ This function provides that interpretive step.
 
 Formula (Cotes 1972; reformulated from Stanojevic 2017 p. 9, with
 constants 1.7 and 0.7 reflecting the membrane / capillary diffusing
-capacity ratio of 0.7 mL min⁻¹ mmHg⁻¹ mL-blood⁻¹):
+capacity ratio of 0.7 mL min^-1 mmHg^-1 mL-blood^-1):
 
 \deqn{TLCO_{Hb} = TLCO_{measured} \times \frac{1.7 \cdot Hb_{ref}}{Hb + 0.7 \cdot Hb_{ref}}}
 
