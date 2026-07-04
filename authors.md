@@ -17,14 +17,14 @@ Source:
 [`inst/CITATION`](https://github.com/overdodactyl/pft/blob/main/inst/CITATION)
 
 Johnson P, Helgeson S (2026). *pft: Pulmonary Function Test
-Interpretation per ERS/ATS 2022*. R package version 0.1.0,
+Interpretation per ERS/ATS 2022*. R package version 1.0.0,
 <https://github.com/overdodactyl/pft>.
 
     @Manual{,
       title = {pft: Pulmonary Function Test Interpretation per ERS/ATS 2022},
       author = {Pat Johnson and Scott Helgeson},
       year = {2026},
-      note = {R package version 0.1.0},
+      note = {R package version 1.0.0},
       url = {https://github.com/overdodactyl/pft},
     }
 

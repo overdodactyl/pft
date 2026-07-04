@@ -1,6 +1,6 @@
 # Changelog
 
-## pft 0.1.0
+## pft 1.0.0
 
 Initial public release. Baseline feature set implementing routine
 pulmonary function test interpretation under the ERS/ATS 2022 technical
@@ -16,7 +16,7 @@ log for the development history follows.
 
 ------------------------------------------------------------------------
 
-### Development history (pre-0.1.0)
+### Development history (pre-1.0.0)
 
 ### Breaking changes
 
