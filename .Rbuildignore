@@ -31,3 +31,4 @@
 ^cran-comments\.md$
 ^\.zenodo\.json$
 ^SUBMIT-TO-CRAN\.md$
+^CRAN-SUBMISSION$
