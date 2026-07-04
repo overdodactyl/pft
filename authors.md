@@ -14,7 +14,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/overdodactyl/pft/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/overdodactyl/pft/blob/v1.0.1/inst/CITATION)
 
 Johnson P, Helgeson S (2026). *pft: Pulmonary Function Test
 Interpretation per ERS/ATS 2022*. R package version 1.0.1,
