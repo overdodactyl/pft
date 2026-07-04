@@ -1,6 +1,6 @@
 ## Submission summary
 
-This is an initial submission of `pft` (version 0.1.0).
+This is an initial submission of `pft` (version 1.0.0).
 
 `pft` implements the ERS/ATS 2022 technical standard for routine
 pulmonary function test interpretation. It provides GLI-family
@@ -18,6 +18,11 @@ for cross-standard reclassification analyses.
 * Local: Ubuntu-equivalent Linux, R 4.2.2
 * GitHub Actions (via `.github/workflows/R-CMD-check.yaml`):
   release / oldrel / devel across Ubuntu, macOS, and Windows.
+  All jobs passed with 0 errors, 0 warnings, 0 notes.
+* R-hub v2 (`rhub::rhub_check()`):
+  `linux` (Ubuntu, R-devel, strict CRAN incoming), `macos-arm64`,
+  `windows`, `clang-asan`, and `clang-ubsan`.
+  All 5 platforms passed cleanly.
 
 ## R CMD check --as-cran results
 

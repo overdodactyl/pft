@@ -4,7 +4,7 @@
 [![R-CMD-check](https://github.com/overdodactyl/pft/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/overdodactyl/pft/actions/workflows/R-CMD-check.yaml)
 [![Codecov test coverage](https://codecov.io/gh/overdodactyl/pft/graph/badge.svg)](https://app.codecov.io/gh/overdodactyl/pft)
 [![pkgdown](https://github.com/overdodactyl/pft/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/overdodactyl/pft/actions/workflows/pkgdown.yaml)
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-green.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 <!-- badges: end -->
 
 Compute ATS / ERS-compliant reference values, lower/upper limits of normal,

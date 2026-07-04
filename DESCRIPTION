@@ -1,7 +1,7 @@
 Package: pft
 Type: Package
 Title: Pulmonary Function Test Interpretation per ERS/ATS 2022
-Version: 0.1.0
+Version: 1.0.0
 Authors@R: c(
     person(given = "Pat",   family = "Johnson",   email = "johnson.pat@mayo.edu",
            role = c("aut", "cre"),
