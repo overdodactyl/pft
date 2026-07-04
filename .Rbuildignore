@@ -30,3 +30,4 @@
 ^scratch\.R$
 ^cran-comments\.md$
 ^\.zenodo\.json$
+^SUBMIT-TO-CRAN\.md$

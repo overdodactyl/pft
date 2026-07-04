@@ -26,14 +26,23 @@ for cross-standard reclassification analyses.
 
 ## R CMD check --as-cran results
 
-There were no ERRORs or WARNINGs.
+There were no ERRORs or WARNINGs from the package itself.
 
-There were 2 NOTEs that are environmental rather than package issues:
+Notes:
 
 * "Maintainer: 'Pat Johnson <johnson.pat@mayo.edu>'" and "New submission" -
   standard notes for a first-time submission.
+* "Found the following (possibly) invalid URLs / DOIs" - one URL, the DOI
+  10.1164/rccm.202205-0963OC (Bowerman et al. 2023, in the American Journal
+  of Respiratory and Critical Care Medicine), returns HTTP 403 when
+  requested by R CMD check --as-cran's URL checker. The DOI is correct and
+  resolves normally in an ordinary web browser (verified). The 403 is
+  server-side rate-limiting / anti-scraping by the ATS journal host, not a
+  broken DOI. The reference is essential to the package (GLI Global 2022
+  spirometry equations, one of the two primary reference standards
+  implemented).
 * "unable to verify current time" - our local check host has no
-  outbound network to the time service; not reproducible on CRAN.
+  outbound network to a time service; not reproducible on CRAN.
 
 ## Downstream dependencies
 
