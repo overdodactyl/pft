@@ -8,12 +8,16 @@ authors:
     email: johnson.pat@mayo.edu
     orcid: "https://orcid.org/0000-0001-8365-1375"
     role: [aut, cre]
+  - given-names: Scott
+    family-names: Helgeson
+    orcid: "https://orcid.org/0000-0001-7590-2293"
+    role: [aut]
   - given-names: Zach
     family-names: Quicksall
-    role: [aut]
+    role: [ctb]
   - given-names: Jairo
     family-names: Pena
-    role: [aut]
+    role: [ctb]
 repository-code: "https://github.com/overdodactyl/pft"
 url: "https://overdodactyl.github.io/pft/"
 license: MIT
@@ -32,9 +36,8 @@ preferred-citation:
     - given-names: Pat
       family-names: Johnson
       orcid: "https://orcid.org/0000-0001-8365-1375"
-    - given-names: Zach
-      family-names: Quicksall
-    - given-names: Jairo
-      family-names: Pena
+    - given-names: Scott
+      family-names: Helgeson
+      orcid: "https://orcid.org/0000-0001-7590-2293"
   url: "https://github.com/overdodactyl/pft"
   notes: "R package version 0.1.0"

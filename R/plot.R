@@ -3,8 +3,11 @@
 #' @description
 #' `pft_plot()` draws a single-patient z-score figure: one row per
 #' measure, points at the patient's z-score, shaded reference bands
-#' for the Stanojevic 2022 severity grades (severe / moderate / mild /
-#' normal / elevated).
+#' for the four Stanojevic 2022 severity grades returned by
+#' [pft_severity()]: normal (z >= -1.645), mild (-2.5 <= z < -1.645),
+#' moderate (-4 <= z < -2.5), and severe (z < -4). The normal band
+#' extends symmetrically above zero to the upper limit of normal;
+#' values above the ULN are shown but are not a 2022 severity grade.
 #'
 #' Requires the `ggplot2` package (a Suggested dependency).
 #'
@@ -81,10 +84,13 @@ pft_plot <- function(data) {
   plot_df <- plot_df[order(plot_df$zscore), ]
   plot_df$measure <- factor(plot_df$measure, levels = plot_df$measure)
 
+  # Four Stanojevic 2022 severity zones. The normal band extends from
+  # -1.645 (LLN) upward without an upper cap; the 2022 standard does not
+  # define a distinct severity grade for values above the ULN.
   bands <- data.frame(
-    ymin = c(-Inf, -4,   -2.5,   -1.645, 1.645),
-    ymax = c(-4,   -2.5, -1.645,  1.645, Inf),
-    fill = c("#d73027", "#fc8d59", "#fee090", "#e0e0e0", "#abd9e9"),
+    ymin = c(-Inf, -4,   -2.5,   -1.645),
+    ymax = c(-4,   -2.5, -1.645,  Inf),
+    fill = c("#d73027", "#fc8d59", "#fee090", "#e0e0e0"),
     stringsAsFactors = FALSE
   )
   ggplot2::ggplot(plot_df, ggplot2::aes(x = measure, y = zscore)) +
