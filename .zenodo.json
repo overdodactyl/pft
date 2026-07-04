@@ -1,0 +1,37 @@
+{
+  "title": "pft: An R package for ERS/ATS 2022 pulmonary function test interpretation",
+  "description": "<p>An open-source R package implementing routine pulmonary function test (PFT) interpretation according to the European Respiratory Society / American Thoracic Society 2022 technical standard. The package computes predicted values, lower and upper limits of normal, z-scores, and percent-predicted values from Global Lung Function Initiative reference equations for spirometry (GLI-2012 and GLI Global 2022), static lung volumes (GLI-2021), and diffusion capacity (GLI-2017 with the 2020 author correction), then applies pattern classification, severity grading, bronchodilator response rules, PRISm identification, hemoglobin correction, conditional-change z-scores, the FEV1Q survival index, GOLD 1-4 airflow-limitation grading, and Graham 2019 A-F spirometry acceptability grading. Pellegrino et al. 2005 legacy primitives are retained for cross-standard reclassification analyses.</p>",
+  "creators": [
+    {
+      "name": "Johnson, Patrick W.",
+      "orcid": "0000-0001-8365-1375",
+      "affiliation": "Department of Quantitative Health Sciences and Department of Artificial Intelligence and Informatics, Mayo Clinic, Jacksonville, Florida, USA"
+    },
+    {
+      "name": "Helgeson, Scott A.",
+      "orcid": "0000-0001-7590-2293",
+      "affiliation": "Department of Pulmonary and Critical Care Medicine, Mayo Clinic, Jacksonville, Florida, USA"
+    }
+  ],
+  "license": "MIT",
+  "upload_type": "software",
+  "access_right": "open",
+  "keywords": [
+    "pulmonary function test",
+    "spirometry",
+    "lung volumes",
+    "diffusion capacity",
+    "GLI",
+    "ERS/ATS 2022",
+    "reproducible research",
+    "R",
+    "clinical decision support"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/overdodactyl/pft",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ]
+}
