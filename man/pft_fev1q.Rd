@@ -21,11 +21,13 @@ Numeric vector of FEV1Q ratios, same length as \code{fev1}. \code{NA}
 propagates from any input.
 }
 \description{
-Computes FEV1Q per Stanojevic et al. ERJ 2022 Box 3 (p. 13): an
-alternative to the conditional change score (\code{\link[=pft_change]{pft_change()}}) for
-adults. FEV1Q expresses FEV1 in relation to a "bottom line" required
-for survival, rather than how far an individual's result is from
-their predicted value.
+Computes the FEV1Q survival index proposed by Miller & Pedersen
+(ERJ 2010) and discussed as an adult alternative to the conditional
+change score in Box 3 (p. 13) of the Stanojevic et al. ERJ 2022
+interpretation standard. FEV1Q expresses FEV1 in relation to a
+"bottom line" required for survival, rather than how far an
+individual's result is from their predicted value; the race-neutral
+evidence base was consolidated by Balasubramanian et al. (ERJ 2024).
 }
 \details{
 Formula (Box 3 verbatim):
@@ -37,8 +39,9 @@ lung-disease populations. The index approximates the number of
 turnovers remaining of a lower survivable limit of FEV1; values
 closer to 1 indicate greater risk of death.
 
-The 2022 standard cautions (Box 3 closing sentence): "FEV1Q is not
-appropriate for children and adolescents." When \code{age} is supplied,
+The 2022 standard cautions (running text on p. 13, immediately
+preceding Box 3): "FEV1Q is not appropriate for children and
+adolescents." When \code{age} is supplied,
 rows with \code{age < 18} return \code{NA_real_}. When \code{age} is omitted, the
 age guard is skipped and the caller is responsible for restricting
 input to adults.
@@ -62,11 +65,22 @@ pft_fev1q(1.0, "F", age = 10)
 
 }
 \references{
+Miller MR, Pedersen OF. New concepts for expressing forced expiratory
+volume in 1 s arising from survival analysis. Eur Respir J.
+2010;35(4):873-882. \doi{10.1183/09031936.00025809}. Original
+proposal of the FEV1Q index and the sex-specific 1st-percentile
+denominators (0.5 L male, 0.4 L female).
+
+Balasubramanian A, Wise RA, Stanojevic S, Miller MR, McCormack MC.
+FEV1Q: a race-neutral approach to assessing lung function. Eur Respir
+J. 2024;63(4):2301622. \doi{10.1183/13993003.01622-2023}. Race-neutral
+validation of the FEV1Q index.
+
 Stanojevic S, Kaminsky DA, Miller MR, et al. ERS/ATS technical
 standard on interpretive strategies for routine lung function
 tests. Eur Respir J. 2022;60(1):2101499.
-\doi{10.1183/13993003.01499-2021}. FEV1Q is defined in Box 3
-(p. 13).
+\doi{10.1183/13993003.01499-2021}. Discusses FEV1Q in Box 3
+(p. 13) as an adult alternative to the conditional change score.
 }
 \seealso{
 \code{\link[=pft_change]{pft_change()}} for the conditional change score (the

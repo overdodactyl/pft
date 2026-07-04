@@ -163,8 +163,13 @@ Useful links:
 
 Authors:
 \itemize{
-  \item Zach Quicksall
-  \item Jairo Pena
+  \item Scott Helgeson (\href{https://orcid.org/0000-0001-7590-2293}{ORCID})
+}
+
+Other contributors:
+\itemize{
+  \item Zach Quicksall [contributor]
+  \item Jairo Pena [contributor]
 }
 
 }
