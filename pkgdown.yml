@@ -1,0 +1,14 @@
+pandoc: 3.8.3
+pkgdown: 2.2.0
+pkgdown_sha: ~
+articles:
+  diffusion-capacity: diffusion-capacity.html
+  glossary: glossary.html
+  input-format: input-format.html
+  interpretation-guide: interpretation-guide.html
+  longitudinal-analysis: longitudinal-analysis.html
+  pft: pft.html
+last_built: 2026-07-04T15:57Z
+urls:
+  reference: https://overdodactyl.github.io/pft/reference
+  article: https://overdodactyl.github.io/pft/articles

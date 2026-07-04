@@ -1,0 +1,167 @@
+# Input data format
+
+The reference functions in `pft`
+([`pft_spirometry()`](https://overdodactyl.github.io/pft/reference/pft_spirometry.md),
+[`pft_volumes()`](https://overdodactyl.github.io/pft/reference/pft_volumes.md),
+[`pft_diffusion()`](https://overdodactyl.github.io/pft/reference/pft_diffusion.md),
+and the one-call workflow
+[`pft_interpret()`](https://overdodactyl.github.io/pft/reference/pft_interpret.md))
+all take a data frame and append reference columns to it. This article
+documents exactly which columns each function expects, which are
+optional, and how to point pft at columns whose names don’t match the
+canonical ones.
+
+## Required vs. optional columns
+
+Three categories of column drive the reference functions:
+
+**Required** – demographics that must be present, or the function
+errors:
+
+- `pft_spirometry(year = 2012)` and `pft_interpret(year = 2012)`: `sex`,
+  `age`, `height`, `race`.
+- `pft_spirometry(year = 2022)` and `pft_interpret(year = 2022)`: `sex`,
+  `age`, `height` (the GLI Global 2022 equations are race-neutral and
+  ignore `race`).
+- [`pft_volumes()`](https://overdodactyl.github.io/pft/reference/pft_volumes.md)
+  and
+  [`pft_diffusion()`](https://overdodactyl.github.io/pft/reference/pft_diffusion.md):
+  `sex`, `age`, `height`.
+
+**Optional measured** – `<measure>_measured` columns whose presence
+unlocks z-score and percent-predicted outputs for that measure. Missing
+these is silent; the function simply emits fewer output columns.
+Recognised measures by function:
+
+- Spirometry: `fev1`, `fvc`, `fev1fvc`, `fef2575`, `fef75`.
+- Volumes: `frc`, `tlc`, `rv`, `rv_tlc`, `erv`, `ic`, `vc`.
+- Diffusion (traditional units): `dlco`, `kco_tr`, `va`.
+- Diffusion (SI units): `tlco`, `kco_si`, `va`.
+
+**Optional BDR** –
+([`pft_interpret()`](https://overdodactyl.github.io/pft/reference/pft_interpret.md)
+only) `<measure>_pre` and `<measure>_post` columns for `fev1`, `fvc`, or
+`fev1fvc`. When present, bronchodilator-response columns are appended.
+
+## Units and types
+
+The canonical types and units are:
+
+| Column | Type | Allowed values / units |
+|----|----|----|
+| `sex` | character | `"M"` or `"F"`. Common variants (`"male"`, `"Female"`, `"m"`, …) are auto-normalised with a warning. |
+| `age` | numeric | Years (decimal allowed). |
+| `height` | numeric | Centimetres. |
+| `race` | character | One of `"Caucasian"`, `"AfrAm"`, `"NEAsia"`, `"SEAsia"`, `"Other/mixed"`. Common synonyms are auto-normalised. (GLI 2012 only.) |
+| `fev1_measured`, `fvc_measured`, etc. (spirometry) | numeric | Litres for volumes; L/s for flows; dimensionless for FEV1/FVC. |
+| `frc_measured`, `tlc_measured`, … (volumes) | numeric | Litres. `rv_tlc_measured` is dimensionless. |
+| `dlco_measured` / `tlco_measured` / `kco_*` / `va_measured` (diffusion) | numeric | Diffusion measures in the unit system requested via `SI.units`. |
+| `<measure>_pre`, `<measure>_post` (BDR) | numeric | Same units as `<measure>_measured`. |
+
+See the
+[Glossary](https://overdodactyl.github.io/pft/articles/glossary.md) for
+definitions of every measure abbreviation.
+
+## Using non-canonical column names
+
+If your data frame uses different column names for the demographics, all
+reference functions accept `sex`, `age`, `height`, and (where
+applicable) `race` overrides. Three forms are accepted: a bare column
+name (the usual tidyverse style), a string, or an injection from a
+variable:
+
+``` r
+
+patient <- data.frame(
+  Sex      = "M",
+  Age_y    = 45,
+  Ht_cm    = 178,
+  Ancestry = "Caucasian"
+)
+
+# Bare names (tidyverse-style)
+pft_spirometry(patient,
+               sex    = Sex,
+               age    = Age_y,
+               height = Ht_cm,
+               race   = Ancestry)
+```
+
+    #> # A tibble: 1 × 13
+    #>   Sex   Age_y Ht_cm Ancestry  fev1_pred_2022 fev1_lln_2022 fev1_uln_2022
+    #>   <chr> <dbl> <dbl> <chr>              <dbl>         <dbl>         <dbl>
+    #> 1 M        45   178 Caucasian           3.87          2.94          4.75
+    #> # ℹ 6 more variables: fvc_pred_2022 <dbl>, fvc_lln_2022 <dbl>,
+    #> #   fvc_uln_2022 <dbl>, fev1fvc_pred_2022 <dbl>, fev1fvc_lln_2022 <dbl>,
+    #> #   fev1fvc_uln_2022 <dbl>
+
+``` r
+
+# Strings -- equivalent
+pft_spirometry(patient,
+               sex    = "Sex",
+               age    = "Age_y",
+               height = "Ht_cm",
+               race   = "Ancestry")
+```
+
+    #> # A tibble: 1 × 13
+    #>   Sex   Age_y Ht_cm Ancestry  fev1_pred_2022 fev1_lln_2022 fev1_uln_2022
+    #>   <chr> <dbl> <dbl> <chr>              <dbl>         <dbl>         <dbl>
+    #> 1 M        45   178 Caucasian           3.87          2.94          4.75
+    #> # ℹ 6 more variables: fvc_pred_2022 <dbl>, fvc_lln_2022 <dbl>,
+    #> #   fvc_uln_2022 <dbl>, fev1fvc_pred_2022 <dbl>, fev1fvc_lln_2022 <dbl>,
+    #> #   fev1fvc_uln_2022 <dbl>
+
+``` r
+
+# Injection from a variable, e.g. driven by a config
+sex_col <- "Sex"
+pft_spirometry(patient, sex = !!sex_col,
+               age    = Age_y,
+               height = Ht_cm,
+               race   = Ancestry)
+```
+
+    #> # A tibble: 1 × 13
+    #>   Sex   Age_y Ht_cm Ancestry  fev1_pred_2022 fev1_lln_2022 fev1_uln_2022
+    #>   <chr> <dbl> <dbl> <chr>              <dbl>         <dbl>         <dbl>
+    #> 1 M        45   178 Caucasian           3.87          2.94          4.75
+    #> # ℹ 6 more variables: fvc_pred_2022 <dbl>, fvc_lln_2022 <dbl>,
+    #> #   fvc_uln_2022 <dbl>, fev1fvc_pred_2022 <dbl>, fev1fvc_lln_2022 <dbl>,
+    #> #   fev1fvc_uln_2022 <dbl>
+
+The user’s original column names are **preserved** in the output (no
+renaming to canonical). Sex and race values are normalised in place, so
+e.g. `"male"` becomes `"M"` in the original `Sex` column.
+
+The `_measured`, `_pre`, and `_post` columns are not overridable – they
+are looked up by name. If your data uses different names, rename them
+before calling `pft`:
+
+``` r
+
+library(dplyr)
+patient %>%
+  rename(fev1_measured = FEV1_L,
+         fvc_measured  = FVC_L) %>%
+  pft_spirometry(year = 2022)
+```
+
+## Common errors
+
+**`required column(s) missing from input: 'race'`** – you called
+`pft_spirometry(d, year = 2012)` without a `race` column. Either supply
+one (canonical levels: `"Caucasian"`, `"AfrAm"`, `"NEAsia"`, `"SEAsia"`,
+`"Other/mixed"`) or call `pft_spirometry(d, year = 2022)` for the
+race-neutral equations.
+
+**Warning: `pft input normalization: ...`** – one or more sex or race
+values were normalised (e.g. `"male"` → `"M"`) or set to NA because they
+didn’t match any known canonical value. The warning is consolidated to
+one message per call and lists the offending values so you can locate
+the affected rows.
+
+**`year = 2012` running but all outputs NA** – check whether the `race`
+column contains values outside the five GLI 2012 categories. Unknown
+values are set to NA, which propagates through the reference equations.

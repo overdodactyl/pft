@@ -1,0 +1,229 @@
+# Glossary
+
+A reference for the clinical and statistical terms used throughout
+`pft`. Every definition is keyed to the canonical source where the term
+is formally defined.
+
+## Measure abbreviations
+
+**FEV1** — Forced Expiratory Volume in 1 second. The volume of air
+expired during the first second of a forced expiratory maneuver, in
+litres.
+
+**FVC** — Forced Vital Capacity. The total volume of air expired during
+a forced exhalation from full inspiration, in litres.
+
+**FEV1/FVC** — Ratio of FEV1 to FVC. Dimensionless; typical adult values
+are 0.70 – 0.85.
+
+**FEF25-75** — Forced Expiratory Flow between 25% and 75% of FVC. Litres
+per second.
+
+**FEF75** — Forced Expiratory Flow at 75% of expired FVC.
+
+**FRC** — Functional Residual Capacity. The volume in the lungs at the
+end of normal tidal expiration.
+
+**TLC** — Total Lung Capacity. The maximum volume of air in the lungs
+after full inspiration.
+
+**RV** — Residual Volume. The volume remaining in the lungs after
+maximum exhalation.
+
+**RV/TLC** — The ratio of residual volume to total lung capacity.
+
+**ERV** — Expiratory Reserve Volume.
+
+**IC** — Inspiratory Capacity.
+
+**VC** — Vital Capacity (slow VC, distinct from FVC).
+
+**TLCO** / **DLCO** — Transfer factor / diffusing capacity for carbon
+monoxide. “TLCO” is the SI-units name; “DLCO” is the traditional-units
+name; they describe the same physiological measure.
+
+**KCO** — Carbon-monoxide transfer coefficient, equal to TLCO/VA (or
+DLCO/VA). Expressed in SI or traditional units accordingly.
+
+**VA** — Alveolar volume, used in the single-breath DLCO maneuver.
+
+## Statistical terms
+
+**M (median / predicted value)** — The age-, sex-, and demographic-
+adjusted central value for a measure. In the GLI LMS framework, the
+expected value for a healthy individual matching the inputs.
+
+**S (coefficient of variation)** — A scale parameter from the LMS
+framework that captures the spread of healthy values at each age/sex
+combination.
+
+**L (skewness / Box-Cox transform)** — A shape parameter from the LMS
+framework that adjusts for non-normality of the underlying distribution.
+
+**LMS method** — A statistical framework (Cole TJ. *Stat Med.*
+1988;7(3):305-12) that models reference distributions via three
+age-varying parameters L, M, S. Used by the GLI equations for FEV1, FVC,
+FEV1/FVC, TLCO, lung volumes, and others.
+
+**LLN (lower limit of normal)** — The 5th percentile of the reference
+distribution: the value below which a healthy individual falls only 5%
+of the time. Equivalent to a z-score of **−1.645**.
+
+**ULN (upper limit of normal)** — The 95th percentile, equivalent to
+z-score **+1.645**.
+
+**z-score** — A measure of how far an observed value is from the
+predicted median, expressed in standard deviation units. In the LMS
+framework:
+``` math
+z = \frac{(measured / M)^L - 1}{L \cdot S}.
+```
+Implemented by the `<measure>_zscore` outputs of
+[`pft_spirometry()`](https://overdodactyl.github.io/pft/reference/pft_spirometry.md),
+[`pft_volumes()`](https://overdodactyl.github.io/pft/reference/pft_volumes.md),
+and
+[`pft_diffusion()`](https://overdodactyl.github.io/pft/reference/pft_diffusion.md).
+
+**Percent predicted** — `(measured / M) × 100`. A traditional expression
+of departure from predicted; superseded by z-scores in the Stanojevic
+2022 standard but still widely used in clinical practice.
+
+## Patterns and clinical entities
+
+**Normal** — All measured values at or above their LLN.
+
+**Obstructed** — FEV1/FVC below LLN with TLC at or above LLN (or
+unknown).
+
+**Restricted** — TLC below LLN with FEV1/FVC at or above LLN.
+
+**Mixed** — Both FEV1/FVC and TLC below their LLNs.
+
+**Non-specific pattern** — Low FVC with normal FEV1/FVC and normal TLC.
+By definition not restrictive (TLC is normal) and not obstructive
+(FEV1/FVC is normal). The label is descriptive only; Stanojevic 2022
+Table 5 enumerates clinical contexts.
+
+**PRISm** — Preserved Ratio Impaired Spirometry. Low FEV1 with FEV1/FVC
+at or above LLN. A spirometry-only screening label (no TLC required).
+
+**Dysanapsis** — A normal-variant pattern with normal FEV1, high FVC,
+and low FEV1/FVC. Listed in Stanojevic 2022 Table 5 but not emitted as a
+separate label by
+[`pft_classify()`](https://overdodactyl.github.io/pft/reference/pft_classify.md)
+(folded into “Obstructed” when FEV1/FVC is below LLN).
+
+## Tests and gradings
+
+**BDR (bronchodilator response)** — Per Stanojevic 2022: a change of
+**more than 10% of the predicted value** in FEV1 or FVC between pre- and
+post-bronchodilator measurements. Implemented by
+[`pft_bdr()`](https://overdodactyl.github.io/pft/reference/pft_bdr.md).
+Replaces the 2005 standard (≥12% AND ≥200 mL from baseline).
+
+**Severity grading** — Per Stanojevic 2022, a uniform three-level system
+applied to any z-score:
+
+| Grade    | z-score            |
+|----------|--------------------|
+| Normal   | z ≥ −1.645         |
+| Mild     | −2.5 ≤ z \< −1.645 |
+| Moderate | −4 ≤ z \< −2.5     |
+| Severe   | z \< −4            |
+
+Implemented by
+[`pft_severity()`](https://overdodactyl.github.io/pft/reference/pft_severity.md).
+
+**GOLD COPD severity** — Per the Global Initiative for Chronic
+Obstructive Lung Disease, in patients with confirmed airflow
+obstruction:
+
+| Grade  | FEV1 % predicted |
+|--------|------------------|
+| GOLD 1 | ≥ 80%            |
+| GOLD 2 | 50 – \< 80%      |
+| GOLD 3 | 30 – \< 50%      |
+| GOLD 4 | \< 30%           |
+
+Implemented by
+[`pft_gold()`](https://overdodactyl.github.io/pft/reference/pft_gold.md).
+
+**CCS (conditional change score)** — A z-score-style index of whether
+the change between two measurements computed as
+`(z2 − r * z1) / sqrt(1 − r^2)` exceeds the within-subject variability
+expected by regression-to-the-mean alone. `|CCS| > 1.96` is the
+Stanojevic 2022 two-sided 95% normal-limits threshold (Box 2).
+Implemented by
+[`pft_change()`](https://overdodactyl.github.io/pft/reference/pft_change.md).
+
+**Spirometry quality grade (A–F)** — Per Graham et al. ATS/ERS 2019, a
+grade based on the number of acceptable maneuvers from a session and the
+difference between the two best values:
+
+| Grade | Acceptable | Best-two diff (adult)     | Best-two diff (child ≤ 6) |
+|-------|------------|---------------------------|---------------------------|
+| A     | ≥ 3        | ≤ 0.150 L                 | ≤ 0.100 L                 |
+| B     | 2          | ≤ 0.150 L                 | ≤ 0.100 L                 |
+| C     | ≥ 2        | ≤ 0.200 L                 | ≤ 0.150 L                 |
+| D     | ≥ 2        | ≤ 0.250 L                 | ≤ 0.200 L                 |
+| E     | ≥ 2        | \> 0.250 L, or 1 maneuver | \> 0.200 L, or 1 maneuver |
+| F     | 0          | n/a                       | n/a                       |
+
+The child thresholds (column “Best-two diff (child ≤ 6)”) are
+additionally floored at 10% of the highest measured value per Graham
+2019 Table 10’s footnote.
+
+Implemented by
+[`pft_quality()`](https://overdodactyl.github.io/pft/reference/pft_quality.md).
+
+## Notation: the 4-character pattern combination
+
+[`pft_classify()`](https://overdodactyl.github.io/pft/reference/pft_classify.md)
+emits an `ats_pattern_combination` column with a four-character string.
+Each character is **A** (below LLN) or **N** (at or above LLN), in the
+fixed order:
+
+1.  FEV1
+2.  FVC
+3.  FEV1/FVC
+4.  TLC
+
+So `"NNAN"` means *normal FEV1, normal FVC, abnormally low FEV1/FVC,
+normal TLC*. This is by definition pure airway obstruction.
+
+## Race / ancestry categories (GLI 2012 only)
+
+GLI 2012 distinguishes five ancestral groups for spirometry:
+
+- **Caucasian** — European-ancestry populations.
+- **AfrAm** — African American.
+- **NEAsia** — North-East Asian (Han Chinese, Japanese, Korean).
+- **SEAsia** — South-East Asian.
+- **Other/mixed** — A multi-ethnic composite category constructed by the
+  GLI Task Force from populations not captured by the four above.
+
+GLI Global 2022 is race-neutral; the `race` column is ignored when
+calling `pft_spirometry(year = 2022)`.
+
+## Common validation errors
+
+If your cohort is unexpectedly all-NA or you see a warning about
+unrecognised inputs, check the following before anything else:
+
+**Sex must be canonical `"M"` / `"F"`.** Common dataset values like
+`"male"`, `"Male"`, `"MALE"`, `"m"`, `"f"`, `"Female"`, `"woman"`,
+`"boy"`, `"girl"` are auto-normalised with a warning. Anything else
+(e.g. `"Unknown"`, `"X"`, `"NB"`) is set to `NA`. Prior to this
+behaviour any value other than `"M"` was silently treated as female;
+make sure your data isn’t relying on that.
+
+**Race must be one of the five GLI 2012 categories.** Common variants
+like `"caucasian"` (lowercase), `" Caucasian"` (whitespace), `"white"`,
+`"black"`, `"African American"`, `"european"` are auto-normalised with a
+warning. Anything else (`"Asian"` ambiguous between NEAsia/SEAsia is
+mapped to `NEAsia`; other strings like `"Hispanic"`, `"Latino"`,
+`"Native American"` are not in the GLI 2012 framework) is set to `NA`.
+
+**`year = 2012` without a `race` column errors** rather than silently
+producing all-NA output. Either supply a `race` column or call
+`pft_spirometry(data, year = 2022)` for the race-neutral equations.
