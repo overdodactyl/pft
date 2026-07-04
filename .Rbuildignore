@@ -24,3 +24,8 @@
 ^pft_.*\.tar\.gz$
 ^\.Rhistory$
 ^backup-.*$
+^\.vscode$
+^paper$
+^pft_demo\.R$
+^scratch\.R$
+^cran-comments\.md$
