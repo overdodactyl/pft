@@ -94,7 +94,11 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
+<p>Install the released version from CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"pft"</span><span class="op">)</span></span></code></pre></div>
+<p>Or the development version from GitHub:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"overdodactyl/pft"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -230,7 +234,7 @@
 <div class="section level2">
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/overdodactyl/pft" class="external-link">pft</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
@@ -255,7 +259,7 @@
 <span><span class="co"># -&gt; adds fev1_pred_2022, fev1_lln_2022, fev1_uln_2022,</span></span>
 <span><span class="co">#         fev1_zscore_2022, fev1_pctpred_2022, and equivalents for fvc.</span></span></code></pre></div>
 <p>To classify a patient’s pattern, attach their measured values plus LLNs and pipe through <code><a href="reference/pft_classify.html">pft_classify()</a></code>:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">patient</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  fev1 <span class="op">=</span> <span class="fl">2.5</span>,  fev1_lln <span class="op">=</span> <span class="fl">3.0</span>,</span>
 <span>  fvc  <span class="op">=</span> <span class="fl">3.8</span>,  fvc_lln  <span class="op">=</span> <span class="fl">3.5</span>,</span>
@@ -269,7 +273,7 @@
 <h3 id="end-to-end-pipeline">End-to-end pipeline<a class="anchor" aria-label="anchor" href="#end-to-end-pipeline"></a>
 </h3>
 <p>For the canonical “interpret → visualise” workflow on a cohort:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cohort</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  sex    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"M"</span>, <span class="st">"F"</span><span class="op">)</span>,</span>
 <span>  age    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">45</span>,  <span class="fl">60</span><span class="op">)</span>,</span>
@@ -290,7 +294,7 @@
 <div class="section level3">
 <h3 id="cohort-analysis-with-broom-style-tidiers">Cohort analysis with broom-style tidiers<a class="anchor" aria-label="anchor" href="#cohort-analysis-with-broom-style-tidiers"></a>
 </h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/pft_interpret.html">pft_interpret</a></span><span class="op">(</span><span class="va">cohort</span><span class="op">)</span></span>
 <span><span class="va">result</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/pft_long.html">pft_long</a></span><span class="op">(</span><span class="op">)</span>              <span class="co"># one row per (patient, measure)</span></span></code></pre></div>
 </div>
@@ -378,6 +382,7 @@
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
+<li><a href="https://cloud.r-project.org/package=pft" class="external-link">View on CRAN</a></li>
 <li><a href="https://github.com/overdodactyl/pft/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/overdodactyl/pft/issues" class="external-link">Report a bug</a></li>
 </ul>
@@ -418,10 +423,13 @@
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
+<li><a href="https://CRAN.R-project.org/package=pft" class="external-link"><img src="https://www.r-pkg.org/badges/version/pft" alt="CRAN status"></a></li>
+<li><a href="https://cran.r-project.org/package=pft" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/pft" alt="CRAN downloads"></a></li>
 <li><a href="https://github.com/overdodactyl/pft/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/overdodactyl/pft/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 <li><a href="https://app.codecov.io/gh/overdodactyl/pft" class="external-link"><img src="https://codecov.io/gh/overdodactyl/pft/graph/badge.svg" alt="Codecov test coverage"></a></li>
 <li><a href="https://github.com/overdodactyl/pft/actions/workflows/pkgdown.yaml" class="external-link"><img src="https://github.com/overdodactyl/pft/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a></li>
 <li><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="https://img.shields.io/badge/lifecycle-stable-green.svg" alt="Lifecycle: stable"></a></li>
+<li><a href="https://doi.org/10.5281/zenodo.21196107" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.21196107.svg" alt="DOI"></a></li>
 </ul>
 </div>
 
@@ -434,7 +442,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

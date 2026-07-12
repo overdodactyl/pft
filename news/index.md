@@ -2,7 +2,10 @@
 
 ## pft 1.0.1
 
-CRAN pretest fixes; no user-facing behaviour changes.
+CRAN release: 2026-07-11
+
+First CRAN release. CRAN pretest fixes; no user-facing behaviour
+changes.
 
 - Replaced the Unicode superscript-minus characters in the
   [`pft_dlco_hb_correct()`](https://overdodactyl.github.io/pft/reference/pft_dlco_hb_correct.md)

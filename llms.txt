@@ -14,6 +14,15 @@ tests in R.
 
 ## Installation
 
+Install the released version from CRAN:
+
+``` r
+
+install.packages("pft")
+```
+
+Or the development version from GitHub:
+
 ``` r
 
 # install.packages("remotes")
