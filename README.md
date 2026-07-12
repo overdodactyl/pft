@@ -1,10 +1,13 @@
 # pft <a href="https://overdodactyl.github.io/pft/"><img src="man/figures/logo.png" align="right" height="120" alt="pft website" /></a>
 
 <!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/pft)](https://CRAN.R-project.org/package=pft)
+[![CRAN downloads](https://cranlogs.r-pkg.org/badges/pft)](https://cran.r-project.org/package=pft)
 [![R-CMD-check](https://github.com/overdodactyl/pft/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/overdodactyl/pft/actions/workflows/R-CMD-check.yaml)
 [![Codecov test coverage](https://codecov.io/gh/overdodactyl/pft/graph/badge.svg)](https://app.codecov.io/gh/overdodactyl/pft)
 [![pkgdown](https://github.com/overdodactyl/pft/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/overdodactyl/pft/actions/workflows/pkgdown.yaml)
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-green.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21196107.svg)](https://doi.org/10.5281/zenodo.21196107)
 <!-- badges: end -->
 
 Compute ATS / ERS-compliant reference values, lower/upper limits of normal,
@@ -18,6 +21,14 @@ and interpretive pattern classifications for pulmonary function tests in R.
 > decision-making. All outputs require interpretation by a qualified clinician.
 
 ## Installation
+
+Install the released version from CRAN:
+
+```r
+install.packages("pft")
+```
+
+Or the development version from GitHub:
 
 ```r
 # install.packages("remotes")

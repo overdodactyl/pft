@@ -1,6 +1,6 @@
 # pft 1.0.1
 
-CRAN pretest fixes; no user-facing behaviour changes.
+First CRAN release. CRAN pretest fixes; no user-facing behaviour changes.
 
 * Replaced the Unicode superscript-minus characters in the
   `pft_dlco_hb_correct()` docstring with ASCII (`^-1`), so the PDF

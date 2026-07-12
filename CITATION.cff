@@ -20,6 +20,7 @@ authors:
     role: [ctb]
 repository-code: "https://github.com/overdodactyl/pft"
 url: "https://overdodactyl.github.io/pft/"
+doi: "10.5281/zenodo.21196107"
 license: MIT
 keywords:
   - pulmonary-function-test
@@ -40,4 +41,5 @@ preferred-citation:
       family-names: Helgeson
       orcid: "https://orcid.org/0000-0001-7590-2293"
   url: "https://github.com/overdodactyl/pft"
-  notes: "R package version 1.0.0"
+  doi: "10.5281/zenodo.21196107"
+  notes: "R package version 1.0.1"

@@ -9,7 +9,8 @@ bibentry(
               person("Scott", "Helgeson")),
   year    = format(Sys.Date(), "%Y"),
   note    = sprintf("R package version %s", meta$Version),
-  url     = "https://github.com/overdodactyl/pft"
+  url     = "https://CRAN.R-project.org/package=pft",
+  doi     = "10.5281/zenodo.21196107"
 )
 
 bibentry(
