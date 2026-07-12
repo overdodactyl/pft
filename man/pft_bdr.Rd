@@ -2,7 +2,7 @@
 % Please edit documentation in R/interpretation.R
 \name{pft_bdr}
 \alias{pft_bdr}
-\title{Bronchodilator response per the ERS/ATS 2022 criterion}
+\title{Bronchodilator response per the current ATS/ERS criterion}
 \usage{
 pft_bdr(pre, post, predicted, threshold = BDR_THRESHOLD_PCT_PRED)
 }

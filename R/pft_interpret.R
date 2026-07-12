@@ -1,4 +1,4 @@
-#' @title Comprehensive ERS/ATS 2022 PFT interpretation in one call
+#' @title Comprehensive ATS/ERS PFT interpretation in one call
 #'
 #' @description
 #' `pft_interpret()` is a single-call workflow that combines every

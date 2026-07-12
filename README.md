@@ -20,6 +20,18 @@ and interpretive pattern classifications for pulmonary function tests in R.
 > standards, but the package itself has not been validated for diagnostic
 > decision-making. All outputs require interpretation by a qualified clinician.
 
+## Guideline currency
+
+The ATS/ERS interpretive algorithm implemented in `pft_classify()`,
+`pft_severity()`, `pft_bdr()`, `pft_prism()`, and `pft_change()` is the
+Stanojevic et al. 2022 technical standard, which is the most recent
+ATS/ERS interpretive standard as of the current release. Predecessor
+standards remain available (`pft_severity_2005()`, `pft_bdr_2005()`,
+and `standard = "2005"` on `pft_classify()` / `pft_interpret()`) so
+users can reclassify or compare across eras. `pft` is designed to
+incorporate future ATS/ERS, GLI, and GOLD revisions as they are
+published.
+
 ## Installation
 
 Install the released version from CRAN:
@@ -37,15 +49,19 @@ remotes::install_github("overdodactyl/pft")
 
 ## What it does
 
-`pft` implements the Stanojevic 2022 ERS/ATS interpretive standard
-for pulmonary function tests. Reference values come from the GLI
-family of equations (GLI 2012 and GLI Global 2022 spirometry,
-GLI 2021 static lung volumes, GLI 2017 TLCO with the 2020 author
-correction). On top of those, the package computes z-scores and
-percent predicted, ATS pattern classification, severity grading,
-bronchodilator response, PRISm, conditional change scores and
-longitudinal slopes, GLI 2012 vs GLI Global 2022 reclassification,
-the Hughes & Pride diffusion category, lung age, and ggplot2-based
+`pft` computes reference values and routine interpretation for
+pulmonary function tests. Reference values come from the GLI family
+of equations (GLI 2012 and GLI Global 2022 spirometry, GLI 2021
+static lung volumes, GLI 2017 TLCO with the 2020 author correction).
+Interpretive primitives implement the current ATS/ERS technical
+standard (Stanojevic et al. 2022) for pattern classification,
+severity grading, bronchodilator response, PRISm, conditional-change
+z-scores and longitudinal slopes; the Pellegrino et al. 2005
+predecessor standard is retained for reclassification and
+cross-standard comparison. The package also computes GOLD 1-4
+airflow-limitation grading, Graham 2019 spirometry acceptability
+grading, the Hughes & Pride diffusion category, lung age, GLI 2012
+vs GLI Global 2022 reclassification, and ggplot2-based
 single-patient and cohort figures.
 
 ### Reference value functions

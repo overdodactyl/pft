@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: "pft: Pulmonary Function Test Interpretation per ERS/ATS 2022"
+title: "pft: Reference Values and Interpretation for Pulmonary Function Tests"
 message: "If you use this software, please cite it as below."
 type: software
 authors:
@@ -32,7 +32,7 @@ keywords:
   - clinical-interpretation
 preferred-citation:
   type: software
-  title: "pft: Pulmonary Function Test Interpretation per ERS/ATS 2022"
+  title: "pft: Reference Values and Interpretation for Pulmonary Function Tests"
   authors:
     - given-names: Pat
       family-names: Johnson

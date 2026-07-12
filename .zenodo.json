@@ -1,6 +1,6 @@
 {
-  "title": "pft: An R package for ERS/ATS 2022 pulmonary function test interpretation",
-  "description": "<p>An open-source R package implementing routine pulmonary function test (PFT) interpretation according to the European Respiratory Society / American Thoracic Society 2022 technical standard. The package computes predicted values, lower and upper limits of normal, z-scores, and percent-predicted values from Global Lung Function Initiative reference equations for spirometry (GLI-2012 and GLI Global 2022), static lung volumes (GLI-2021), and diffusion capacity (GLI-2017 with the 2020 author correction), then applies pattern classification, severity grading, bronchodilator response rules, PRISm identification, hemoglobin correction, conditional-change z-scores, the FEV1Q survival index, GOLD 1-4 airflow-limitation grading, and Graham 2019 A-F spirometry acceptability grading. Pellegrino et al. 2005 legacy primitives are retained for cross-standard reclassification analyses.</p>",
+  "title": "pft: An R package for reference values and interpretation of pulmonary function tests",
+  "description": "<p>An open-source R package for pulmonary function test (PFT) reference values and routine interpretation. Reference equations are drawn from the Global Lung Function Initiative family (GLI-2012 and GLI Global 2022 spirometry, GLI-2021 static lung volumes, and GLI-2017 diffusion capacity with the 2020 author correction). Interpretive primitives implement the current ERS/ATS technical standard (Stanojevic et al. 2022) for pattern classification, severity grading, bronchodilator response, PRISm identification, and conditional-change z-scores, together with GOLD airflow-limitation grading, Graham 2019 A-F spirometry acceptability grading, hemoglobin correction, and the FEV1Q survival index. Pellegrino et al. 2005 legacy primitives are retained for cross-standard reclassification analyses. The package is designed to incorporate future guideline revisions as they are published.</p>",
   "creators": [
     {
       "name": "Johnson, Patrick W.",
@@ -22,7 +22,7 @@
     "lung volumes",
     "diffusion capacity",
     "GLI",
-    "ERS/ATS 2022",
+    "ATS/ERS",
     "reproducible research",
     "R",
     "clinical decision support"

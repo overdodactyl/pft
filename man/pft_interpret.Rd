@@ -2,7 +2,7 @@
 % Please edit documentation in R/pft_interpret.R
 \name{pft_interpret}
 \alias{pft_interpret}
-\title{Comprehensive ERS/ATS 2022 PFT interpretation in one call}
+\title{Comprehensive ATS/ERS PFT interpretation in one call}
 \usage{
 pft_interpret(
   data,

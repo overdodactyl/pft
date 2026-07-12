@@ -5,12 +5,14 @@ template:
   bootswatch: cosmo
 
 home:
-  title: pft — ATS/ERS 2022-compliant pulmonary function test interpretation
+  title: pft — reference values and interpretation for pulmonary function tests
   description: >
-    A comprehensive R toolkit implementing the full Stanojevic 2022
-    interpretive strategy: reference values, z-scores, ATS pattern
-    classification, severity grading, bronchodilator response, PRISm
-    screening, conditional change scores, and clinical visualisation.
+    An R toolkit for pulmonary function test reference values and
+    routine interpretation: GLI-family predicted values, z-scores,
+    ATS/ERS pattern classification, severity grading, bronchodilator
+    response, PRISm screening, conditional change scores, GOLD
+    airflow-limitation grading, spirometry quality grading, and
+    clinical visualisation.
 
 reference:
   - title: Reference values
@@ -27,7 +29,7 @@ reference:
   - title: Interpretation primitives
     desc: >
       Per-measure clinical interpretation primitives implementing the
-      Stanojevic 2022 ERS/ATS standard.
+      current ATS/ERS interpretive standard.
     contents:
       - pft_classify
       - pft_volume_subpattern
@@ -39,10 +41,10 @@ reference:
       - pft_dlco_hb_correct
       - pft_diffusion_interpret
 
-  - title: Predecessor 2005 standard
+  - title: Legacy interpretive primitives
     desc: >
       Pellegrino 2005 interpretive primitives, provided for
-      reclassification analyses comparing the current Stanojevic 2022
+      reclassification analyses comparing the current interpretive
       standard against its predecessor. `pft_classify(standard = "2005")`
       and `pft_interpret(standard = "2005")` route through these.
     contents:

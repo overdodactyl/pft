@@ -49,7 +49,7 @@ pft_severity <- function(zscore) {
 }
 
 
-#' @title Bronchodilator response per the ERS/ATS 2022 criterion
+#' @title Bronchodilator response per the current ATS/ERS criterion
 #'
 #' @description
 #' Classifies bronchodilator response (BDR) by the percent change in
