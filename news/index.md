@@ -1,5 +1,21 @@
 # Changelog
 
+## pft (development version)
+
+- Reframed package identity to reflect the multi-standard scope. The
+  package title, README, `_pkgdown` home block, `CITATION`, Zenodo
+  metadata, paper, and top-level vignette openings no longer describe
+  `pft` as an “ERS/ATS 2022” implementation; they now present it as
+  reference-value and interpretation tooling composing GLI, ATS/ERS, and
+  GOLD standards, with the 2022 ATS/ERS interpretive statement called
+  out as the most recent standard at the time of the current release.
+  Function names, output column suffixes, argument defaults, and
+  provenance citations are unchanged.
+- Renamed the `_pkgdown` reference-index section “Predecessor 2005
+  standard” to “Legacy interpretive primitives”.
+- Reconciled paper’s GOLD citation from GOLD 2024 to GOLD 2026 to match
+  `R/gold.R` and `R/constants.R`.
+
 ## pft 1.0.1
 
 CRAN release: 2026-07-11

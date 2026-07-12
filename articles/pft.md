@@ -1,10 +1,13 @@
 # Getting started with pft
 
-`pft` implements the Stanojevic et al. ERJ 2022 ERS/ATS interpretive
-strategy for pulmonary function tests: reference values, z-scores,
-percent predicted, ATS pattern classification, severity grading,
+`pft` computes reference values and routine interpretation for pulmonary
+function tests: predicted values and limits of normal, z-scores, percent
+predicted, ATS/ERS pattern classification, severity grading,
 bronchodilator response, PRISm screening, and conditional change scores,
-all from a data-frame-pipeline API.
+all from a data-frame-pipeline API. The interpretive primitives
+implement the current ATS/ERS technical standard (Stanojevic et
+al. 2022); the predecessor Pellegrino 2005 primitives are also available
+for reclassification analyses.
 
 The sections below run the pipeline on a single patient and then on a
 small cohort.
@@ -38,9 +41,9 @@ ref[, c("fev1_pred_2022", "fev1_lln_2022", "fev1_uln_2022",
 ```
 
 The default is GLI 2022 (“GLI Global”), the race-neutral equation set
-recommended by the ERS/ATS 2022 standard. To use the predecessor GLI
-2012 multi-ethnic equations, pass `year = 2012` and include a `race`
-column.
+recommended by the current ATS/ERS technical standard. To use the
+predecessor GLI 2012 multi-ethnic equations, pass `year = 2012` and
+include a `race` column.
 
 The same pattern works for lung volumes and diffusion:
 
@@ -190,8 +193,8 @@ pft_change(z1 = -0.5, z2 = -2.5, r = 0.7)
 ## 8. The one-call workflow
 
 [`pft_interpret()`](https://overdodactyl.github.io/pft/reference/pft_interpret.md)
-auto-detects every available input and produces the full Stanojevic
-2022-compliant interpretation in one call:
+auto-detects every available input and produces the full ATS/ERS
+interpretation in one call:
 
 ``` r
 
@@ -323,8 +326,9 @@ citation("pft")
 #> Please cite the underlying reference standard for whichever function(s)
 #> you use, in addition to (or instead of) the pft package itself.
 #> 
-#>   Johnson P, Helgeson S (2026). _pft: Pulmonary Function Test
-#>   Interpretation per ERS/ATS 2022_. doi:10.5281/zenodo.21196107
+#>   Johnson P, Helgeson S (2026). _pft: Reference Values and
+#>   Interpretation for Pulmonary Function Tests_.
+#>   doi:10.5281/zenodo.21196107
 #>   <https://doi.org/10.5281/zenodo.21196107>. R package version 1.0.1,
 #>   <https://CRAN.R-project.org/package=pft>.
 #> 

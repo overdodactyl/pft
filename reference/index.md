@@ -16,8 +16,8 @@ function takes a data frame in and returns a tibble out.
 
 ## Interpretation primitives
 
-Per-measure clinical interpretation primitives implementing the
-Stanojevic 2022 ERS/ATS standard.
+Per-measure clinical interpretation primitives implementing the current
+ATS/ERS interpretive standard.
 
 - [`pft_classify()`](https://overdodactyl.github.io/pft/reference/pft_classify.md)
   : Classify ATS spirometry patterns from spirometry and lung-volume
@@ -27,7 +27,7 @@ Stanojevic 2022 ERS/ATS standard.
 - [`pft_severity()`](https://overdodactyl.github.io/pft/reference/pft_severity.md)
   : Grade severity of lung function impairment from a z-score
 - [`pft_bdr()`](https://overdodactyl.github.io/pft/reference/pft_bdr.md)
-  : Bronchodilator response per the ERS/ATS 2022 criterion
+  : Bronchodilator response per the current ATS/ERS criterion
 - [`pft_prism()`](https://overdodactyl.github.io/pft/reference/pft_prism.md)
   : Screen for Preserved Ratio Impaired Spirometry (PRISm)
 - [`pft_change()`](https://overdodactyl.github.io/pft/reference/pft_change.md)
@@ -39,10 +39,10 @@ Stanojevic 2022 ERS/ATS standard.
 - [`pft_diffusion_interpret()`](https://overdodactyl.github.io/pft/reference/pft_diffusion_interpret.md)
   : Classify a diffusion result into a clinical pattern category
 
-## Predecessor 2005 standard
+## Legacy interpretive primitives
 
 Pellegrino 2005 interpretive primitives, provided for reclassification
-analyses comparing the current Stanojevic 2022 standard against its
+analyses comparing the current interpretive standard against its
 predecessor. `pft_classify(standard = "2005")` and
 `pft_interpret(standard = "2005")` route through these.
 
@@ -67,7 +67,7 @@ End-to-end interpretation in a single call, input QC, and clinical-style
 visualisation.
 
 - [`pft_interpret()`](https://overdodactyl.github.io/pft/reference/pft_interpret.md)
-  : Comprehensive ERS/ATS 2022 PFT interpretation in one call
+  : Comprehensive ATS/ERS PFT interpretation in one call
 - [`pft_plot()`](https://overdodactyl.github.io/pft/reference/pft_plot.md)
   : Clinical visualisation for a single PFT result
 

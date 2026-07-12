@@ -1,4 +1,4 @@
-# Comprehensive ERS/ATS 2022 PFT interpretation in one call
+# Comprehensive ATS/ERS PFT interpretation in one call
 
 `pft_interpret()` is a single-call workflow that combines every
 interpretation primitive in this package into a complete clinical report

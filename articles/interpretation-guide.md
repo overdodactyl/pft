@@ -107,19 +107,19 @@ Reading row by row:
 4.  FEV1/FVC normal, FVC \< LLN, TLC normal -\> **Non-specific**.
 5.  Everything \>= LLN -\> **Normal**.
 
-## When to use 2022 vs 2005
+## Choosing between the current and legacy interpretive standards
 
 The two standards differ in three ways:
 
-| Aspect                  | 2022 (Stanojevic) | 2005 (Pellegrino)       |
-|-------------------------|-------------------|-------------------------|
-| Severity input          | z-score           | % predicted (FEV1)      |
-| Bronchodilator response | \> 10 % predicted | \>= 12 % AND \>= 200 mL |
-| Pattern flowchart       | Fig 8 / Table 5   | Fig 2                   |
+| Aspect                  | Current (Stanojevic 2022) | Legacy (Pellegrino 2005) |
+|-------------------------|---------------------------|--------------------------|
+| Severity input          | z-score                   | % predicted (FEV1)       |
+| Bronchodilator response | \> 10 % predicted         | \>= 12 % AND \>= 200 mL  |
+| Pattern flowchart       | Fig 8 / Table 5           | Fig 2                    |
 
-The 2022 standard is the recommended default and is what
+The current standard is the recommended default and is what
 [`pft_interpret()`](https://overdodactyl.github.io/pft/reference/pft_interpret.md)
-applies by default. Use the 2005 path when reproducing a historical
+applies by default. Use the legacy path when reproducing a historical
 report or matching an EMR template that was built against the older
 flowchart – run `pft_interpret(data, standard = "2005")` to get the
 predecessor severity and BDR outputs alongside

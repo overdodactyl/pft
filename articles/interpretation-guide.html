@@ -184,14 +184,19 @@ Restricted and Mixed require TLC.</p>
 </ol>
 </div>
 <div class="section level2">
-<h2 id="when-to-use-2022-vs-2005">When to use 2022 vs 2005<a class="anchor" aria-label="anchor" href="#when-to-use-2022-vs-2005"></a>
+<h2 id="choosing-between-the-current-and-legacy-interpretive-standards">Choosing between the current and legacy interpretive standards<a class="anchor" aria-label="anchor" href="#choosing-between-the-current-and-legacy-interpretive-standards"></a>
 </h2>
 <p>The two standards differ in three ways:</p>
 <table class="table">
+<colgroup>
+<col width="30%">
+<col width="35%">
+<col width="34%">
+</colgroup>
 <thead><tr class="header">
 <th>Aspect</th>
-<th>2022 (Stanojevic)</th>
-<th>2005 (Pellegrino)</th>
+<th>Current (Stanojevic 2022)</th>
+<th>Legacy (Pellegrino 2005)</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
@@ -211,10 +216,10 @@ Restricted and Mixed require TLC.</p>
 </tr>
 </tbody>
 </table>
-<p>The 2022 standard is the recommended default and is what
-<code><a href="../reference/pft_interpret.html">pft_interpret()</a></code> applies by default. Use the 2005 path when
-reproducing a historical report or matching an EMR template that was
-built against the older flowchart – run
+<p>The current standard is the recommended default and is what
+<code><a href="../reference/pft_interpret.html">pft_interpret()</a></code> applies by default. Use the legacy path
+when reproducing a historical report or matching an EMR template that
+was built against the older flowchart – run
 <code>pft_interpret(data, standard = "2005")</code> to get the
 predecessor severity and BDR outputs alongside
 <code>pft_classify(standard = "2005")</code>’s pattern labels.</p>

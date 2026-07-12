@@ -1,14 +1,38 @@
-# pft: Pulmonary Function Test Interpretation per ERS/ATS 2022
+# pft: Reference Values and Interpretation for Pulmonary Function Tests
 
-`pft` implements the Stanojevic 2022 ERS/ATS interpretive standard for
-pulmonary function tests. Reference values come from the GLI family of
-equations (GLI 2012 and GLI Global 2022 spirometry, GLI 2021 static lung
-volumes, GLI 2017 TLCO with the 2020 author correction). On top of
-those, the package computes z-scores and percent predicted, severity
-grading, ATS pattern classification, bronchodilator response per the
-2022 criterion, PRISm screening, conditional change scores for serial
-measurements, GOLD COPD severity grading, Graham 2019 spirometry quality
-grades, and a ggplot2-based clinical lollipop figure.
+`pft` computes reference values and routine interpretation for pulmonary
+function tests. Reference values come from the GLI family of equations
+(GLI 2012 and GLI Global 2022 spirometry, GLI 2021 static lung volumes,
+GLI 2017 TLCO with the 2020 author correction). Interpretive primitives
+implement the current ATS/ERS technical standard (Stanojevic et al.
+2022) for pattern classification, severity grading, bronchodilator
+response, PRISm screening, and conditional-change z-scores, alongside
+GOLD airflow-limitation grading, Graham 2019 spirometry quality grades,
+hemoglobin correction, the FEV1Q survival index, and a ggplot2-based
+clinical lollipop figure. Pellegrino et al. 2005 legacy primitives are
+retained for cross-standard reclassification analyses.
+
+## Guideline currency
+
+The ATS/ERS technical standard implemented by
+[`pft_classify()`](https://overdodactyl.github.io/pft/reference/pft_classify.md),
+[`pft_severity()`](https://overdodactyl.github.io/pft/reference/pft_severity.md),
+[`pft_bdr()`](https://overdodactyl.github.io/pft/reference/pft_bdr.md),
+[`pft_prism()`](https://overdodactyl.github.io/pft/reference/pft_prism.md),
+and
+[`pft_change()`](https://overdodactyl.github.io/pft/reference/pft_change.md)
+is Stanojevic et al. 2022, which is the most recent interpretive
+standard from these societies as of the current package release. Older
+standards (Pellegrino et al. 2005) remain available for reclassification
+and comparison work via
+[`pft_severity_2005()`](https://overdodactyl.github.io/pft/reference/pft_severity_2005.md),
+[`pft_bdr_2005()`](https://overdodactyl.github.io/pft/reference/pft_bdr_2005.md),
+and the `standard = "2005"` argument to
+[`pft_classify()`](https://overdodactyl.github.io/pft/reference/pft_classify.md)
+/
+[`pft_interpret()`](https://overdodactyl.github.io/pft/reference/pft_interpret.md).
+`pft` is designed to incorporate future ATS/ERS, GLI, and GOLD revisions
+as they are published.
 
 ## Input data format
 

@@ -1,4 +1,4 @@
-# Bronchodilator response per the ERS/ATS 2022 criterion
+# Bronchodilator response per the current ATS/ERS criterion
 
 Classifies bronchodilator response (BDR) by the percent change in the
 measured value relative to the patient's predicted value, as recommended

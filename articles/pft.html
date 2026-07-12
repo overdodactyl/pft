@@ -84,11 +84,14 @@
 
     
     
-<p><code>pft</code> implements the Stanojevic et al. ERJ 2022 ERS/ATS
-interpretive strategy for pulmonary function tests: reference values,
-z-scores, percent predicted, ATS pattern classification, severity
+<p><code>pft</code> computes reference values and routine interpretation
+for pulmonary function tests: predicted values and limits of normal,
+z-scores, percent predicted, ATS/ERS pattern classification, severity
 grading, bronchodilator response, PRISm screening, and conditional
-change scores, all from a data-frame-pipeline API.</p>
+change scores, all from a data-frame-pipeline API. The interpretive
+primitives implement the current ATS/ERS technical standard (Stanojevic
+et al. 2022); the predecessor Pellegrino 2005 primitives are also
+available for reclassification analyses.</p>
 <p>The sections below run the pipeline on a single patient and then on a
 small cohort.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
@@ -114,9 +117,9 @@ normal (ULN) for every measure.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           3.87          2.94          4.75          4.81         3.68</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: fvc_uln_2022 &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>The default is GLI 2022 (“GLI Global”), the race-neutral equation set
-recommended by the ERS/ATS 2022 standard. To use the predecessor GLI
-2012 multi-ethnic equations, pass <code>year = 2012</code> and include a
-<code>race</code> column.</p>
+recommended by the current ATS/ERS technical standard. To use the
+predecessor GLI 2012 multi-ethnic equations, pass
+<code>year = 2012</code> and include a <code>race</code> column.</p>
 <p>The same pattern works for lung volumes and diffusion:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pft_volumes.html">pft_volumes</a></span><span class="op">(</span><span class="va">patient</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"frc_pred"</span>, <span class="st">"tlc_pred"</span>, <span class="st">"rv_pred"</span>, <span class="st">"vc_pred"</span><span class="op">)</span><span class="op">]</span></span>
@@ -245,8 +248,7 @@ normal-limits range.</p>
 <h2 id="the-one-call-workflow">8. The one-call workflow<a class="anchor" aria-label="anchor" href="#the-one-call-workflow"></a>
 </h2>
 <p><code><a href="../reference/pft_interpret.html">pft_interpret()</a></code> auto-detects every available input and
-produces the full Stanojevic 2022-compliant interpretation in one
-call:</p>
+produces the full ATS/ERS interpretation in one call:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">patient</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  sex <span class="op">=</span> <span class="st">"M"</span>, age <span class="op">=</span> <span class="fl">45</span>, height <span class="op">=</span> <span class="fl">178</span>, race <span class="op">=</span> <span class="st">"Caucasian"</span>,</span>
@@ -364,8 +366,9 @@ direct inclusion in publications.</p>
 <span><span class="co">#&gt; Please cite the underlying reference standard for whichever function(s)</span></span>
 <span><span class="co">#&gt; you use, in addition to (or instead of) the pft package itself.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;   Johnson P, Helgeson S (2026). _pft: Pulmonary Function Test</span></span>
-<span><span class="co">#&gt;   Interpretation per ERS/ATS 2022_. doi:10.5281/zenodo.21196107</span></span>
+<span><span class="co">#&gt;   Johnson P, Helgeson S (2026). _pft: Reference Values and</span></span>
+<span><span class="co">#&gt;   Interpretation for Pulmonary Function Tests_.</span></span>
+<span><span class="co">#&gt;   doi:10.5281/zenodo.21196107</span></span>
 <span><span class="co">#&gt;   &lt;https://doi.org/10.5281/zenodo.21196107&gt;. R package version 1.0.1,</span></span>
 <span><span class="co">#&gt;   &lt;https://CRAN.R-project.org/package=pft&gt;.</span></span>
 <span><span class="co">#&gt; </span></span>
