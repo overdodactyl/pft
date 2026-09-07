@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,9 +45,21 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/overdodactyl/pft/blob/v1.0.2/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/overdodactyl/pft/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.3" id="pft-103">pft 1.0.3<a class="anchor" aria-label="anchor" href="#pft-103"></a></h2>
+<p>Documentation-only patch release. No user-facing behaviour changes. This release folds in additional refinements from the SoftwareX manuscript review (round 2):</p>
+<ul><li>
+<code><a href="../reference/pft_bdr_2005.html">pft_bdr_2005()</a></code>: added an explicit Boundary-convention section to the roxygen docs explaining why the implementation follows the Pellegrino 2005 running-text (strict <code>&gt;</code>) formulation over the Table 6 inclusive-symbol formulation. Vignette (<code>interpretation-guide</code>) cross-references the note.</li>
+<li>
+<code><a href="../reference/pft_interpret.html">pft_interpret()</a></code> wording sweep: README table now describes the wrapper as a “one-call research workflow” that runs only the routine 2022 primitives, and the “all functions take a data frame and return a data frame” claim was corrected to name the actual exceptions.</li>
+<li>
+<code>CITATION.cff</code> and <code>inst/CITATION</code> now use the version-specific Zenodo DOI (with the concept DOI called out separately as the version-agnostic identifier).</li>
+<li>
+<code>inst/benchmarks/pft_interpret_benchmark.R</code> rewritten to run a warm-up plus five measured repetitions and report the median elapsed time, and to use the same physiologically constrained synthetic cohort generator (FEV1 &lt;= FVC, TLC &gt; FVC) that the SoftwareX manuscript now uses for its reclassification example.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.2" id="pft-102">pft 1.0.2<a class="anchor" aria-label="anchor" href="#pft-102"></a></h2>
 <p>Documentation-only patch release. No user-facing behaviour changes. This release resolves internal inconsistencies flagged during the SoftwareX manuscript review.</p>
@@ -194,7 +206,7 @@
 <div class="section level3">
 <h3 id="workflow-wrappers-1-0-0">Workflow wrappers<a class="anchor" aria-label="anchor" href="#workflow-wrappers-1-0-0"></a></h3>
 <ul><li>
-<code>pft_interpret(data)</code> is a single-call workflow that auto-detects which inputs are present and emits a complete Stanojevic 2022-compliant interpretation: reference values, z-scores, percent predicted, severity grading, ATS pattern, PRISm flag, and bronchodilator response. This is the recommended entry point for clinical-style reporting.</li>
+<code>pft_interpret(data)</code> is a one-call research workflow that auto-detects which inputs are present and appends the Stanojevic 2022 reference values, z-scores, percent predicted, severity grading, ATS pattern, PRISm flag, and bronchodilator response for modalities the caller supplied. Standalone helpers (<code><a href="../reference/pft_gold.html">pft_gold()</a></code>, <code><a href="../reference/pft_fev1q.html">pft_fev1q()</a></code>, <code><a href="../reference/pft_quality.html">pft_quality()</a></code>, <code><a href="../reference/pft_change.html">pft_change()</a></code>, and <code><a href="../reference/pft_dlco_hb_correct.html">pft_dlco_hb_correct()</a></code>) are exported for stand-alone use and are not run automatically.</li>
 <li>
 <code>pft_plot(result)</code> generates a clinical-style z-score lollipop plot with severity-band shading. Requires <code>ggplot2</code> (Suggests).</li>
 </ul></div>

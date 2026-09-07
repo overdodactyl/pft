@@ -114,8 +114,16 @@ The two standards differ in three ways:
 | Aspect                  | Current (Stanojevic 2022) | Legacy (Pellegrino 2005) |
 |-------------------------|---------------------------|--------------------------|
 | Severity input          | z-score                   | % predicted (FEV1)       |
-| Bronchodilator response | \> 10 % predicted         | \> 12 % AND \> 200 mL    |
+| Bronchodilator response | \> 10 % predicted         | \> 12 % AND \> 200 mL^\* |
 | Pattern flowchart       | Fig 8 / Table 5           | Fig 2                    |
+
+\*^ The Pellegrino 2005 paper is internally inconsistent: Table 6 uses
+inclusive symbols (`>=12%`, `>=200 mL`), but the running text on p. 959
+disambiguates the rule as strict `>12%` AND strict `>200 mL`.
+[`pft_bdr_2005()`](https://overdodactyl.github.io/pft/reference/pft_bdr_2005.md)
+follows the running-text convention, matching the more specific of the
+two source formulations. See
+[`?pft_bdr_2005`](https://overdodactyl.github.io/pft/reference/pft_bdr_2005.md).
 
 The current standard is the recommended default and is what
 [`pft_interpret()`](https://overdodactyl.github.io/pft/reference/pft_interpret.md)

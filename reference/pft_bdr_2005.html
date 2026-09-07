@@ -23,7 +23,7 @@ is not significant under this criterion."><meta property="og:image" content="htt
 
     <a class="navbar-brand me-2" href="../index.html">pft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -61,7 +61,7 @@ is not significant under this criterion."><meta property="og:image" content="htt
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Bronchodilator response per the Pellegrino 2005 standard</h1>
-      <small class="dont-index">Source: <a href="https://github.com/overdodactyl/pft/blob/v1.0.2/R/interpretation_2005.R" class="external-link"><code>R/interpretation_2005.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/overdodactyl/pft/blob/main/R/interpretation_2005.R" class="external-link"><code>R/interpretation_2005.R</code></a></small>
       <div class="d-none name"><code>pft_bdr_2005.Rd</code></div>
     </div>
 
@@ -111,13 +111,28 @@ the 2022 criterion). The two functions deliberately use distinct
 column names so a result frame can carry both without ambiguity.</p>
     </div>
     <div class="section level2">
+    <h2 id="boundary-convention-why-strict-gt-">Boundary convention (why strict <code>&gt;</code>)<a class="anchor" aria-label="anchor" href="#boundary-convention-why-strict-gt-"></a></h2>
+
+
+<p>The Pellegrino et al. ERJ 2005 paper is internally inconsistent on
+operator symbols: Table 6 uses inclusive symbols (<code>&gt;=12%</code>,
+<code>&gt;=200 mL</code>), while the running text on p. 959 disambiguates the
+rule as <code>"(&gt;12% of control and &gt;200 mL)"</code> – strict <code>&gt;</code> on both
+criteria. This implementation follows the running-text convention,
+matching the more specific of the two source formulations. Callers
+who prefer the inclusive Table 6 convention can trivially test
+equality themselves against the <code>pct_change</code> and <code>abs_change</code>
+columns; a mixed-convention wrapper is out of scope for this
+package.</p>
+    </div>
+    <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Pellegrino R, Viegi G, Brusasco V, et al. Interpretative strategies
 for lung function tests. Eur Respir J. 2005;26(5):948-968.
 <a href="https://doi.org/10.1183/09031936.05.00035205" class="external-link">doi:10.1183/09031936.05.00035205</a>
 . Criterion stated in the
 "Bronchodilator response" section (p. 958) and disambiguated on
-p. 959.</p>
+p. 959; Table 6 uses inclusive symbols.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

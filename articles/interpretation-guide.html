@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,7 +78,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Interpretation reference: severity bands, patterns, and standards</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/overdodactyl/pft/blob/v1.0.2/vignettes/interpretation-guide.Rmd" class="external-link"><code>vignettes/interpretation-guide.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/overdodactyl/pft/blob/main/vignettes/interpretation-guide.Rmd" class="external-link"><code>vignettes/interpretation-guide.Rmd</code></a></small>
       <div class="d-none name"><code>interpretation-guide.Rmd</code></div>
     </div>
 
@@ -207,7 +207,7 @@ Restricted and Mixed require TLC.</p>
 <tr class="even">
 <td>Bronchodilator response</td>
 <td>&gt; 10 % predicted</td>
-<td>&gt; 12 % AND &gt; 200 mL</td>
+<td>&gt; 12 % AND &gt; 200 mL^*</td>
 </tr>
 <tr class="odd">
 <td>Pattern flowchart</td>
@@ -216,6 +216,13 @@ Restricted and Mixed require TLC.</p>
 </tr>
 </tbody>
 </table>
+<p>*^ The Pellegrino 2005 paper is internally inconsistent: Table 6 uses
+inclusive symbols (<code>&gt;=12%</code>, <code>&gt;=200 mL</code>), but
+the running text on p. 959 disambiguates the rule as strict
+<code>&gt;12%</code> AND strict <code>&gt;200 mL</code>.
+<code><a href="../reference/pft_bdr_2005.html">pft_bdr_2005()</a></code> follows the running-text convention,
+matching the more specific of the two source formulations. See
+<code><a href="../reference/pft_bdr_2005.html">?pft_bdr_2005</a></code>.</p>
 <p>The current standard is the recommended default and is what
 <code><a href="../reference/pft_interpret.html">pft_interpret()</a></code> applies by default. Use the legacy path
 when reproducing a historical report or matching an EMR template that

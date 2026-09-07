@@ -30,7 +30,7 @@
 
     <a class="navbar-brand me-2" href="index.html">pft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -163,7 +163,7 @@
 <tbody>
 <tr>
 <td><code><a href="reference/pft_interpret.html">pft_interpret()</a></code></td>
-<td>Single-call wrapper combining every primitive below</td>
+<td>One-call research workflow auto-running the reference-value and routine 2022 interpretive stages (see <code><a href="reference/pft_interpret.html">?pft_interpret</a></code> for the exact list; standalone helpers are not run)</td>
 <td>Stanojevic 2022</td>
 </tr>
 <tr>
@@ -233,7 +233,7 @@
 </tr>
 </tbody>
 </table>
-<p>All functions take a data frame and return a data frame, so they compose with <code>dplyr</code> pipelines.</p>
+<p>Most reference-value and interpretive functions take a data frame and return a data frame with new columns appended, so they compose with <code>dplyr</code> pipelines. Exceptions: <code><a href="reference/pft_change.html">pft_change()</a></code>, <code><a href="reference/pft_severity.html">pft_severity()</a></code>, <code><a href="reference/pft_severity_2005.html">pft_severity_2005()</a></code>, <code><a href="reference/pft_gold.html">pft_gold()</a></code>, <code><a href="reference/pft_fev1q.html">pft_fev1q()</a></code>, and <code><a href="reference/pft_quality.html">pft_quality()</a></code> take vector or paired inputs rather than a data frame, and <code><a href="reference/pft_plot.html">pft_plot()</a></code> returns a <code>ggplot</code> object.</p>
 </div>
 </div>
 <div class="section level2">
@@ -347,6 +347,7 @@
 <div class="section level2">
 <h2 id="citations">Citations<a class="anchor" aria-label="anchor" href="#citations"></a>
 </h2>
+<p>The tagged v1.0.2 source release is archived on Zenodo at <a href="https://doi.org/10.5281/zenodo.22651011" class="external-link">doi:10.5281/zenodo.22651011</a>. The Zenodo concept DOI <a href="https://doi.org/10.5281/zenodo.21196107" class="external-link">10.5281/zenodo.21196107</a> is version-agnostic and always resolves to the latest archived release. Use the version-specific DOI when citing a specific version of the software; use the concept DOI when a version-agnostic reference is preferred. <code>citation("pft")</code> returns a <code>bibentry</code> that includes the version-specific DOI.</p>
 <p>Reference equations:</p>
 <ul>
 <li>
@@ -434,7 +435,8 @@
 <li><a href="https://app.codecov.io/gh/overdodactyl/pft" class="external-link"><img src="https://codecov.io/gh/overdodactyl/pft/graph/badge.svg" alt="Codecov test coverage"></a></li>
 <li><a href="https://github.com/overdodactyl/pft/actions/workflows/pkgdown.yaml" class="external-link"><img src="https://github.com/overdodactyl/pft/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a></li>
 <li><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="https://img.shields.io/badge/lifecycle-stable-green.svg" alt="Lifecycle: stable"></a></li>
-<li><a href="https://doi.org/10.5281/zenodo.21196107" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.21196107.svg" alt="DOI"></a></li>
+<li><a href="https://doi.org/10.5281/zenodo.21196107" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.21196107.svg" alt="DOI (latest)"></a></li>
+<li><a href="https://doi.org/10.5281/zenodo.22651011" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.22651011.svg" alt="DOI (v1.0.2)"></a></li>
 </ul>
 </div>
 

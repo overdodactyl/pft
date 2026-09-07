@@ -15,7 +15,7 @@ small cohort.
 ``` r
 
 library(pft)
-#> pft 1.0.2 | Research and education use only. Not validated for diagnostic decision-making; all outputs require clinician interpretation. See citation("pft") for the source reference standards.
+#> pft 1.0.3 | Research and education use only. Not validated for diagnostic decision-making; all outputs require clinician interpretation. See citation("pft") for the source reference standards.
 ```
 
 ## 1. Reference values from demographics alone
@@ -329,8 +329,9 @@ citation("pft")
 #> 
 #>   Johnson P, Helgeson S (2026). _pft: Reference Values and
 #>   Interpretation for Pulmonary Function Tests_.
-#>   doi:10.5281/zenodo.21196107
-#>   <https://doi.org/10.5281/zenodo.21196107>. R package version 1.0.2,
+#>   doi:10.5281/zenodo.22651011
+#>   <https://doi.org/10.5281/zenodo.22651011>. R package version 1.0.3
+#>   (Zenodo concept DOI: 10.5281/zenodo.21196107),
 #>   <https://CRAN.R-project.org/package=pft>.
 #> 
 #> GLI 2012 spirometry equations (year = 2012):

@@ -92,7 +92,7 @@ emerge.
 
 | Function | Purpose | Source |
 |----|----|----|
-| [`pft_interpret()`](https://overdodactyl.github.io/pft/reference/pft_interpret.md) | Single-call wrapper combining every primitive below | Stanojevic 2022 |
+| [`pft_interpret()`](https://overdodactyl.github.io/pft/reference/pft_interpret.md) | One-call research workflow auto-running the reference-value and routine 2022 interpretive stages (see [`?pft_interpret`](https://overdodactyl.github.io/pft/reference/pft_interpret.md) for the exact list; standalone helpers are not run) | Stanojevic 2022 |
 | [`pft_classify()`](https://overdodactyl.github.io/pft/reference/pft_classify.md) | Normal / Non-specific / Obstructed / Restricted / Mixed | Stanojevic 2022 Fig 8, Tables 5/8 |
 | [`pft_volume_subpattern()`](https://overdodactyl.github.io/pft/reference/pft_volume_subpattern.md) | Six lung-volume sub-patterns (Hyperinflation, Simple/Complex restriction, etc.) | Stanojevic 2022 Fig 10 |
 | [`pft_severity()`](https://overdodactyl.github.io/pft/reference/pft_severity.md) | normal / mild / moderate / severe per measure z-score | Stanojevic 2022 |
@@ -107,8 +107,19 @@ emerge.
 | [`pft_plot()`](https://overdodactyl.github.io/pft/reference/pft_plot.md) | Single-patient z-score lollipop with severity bands | — |
 | [`pft_long()`](https://overdodactyl.github.io/pft/reference/pft_long.md) | Wide → long pivot; [`broom::tidy`](https://generics.r-lib.org/reference/tidy.html) dispatches to it | — |
 
-All functions take a data frame and return a data frame, so they compose
-with `dplyr` pipelines.
+Most reference-value and interpretive functions take a data frame and
+return a data frame with new columns appended, so they compose with
+`dplyr` pipelines. Exceptions:
+[`pft_change()`](https://overdodactyl.github.io/pft/reference/pft_change.md),
+[`pft_severity()`](https://overdodactyl.github.io/pft/reference/pft_severity.md),
+[`pft_severity_2005()`](https://overdodactyl.github.io/pft/reference/pft_severity_2005.md),
+[`pft_gold()`](https://overdodactyl.github.io/pft/reference/pft_gold.md),
+[`pft_fev1q()`](https://overdodactyl.github.io/pft/reference/pft_fev1q.md),
+and
+[`pft_quality()`](https://overdodactyl.github.io/pft/reference/pft_quality.md)
+take vector or paired inputs rather than a data frame, and
+[`pft_plot()`](https://overdodactyl.github.io/pft/reference/pft_plot.md)
+returns a `ggplot` object.
 
 ## Quick start
 
@@ -208,6 +219,16 @@ ground truth from the official GLI web calculator at
 [gli-calculator.ersnet.org](http://gli-calculator.ersnet.org).
 
 ## Citations
+
+The tagged v1.0.2 source release is archived on Zenodo at
+[doi:10.5281/zenodo.22651011](https://doi.org/10.5281/zenodo.22651011).
+The Zenodo concept DOI
+[10.5281/zenodo.21196107](https://doi.org/10.5281/zenodo.21196107) is
+version-agnostic and always resolves to the latest archived release. Use
+the version-specific DOI when citing a specific version of the software;
+use the concept DOI when a version-agnostic reference is preferred.
+`citation("pft")` returns a `bibentry` that includes the
+version-specific DOI.
 
 Reference equations:
 

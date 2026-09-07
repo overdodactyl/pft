@@ -14,20 +14,21 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/overdodactyl/pft/blob/v1.0.2/inst/CITATION)
+[`inst/CITATION`](https://github.com/overdodactyl/pft/blob/main/inst/CITATION)
 
 Johnson P, Helgeson S (2026). *pft: Reference Values and Interpretation
 for Pulmonary Function Tests*.
-[doi:10.5281/zenodo.21196107](https://doi.org/10.5281/zenodo.21196107).
-R package version 1.0.2, <https://CRAN.R-project.org/package=pft>.
+[doi:10.5281/zenodo.22651011](https://doi.org/10.5281/zenodo.22651011).
+R package version 1.0.3 (Zenodo concept DOI: 10.5281/zenodo.21196107),
+<https://CRAN.R-project.org/package=pft>.
 
     @Manual{,
       title = {pft: Reference Values and Interpretation for Pulmonary Function Tests},
       author = {Pat Johnson and Scott Helgeson},
       year = {2026},
-      note = {R package version 1.0.2},
+      note = {R package version 1.0.3 (Zenodo concept DOI: 10.5281/zenodo.21196107)},
       url = {https://CRAN.R-project.org/package=pft},
-      doi = {10.5281/zenodo.21196107},
+      doi = {10.5281/zenodo.22651011},
     }
 
 Quanjer P, Stanojevic S, Cole T, et al. (2012). “Multi-ethnic reference
