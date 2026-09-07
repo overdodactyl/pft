@@ -220,8 +220,8 @@ ground truth from the official GLI web calculator at
 
 ## Citations
 
-The tagged v1.0.2 source release is archived on Zenodo at
-[doi:10.5281/zenodo.22651011](https://doi.org/10.5281/zenodo.22651011).
+The tagged v1.0.3 source release is archived on Zenodo at
+[doi:10.5281/zenodo.22651275](https://doi.org/10.5281/zenodo.22651275).
 The Zenodo concept DOI
 [10.5281/zenodo.21196107](https://doi.org/10.5281/zenodo.21196107) is
 version-agnostic and always resolves to the latest archived release. Use
