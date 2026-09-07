@@ -23,3 +23,7 @@ notes/
 covr-report.html
 /lib/
 Rplots.pdf
+
+# stray pdflatex output when paper is built from repo root instead of
+# paper/ (see paper/render.sh)
+texput.log

@@ -123,7 +123,8 @@ FVC and TLC are normal.
 # 5. Bronchodilator response
 
 The Stanojevic 2022 BDR criterion is a >10% change relative to predicted
-in FEV1 or FVC (replacing the 2005 12% / 200 mL rule):
+in FEV1 or FVC (replacing the 2005 rule of strictly >12% AND >200 mL
+from baseline):
 
 ```{r}
 pft_bdr(pre = 2.5, post = 3.0, predicted = 4.0)

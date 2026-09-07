@@ -14,17 +14,20 @@ measurements, in litres, same length.}
 A data frame with one row per input observation and three
 columns: \code{pct_change} (i.e. \code{(post - pre) / pre * 100}),
 \code{abs_change} (i.e. \code{post - pre} in litres), and \code{is_significant}
-(logical, \code{TRUE} when \code{pct_change > 12} AND \code{abs_change > 0.2},
-both inequalities strict per the paper's wording on p. 959:
-"(>12\% of control and >200 mL)"). \code{NA} propagates wherever
-either of \code{pre} / \code{post} is \code{NA}.
+(logical, \code{TRUE} when \code{pct_change > 12} AND \code{abs_change > 0.2}).
+\code{NA} propagates wherever either of \code{pre} / \code{post} is \code{NA}.
 }
 \description{
 Classifies bronchodilator response (BDR) by the Pellegrino et al.
-ERJ 2005 dual criterion: significant if both the relative change
-from baseline is at least 12\% AND the absolute change is at least
-200 mL. Replaced in 2022 by \code{\link[=pft_bdr]{pft_bdr()}}'s simpler
-"> 10\% of predicted" rule.
+ERJ 2005 dual criterion: significant when the relative change from
+baseline is \emph{strictly greater than} 12\% AND the absolute change is
+\emph{strictly greater than} 200 mL. Replaced in 2022 by \code{\link[=pft_bdr]{pft_bdr()}}'s
+simpler "> 10\% of predicted" rule.
+
+Both inequalities are strict, matching the paper's disambiguating
+wording on p. 959: "(>12\% of control and >200 mL)". A change that
+hits either boundary exactly (e.g. exactly 12\% or exactly 200 mL)
+is \emph{not} significant under this criterion.
 }
 \section{Column naming}{
 
@@ -37,9 +40,17 @@ column names so a result frame can carry both without ambiguity.
 }
 
 \examples{
-pft_bdr_2005(pre = c(2.5, 2.0), post = c(2.8, 2.1))
-# -> first row significant (>=12\% AND >=200 mL),
-#    second row not (only 5\% and 100 mL increase)
+# +25\% relative AND +500 mL absolute -> both strict bounds cleared,
+# SIGNIFICANT under the 2005 criterion.
+pft_bdr_2005(pre = 2.0, post = 2.5)
+
+# +12\% relative exactly and +300 mL absolute: NOT significant, because
+# the 2005 criterion requires strictly >12\% (not >=12\%).
+pft_bdr_2005(pre = 2.5, post = 2.8)
+
+# +5\% relative and +100 mL absolute: neither bound cleared, NOT
+# significant.
+pft_bdr_2005(pre = 2.0, post = 2.1)
 
 }
 \references{

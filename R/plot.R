@@ -93,6 +93,19 @@ pft_plot <- function(data) {
     fill = c("#d73027", "#fc8d59", "#fee090", "#e0e0e0"),
     stringsAsFactors = FALSE
   )
+  thresholds <- data.frame(
+    z     = c(-1.645, -2.5, -4),
+    label = c("-1.645", "-2.5", "-4")
+  )
+  # Place band-name labels one step above the topmost measure factor
+  # level so they sit in the header strip after coord_flip; matched to
+  # the mid-point of each band on the z-axis.
+  n_measures <- length(levels(plot_df$measure))
+  band_labels <- data.frame(
+    x     = n_measures + 0.55,
+    z     = c(3, -2.07, -3.25, -5),
+    label = c("normal", "mild", "moderate", "severe")
+  )
   ggplot2::ggplot(plot_df, ggplot2::aes(x = measure, y = zscore)) +
     ggplot2::geom_rect(
       data = bands,
@@ -100,12 +113,31 @@ pft_plot <- function(data) {
       xmin = -Inf, xmax = Inf, alpha = 0.4, inherit.aes = FALSE
     ) +
     ggplot2::scale_fill_identity() +
+    ggplot2::geom_hline(
+      data = thresholds, ggplot2::aes(yintercept = z),
+      linetype = "dotted", colour = "gray30"
+    ) +
+    ggplot2::geom_text(
+      data = thresholds,
+      ggplot2::aes(x = 0.55, y = z, label = label),
+      size = 3, colour = "gray30", hjust = 1.1, vjust = -0.3,
+      inherit.aes = FALSE
+    ) +
+    ggplot2::geom_text(
+      data = band_labels,
+      ggplot2::aes(x = x, y = z, label = label),
+      size = 3, colour = "gray20", fontface = "italic",
+      inherit.aes = FALSE
+    ) +
     ggplot2::geom_hline(yintercept = 0, linetype = "dashed",
                          colour = "gray40") +
     ggplot2::geom_segment(
       ggplot2::aes(xend = measure, yend = 0), colour = "black"
     ) +
     ggplot2::geom_point(size = 4, colour = "black") +
+    ggplot2::scale_x_discrete(
+      expand = ggplot2::expansion(add = c(0.6, 1.2))
+    ) +
     ggplot2::coord_flip(ylim = c(-6, 6)) +
     ggplot2::labs(
       x = NULL, y = "z-score",

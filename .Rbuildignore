@@ -32,3 +32,4 @@
 ^\.zenodo\.json$
 ^SUBMIT-TO-CRAN\.md$
 ^CRAN-SUBMISSION$
+^texput\.log$

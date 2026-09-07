@@ -180,6 +180,80 @@ test_that("pft_bdr_2005 returns the right columns", {
   expect_setequal(colnames(out), c("pct_change", "abs_change", "is_significant"))
 })
 
+test_that("pft_bdr_2005 relative-change boundary at exactly 12% (strict >)", {
+  # pre=2.5, post=2.8 -> +12.0% exactly, +300 mL: relative bound not
+  # strictly exceeded -> NOT significant even though abs > 200 mL.
+  out_exact <- pft_bdr_2005(pre = 2.5, post = 2.8)
+  expect_equal(out_exact$pct_change, 12)
+  expect_false(out_exact$is_significant)
+
+  # Just below 12% (abs still well above 200 mL): NOT significant.
+  # pre=2.5, post=2.7999 -> +11.996%, +299.9 mL
+  out_below <- pft_bdr_2005(pre = 2.5, post = 2.7999)
+  expect_lt(out_below$pct_change, 12)
+  expect_false(out_below$is_significant)
+
+  # Just above 12% (with abs also above 200 mL): SIGNIFICANT.
+  # pre=2.5, post=2.8001 -> +12.004%, +300.1 mL
+  out_above <- pft_bdr_2005(pre = 2.5, post = 2.8001)
+  expect_gt(out_above$pct_change, 12)
+  expect_true(out_above$is_significant)
+})
+
+test_that("pft_bdr_2005 absolute-change boundary at exactly 0.200 L (strict >)", {
+  # pre=1.5, post=1.7 -> +13.33%, +0.200 L exactly: absolute bound
+  # not strictly exceeded -> NOT significant even though pct > 12.
+  out_exact <- pft_bdr_2005(pre = 1.5, post = 1.7)
+  expect_equal(out_exact$abs_change, 0.2)
+  expect_false(out_exact$is_significant)
+
+  # Just below 0.200 L absolute (pct still above 12%): NOT significant.
+  # pre=1.5, post=1.6999 -> +13.33%, +0.1999 L
+  out_below <- pft_bdr_2005(pre = 1.5, post = 1.6999)
+  expect_lt(out_below$abs_change, 0.2)
+  expect_false(out_below$is_significant)
+
+  # Just above 0.200 L absolute (pct also above 12%): SIGNIFICANT.
+  # pre=1.5, post=1.7001 -> +13.34%, +0.2001 L
+  out_above <- pft_bdr_2005(pre = 1.5, post = 1.7001)
+  expect_gt(out_above$abs_change, 0.2)
+  expect_true(out_above$is_significant)
+})
+
+test_that("pft_bdr_2005 requires BOTH criteria satisfied simultaneously", {
+  # Only relative criterion satisfied (pct > 12, abs < 0.2): NOT significant.
+  # pre=1.0, post=1.15 -> +15% and +150 mL
+  out_pct_only <- pft_bdr_2005(pre = 1.0, post = 1.15)
+  expect_gt(out_pct_only$pct_change, 12)
+  expect_lt(out_pct_only$abs_change, 0.2)
+  expect_false(out_pct_only$is_significant)
+
+  # Only absolute criterion satisfied (abs > 0.2, pct <= 12): NOT significant.
+  # pre=5.0, post=5.25 -> +5% and +250 mL
+  out_abs_only <- pft_bdr_2005(pre = 5.0, post = 5.25)
+  expect_lt(out_abs_only$pct_change, 12)
+  expect_gt(out_abs_only$abs_change, 0.2)
+  expect_false(out_abs_only$is_significant)
+
+  # Both satisfied: SIGNIFICANT.
+  # pre=2.0, post=2.5 -> +25% and +500 mL
+  out_both <- pft_bdr_2005(pre = 2.0, post = 2.5)
+  expect_gt(out_both$pct_change, 12)
+  expect_gt(out_both$abs_change, 0.2)
+  expect_true(out_both$is_significant)
+})
+
+test_that("pft_bdr_2005 vectorises row-wise", {
+  # Mix boundary/near-boundary/above cases in a single call.
+  out <- pft_bdr_2005(
+    pre  = c(2.5,  1.5,  2.0),
+    post = c(2.8,  1.7,  2.5)
+  )
+  expect_equal(out$pct_change, c(12,      100 * 0.2 / 1.5, 25))
+  expect_equal(out$abs_change, c(0.3,     0.2,             0.5))
+  expect_equal(out$is_significant, c(FALSE, FALSE, TRUE))
+})
+
 
 ## --- pft_interpret(standard = "2005") ----------------------------------
 

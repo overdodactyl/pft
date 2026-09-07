@@ -2,7 +2,7 @@
 % Please edit documentation in R/pft_interpret.R
 \name{pft_interpret}
 \alias{pft_interpret}
-\title{Comprehensive ATS/ERS PFT interpretation in one call}
+\title{One-call ATS/ERS PFT interpretation workflow}
 \usage{
 pft_interpret(
   data,
@@ -47,11 +47,11 @@ z-score, percent predicted, severity grade, pattern label, PRISm
 flag, and BDR result appended.
 }
 \description{
-\code{pft_interpret()} is a single-call workflow that combines every
-interpretation primitive in this package into a complete clinical
-report per the Stanojevic et al. ERJ 2022 standard. It auto-detects
-which computations are possible from the input columns and skips
-anything it cannot do:
+\code{pft_interpret()} combines the core reference-value and routine
+interpretive stages of this package into a one-call research
+workflow following the Stanojevic et al. ERJ 2022 standard. It
+auto-detects which computations are possible from the input columns
+and skips modalities it cannot compute:
 
 \itemize{
 \item If sex / age / height (and race, for \code{year = 2012}) are present,
@@ -64,7 +64,8 @@ reference values via \code{\link[=pft_diffusion]{pft_diffusion()}}.
 and percent-predicted are appended (see the individual reference
 functions for details).
 \item For each measure with a z-score, a \verb{<measure>_severity}
-column is appended via \code{\link[=pft_severity]{pft_severity()}}.
+column is appended via \code{\link[=pft_severity]{pft_severity()}} (or \code{\link[=pft_severity_2005]{pft_severity_2005()}}
+when \code{standard = "2005"}).
 \item If \code{fev1_measured}, \code{fvc_measured}, \code{fev1fvc_measured}, and
 \code{tlc_measured} columns are present, the ATS pattern classifier
 (\code{\link[=pft_classify]{pft_classify()}}) labels each row.
@@ -74,17 +75,39 @@ volume sub-pattern classifier (\code{\link[=pft_volume_subpattern]{pft_volume_su
 a \code{volume_subpattern} column. When \code{frc_tlc_measured} /
 \code{frc_tlc_uln} are also present, both volume ratios are
 consulted per Stanojevic 2022 Figure 10.
+\item If the diffusion z-score columns (\code{dlco_zscore} / \code{va_zscore}
+/ \code{kco_tr_zscore}, or their \verb{_si} variants) are present, the
+Hughes & Pride 2012 diffusion clinical-category classifier
+(\code{\link[=pft_diffusion_interpret]{pft_diffusion_interpret()}}) is applied.
 \item If \code{fev1_measured}, \code{fev1fvc_measured}, and their LLNs are
 resolvable, \code{\link[=pft_prism]{pft_prism()}} adds a \code{prism} flag (independent of
 TLC).
 \item If \verb{<measure>_pre} and \verb{<measure>_post} columns are present
 for any spirometry measure, \code{\link[=pft_bdr]{pft_bdr()}} adds
-\verb{<measure>_bdr_pct} and \verb{<measure>_bdr_significant} columns.
+\verb{<measure>_bdr_pct} and \verb{<measure>_bdr_significant} columns
+(or \code{\link[=pft_bdr_2005]{pft_bdr_2005()}} when \code{standard = "2005"}).
 }
 
-This is the recommended entry point for clinical-style reporting; the
-individual reference and interpretation functions are exported for
-callers who need finer-grained control.
+The following helpers are exported for stand-alone use and are
+\strong{not} invoked automatically by \code{pft_interpret()}; call them
+directly when needed:
+
+\itemize{
+\item \code{\link[=pft_gold]{pft_gold()}} -- GOLD 1-4 airflow-limitation grading.
+\item \code{\link[=pft_fev1q]{pft_fev1q()}} -- FEV1Q survival index (adult-only).
+\item \code{\link[=pft_quality]{pft_quality()}} -- Graham 2019 A-F spirometry acceptability
+grading from per-manoeuvre repeatability values.
+\item \code{\link[=pft_change]{pft_change()}} -- Stanojevic 2022 Box 2 conditional-change
+z-score for paired serial FEV1 z-scores.
+\item \code{\link[=pft_dlco_hb_correct]{pft_dlco_hb_correct()}} -- Cotes 1972 haemoglobin correction
+for DLCO / TLCO.
+}
+
+This is the recommended entry point for one-call research use; the
+individual reference-value, interpretive, and extension functions
+are exported for callers who need finer-grained control. The wrapper
+is intended for research and education, not for regulated clinical
+decision-making.
 }
 \details{
 To trigger z-scores and percent-predicted on a measure, include the
