@@ -20,11 +20,11 @@ authors:
     role: [ctb]
 repository-code: "https://github.com/overdodactyl/pft"
 url: "https://overdodactyl.github.io/pft/"
-# Version-specific DOI for v1.0.2. The Zenodo concept DOI
+# Version-specific DOI for v1.0.3. The Zenodo concept DOI
 # (10.5281/zenodo.21196107) resolves to the latest archived version.
-doi: "10.5281/zenodo.22651011"
+doi: "10.5281/zenodo.22651275"
 license: MIT
-version: "1.0.2"
+version: "1.0.3"
 keywords:
   - pulmonary-function-test
   - spirometry
@@ -44,6 +44,6 @@ preferred-citation:
       family-names: Helgeson
       orcid: "https://orcid.org/0000-0001-7590-2293"
   url: "https://github.com/overdodactyl/pft"
-  version: "1.0.2"
-  doi: "10.5281/zenodo.22651011"
-  notes: "R package version 1.0.2 (Zenodo concept DOI: 10.5281/zenodo.21196107)"
+  version: "1.0.3"
+  doi: "10.5281/zenodo.22651275"
+  notes: "R package version 1.0.3 (Zenodo concept DOI: 10.5281/zenodo.21196107)"

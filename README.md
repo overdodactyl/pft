@@ -8,7 +8,7 @@
 [![pkgdown](https://github.com/overdodactyl/pft/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/overdodactyl/pft/actions/workflows/pkgdown.yaml)
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-green.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![DOI (latest)](https://zenodo.org/badge/DOI/10.5281/zenodo.21196107.svg)](https://doi.org/10.5281/zenodo.21196107)
-[![DOI (v1.0.2)](https://zenodo.org/badge/DOI/10.5281/zenodo.22651011.svg)](https://doi.org/10.5281/zenodo.22651011)
+[![DOI (v1.0.3)](https://zenodo.org/badge/DOI/10.5281/zenodo.22651275.svg)](https://doi.org/10.5281/zenodo.22651275)
 <!-- badges: end -->
 
 Compute ATS / ERS-compliant reference values, lower/upper limits of normal,
@@ -196,8 +196,8 @@ truth from the official GLI web calculator at
 
 ## Citations
 
-The tagged v1.0.2 source release is archived on Zenodo at
-[doi:10.5281/zenodo.22651011](https://doi.org/10.5281/zenodo.22651011).
+The tagged v1.0.3 source release is archived on Zenodo at
+[doi:10.5281/zenodo.22651275](https://doi.org/10.5281/zenodo.22651275).
 The Zenodo concept DOI
 [10.5281/zenodo.21196107](https://doi.org/10.5281/zenodo.21196107)
 is version-agnostic and always resolves to the latest archived

@@ -11,9 +11,9 @@ bibentry(
   note    = sprintf(paste0("R package version %s (Zenodo concept DOI: ",
                            "10.5281/zenodo.21196107)"), meta$Version),
   url     = "https://CRAN.R-project.org/package=pft",
-  # Version-specific DOI for v1.0.2; bump when a new release is
+  # Version-specific DOI for v1.0.3; bump when a new release is
   # published on Zenodo.
-  doi     = "10.5281/zenodo.22651011"
+  doi     = "10.5281/zenodo.22651275"
 )
 
 bibentry(
