@@ -1,11 +1,16 @@
 # Bronchodilator response per the Pellegrino 2005 standard
 
 Classifies bronchodilator response (BDR) by the Pellegrino et al. ERJ
-2005 dual criterion: significant if both the relative change from
-baseline is at least 12% AND the absolute change is at least 200 mL.
-Replaced in 2022 by
+2005 dual criterion: significant when the relative change from baseline
+is *strictly greater than* 12% AND the absolute change is *strictly
+greater than* 200 mL. Replaced in 2022 by
 [`pft_bdr()`](https://overdodactyl.github.io/pft/reference/pft_bdr.md)'s
 simpler "\> 10% of predicted" rule.
+
+Both inequalities are strict, matching the paper's disambiguating
+wording on p. 959: "(\>12% of control and \>200 mL)". A change that hits
+either boundary exactly (e.g. exactly 12% or exactly 200 mL) is *not*
+significant under this criterion.
 
 ## Usage
 
@@ -25,9 +30,8 @@ pft_bdr_2005(pre, post)
 A data frame with one row per input observation and three columns:
 `pct_change` (i.e. `(post - pre) / pre * 100`), `abs_change` (i.e.
 `post - pre` in litres), and `is_significant` (logical, `TRUE` when
-`pct_change > 12` AND `abs_change > 0.2`, both inequalities strict per
-the paper's wording on p. 959: "(\>12% of control and \>200 mL)"). `NA`
-propagates wherever either of `pre` / `post` is `NA`.
+`pct_change > 12` AND `abs_change > 0.2`). `NA` propagates wherever
+either of `pre` / `post` is `NA`.
 
 ## Column naming
 
@@ -57,12 +61,27 @@ FEV1 / FVC – only the pre and post measurements.
 ## Examples
 
 ``` r
-pft_bdr_2005(pre = c(2.5, 2.0), post = c(2.8, 2.1))
-#> # A tibble: 2 × 3
+# +25% relative AND +500 mL absolute -> both strict bounds cleared,
+# SIGNIFICANT under the 2005 criterion.
+pft_bdr_2005(pre = 2.0, post = 2.5)
+#> # A tibble: 1 × 3
 #>   pct_change abs_change is_significant
 #>        <dbl>      <dbl> <lgl>         
-#> 1      12         0.300 FALSE         
-#> 2       5.00      0.100 FALSE         
-# -> first row significant (>=12% AND >=200 mL),
-#    second row not (only 5% and 100 mL increase)
+#> 1         25        0.5 TRUE          
+
+# +12% relative exactly and +300 mL absolute: NOT significant, because
+# the 2005 criterion requires strictly >12% (not >=12%).
+pft_bdr_2005(pre = 2.5, post = 2.8)
+#> # A tibble: 1 × 3
+#>   pct_change abs_change is_significant
+#>        <dbl>      <dbl> <lgl>         
+#> 1         12      0.300 FALSE         
+
+# +5% relative and +100 mL absolute: neither bound cleared, NOT
+# significant.
+pft_bdr_2005(pre = 2.0, post = 2.1)
+#> # A tibble: 1 × 3
+#>   pct_change abs_change is_significant
+#>        <dbl>      <dbl> <lgl>         
+#> 1       5.00      0.100 FALSE         
 ```

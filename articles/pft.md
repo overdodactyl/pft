@@ -15,7 +15,7 @@ small cohort.
 ``` r
 
 library(pft)
-#> pft 1.0.1 | Research and education use only. Not validated for diagnostic decision-making; all outputs require clinician interpretation. See citation("pft") for the source reference standards.
+#> pft 1.0.2 | Research and education use only. Not validated for diagnostic decision-making; all outputs require clinician interpretation. See citation("pft") for the source reference standards.
 ```
 
 ## 1. Reference values from demographics alone
@@ -144,7 +144,8 @@ FVC and TLC are normal.
 ## 5. Bronchodilator response
 
 The Stanojevic 2022 BDR criterion is a \>10% change relative to
-predicted in FEV1 or FVC (replacing the 2005 12% / 200 mL rule):
+predicted in FEV1 or FVC (replacing the 2005 rule of strictly \>12% AND
+\>200 mL from baseline):
 
 ``` r
 
@@ -329,7 +330,7 @@ citation("pft")
 #>   Johnson P, Helgeson S (2026). _pft: Reference Values and
 #>   Interpretation for Pulmonary Function Tests_.
 #>   doi:10.5281/zenodo.21196107
-#>   <https://doi.org/10.5281/zenodo.21196107>. R package version 1.0.1,
+#>   <https://doi.org/10.5281/zenodo.21196107>. R package version 1.0.2,
 #>   <https://CRAN.R-project.org/package=pft>.
 #> 
 #> GLI 2012 spirometry equations (year = 2012):

@@ -1,10 +1,10 @@
-# Comprehensive ATS/ERS PFT interpretation in one call
+# One-call ATS/ERS PFT interpretation workflow
 
-`pft_interpret()` is a single-call workflow that combines every
-interpretation primitive in this package into a complete clinical report
-per the Stanojevic et al. ERJ 2022 standard. It auto-detects which
-computations are possible from the input columns and skips anything it
-cannot do:
+`pft_interpret()` combines the core reference-value and routine
+interpretive stages of this package into a one-call research workflow
+following the Stanojevic et al. ERJ 2022 standard. It auto-detects which
+computations are possible from the input columns and skips modalities it
+cannot compute:
 
 - If sex / age / height (and race, for `year = 2012`) are present, it
   computes spirometry reference values via
@@ -24,7 +24,10 @@ cannot do:
 
 - For each measure with a z-score, a `<measure>_severity` column is
   appended via
-  [`pft_severity()`](https://overdodactyl.github.io/pft/reference/pft_severity.md).
+  [`pft_severity()`](https://overdodactyl.github.io/pft/reference/pft_severity.md)
+  (or
+  [`pft_severity_2005()`](https://overdodactyl.github.io/pft/reference/pft_severity_2005.md)
+  when `standard = "2005"`).
 
 - If `fev1_measured`, `fvc_measured`, `fev1fvc_measured`, and
   `tlc_measured` columns are present, the ATS pattern classifier
@@ -39,6 +42,12 @@ cannot do:
   `frc_tlc_uln` are also present, both volume ratios are consulted per
   Stanojevic 2022 Figure 10.
 
+- If the diffusion z-score columns (`dlco_zscore` / `va_zscore` /
+  `kco_tr_zscore`, or their `_si` variants) are present, the Hughes &
+  Pride 2012 diffusion clinical-category classifier
+  ([`pft_diffusion_interpret()`](https://overdodactyl.github.io/pft/reference/pft_diffusion_interpret.md))
+  is applied.
+
 - If `fev1_measured`, `fev1fvc_measured`, and their LLNs are resolvable,
   [`pft_prism()`](https://overdodactyl.github.io/pft/reference/pft_prism.md)
   adds a `prism` flag (independent of TLC).
@@ -46,11 +55,36 @@ cannot do:
 - If `<measure>_pre` and `<measure>_post` columns are present for any
   spirometry measure,
   [`pft_bdr()`](https://overdodactyl.github.io/pft/reference/pft_bdr.md)
-  adds `<measure>_bdr_pct` and `<measure>_bdr_significant` columns.
+  adds `<measure>_bdr_pct` and `<measure>_bdr_significant` columns (or
+  [`pft_bdr_2005()`](https://overdodactyl.github.io/pft/reference/pft_bdr_2005.md)
+  when `standard = "2005"`).
 
-This is the recommended entry point for clinical-style reporting; the
-individual reference and interpretation functions are exported for
-callers who need finer-grained control.
+The following helpers are exported for stand-alone use and are **not**
+invoked automatically by `pft_interpret()`; call them directly when
+needed:
+
+- [`pft_gold()`](https://overdodactyl.github.io/pft/reference/pft_gold.md)
+  – GOLD 1-4 airflow-limitation grading.
+
+- [`pft_fev1q()`](https://overdodactyl.github.io/pft/reference/pft_fev1q.md)
+  – FEV1Q survival index (adult-only).
+
+- [`pft_quality()`](https://overdodactyl.github.io/pft/reference/pft_quality.md)
+  – Graham 2019 A-F spirometry acceptability grading from per-manoeuvre
+  repeatability values.
+
+- [`pft_change()`](https://overdodactyl.github.io/pft/reference/pft_change.md)
+  – Stanojevic 2022 Box 2 conditional-change z-score for paired serial
+  FEV1 z-scores.
+
+- [`pft_dlco_hb_correct()`](https://overdodactyl.github.io/pft/reference/pft_dlco_hb_correct.md)
+  – Cotes 1972 haemoglobin correction for DLCO / TLCO.
+
+This is the recommended entry point for one-call research use; the
+individual reference-value, interpretive, and extension functions are
+exported for callers who need finer-grained control. The wrapper is
+intended for research and education, not for regulated clinical
+decision-making.
 
 ## Usage
 

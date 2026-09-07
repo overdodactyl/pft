@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,10 +49,17 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="pft-development-version">pft (development version)<a class="anchor" aria-label="anchor" href="#pft-development-version"></a></h2>
-<ul><li>Reframed package identity to reflect the multi-standard scope. The package title, README, <code>_pkgdown</code> home block, <code>CITATION</code>, Zenodo metadata, paper, and top-level vignette openings no longer describe <code>pft</code> as an “ERS/ATS 2022” implementation; they now present it as reference-value and interpretation tooling composing GLI, ATS/ERS, and GOLD standards, with the 2022 ATS/ERS interpretive statement called out as the most recent standard at the time of the current release. Function names, output column suffixes, argument defaults, and provenance citations are unchanged.</li>
+<h2 class="pkg-version" data-toc-text="1.0.2" id="pft-102">pft 1.0.2<a class="anchor" aria-label="anchor" href="#pft-102"></a></h2>
+<p>Documentation-only patch release. No user-facing behaviour changes. This release resolves internal inconsistencies flagged during the SoftwareX manuscript review.</p>
+<ul><li>
+<code><a href="../reference/pft_bdr_2005.html">pft_bdr_2005()</a></code>: rewrote the description and example to remove “at least 12% / at least 200 mL” wording, which conflicted with the implementation and tests. Both the implementation and the Pellegrino et al. ERJ 2005 source (p. 959, “(&gt;12% of control and &gt;200 mL)”) use <em>strictly greater than</em> 12% AND <em>strictly greater than</em> 200 mL; the documentation now says so, and the example demonstrates a boundary case (12% exactly with +300 mL, which is not significant) alongside a clear-significant case and a clear-negative case. The behavior tests already covered this convention and were not changed; additional boundary-condition tests were added for defensiveness.</li>
+<li>
+<code><a href="../reference/pft_interpret.html">pft_interpret()</a></code>: replaced “combines every interpretation primitive in this package into a complete clinical report” with wording that more accurately describes the one-call research workflow, and explicitly noted the helpers that are <em>not</em> auto-run (<code><a href="../reference/pft_gold.html">pft_gold()</a></code>, <code><a href="../reference/pft_fev1q.html">pft_fev1q()</a></code>, <code><a href="../reference/pft_quality.html">pft_quality()</a></code>, <code><a href="../reference/pft_change.html">pft_change()</a></code>, <code><a href="../reference/pft_dlco_hb_correct.html">pft_dlco_hb_correct()</a></code>).</li>
+<li>
+<code><a href="../reference/pft_change.html">pft_change()</a></code> documentation: no wording changes were needed, but the SoftwareX manuscript no longer describes the function as “scalar-valued”; it returns a row-wise tibble with <code>ccs</code>, <code>r_used</code>, and <code>is_significant</code>.</li>
+<li>Reframed package identity to reflect the multi-standard scope. The package title, README, <code>_pkgdown</code> home block, <code>CITATION</code>, Zenodo metadata, paper, and top-level vignette openings no longer describe <code>pft</code> as an “ERS/ATS 2022” implementation; they now present it as reference-value and interpretation tooling composing GLI, ATS/ERS, and GOLD standards, with the 2022 ATS/ERS interpretive statement called out as the most recent standard at the time of the current release. Function names, output column suffixes, argument defaults, and provenance citations are unchanged.</li>
 <li>Renamed the <code>_pkgdown</code> reference-index section “Predecessor 2005 standard” to “Legacy interpretive primitives”.</li>
-<li>Reconciled paper’s GOLD citation from GOLD 2024 to GOLD 2026 to match <code>R/gold.R</code> and <code>R/constants.R</code>.</li>
+<li>Vignette wording (<code>pft.Rmd</code>, <code>glossary.Rmd</code>, <code>interpretation-guide.Rmd</code>) updated so the 2005 BDR criterion is quoted as strict <code>&gt;12% AND &gt;200 mL</code>, matching implementation and tests.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.1" id="pft-101">pft 1.0.1<a class="anchor" aria-label="anchor" href="#pft-101"></a></h2><p class="text-muted">CRAN release: 2026-07-11</p>
@@ -141,7 +148,7 @@
 <li>
 <code>pft_severity_2005(pctpred)</code> grades severity from FEV1 percent predicted into the five Pellegrino bands (mild / moderate / moderately severe / severe / very severe).</li>
 <li>
-<code>pft_bdr_2005(pre, post)</code> applies the dual &gt;=12% AND &gt;=200 mL criterion from the 2005 standard, without needing the patient’s predicted value.</li>
+<code>pft_bdr_2005(pre, post)</code> applies the dual &gt;12% AND &gt;200 mL criterion from the 2005 standard (both inequalities strict per Pellegrino 2005 p. 959), without needing the patient’s predicted value.</li>
 <li>
 <code><a href="../reference/pft_interpret.html">pft_interpret()</a></code> gains a matching <code>standard = c("2022", "2005")</code> argument that dispatches all three primitives to the 2005 forms in one call. <code>year</code> (GLI equation year) and <code>standard</code> (interpretive rules) are independent – you can pair GLI 2022 race-neutral equations with the 2005 interpretive logic, or any other combination, for nuanced reclassification analyses.</li>
 </ul></div>

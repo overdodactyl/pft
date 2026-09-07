@@ -119,7 +119,8 @@ separate label by
 **more than 10% of the predicted value** in FEV1 or FVC between pre- and
 post-bronchodilator measurements. Implemented by
 [`pft_bdr()`](https://overdodactyl.github.io/pft/reference/pft_bdr.md).
-Replaces the 2005 standard (≥12% AND ≥200 mL from baseline).
+Replaces the 2005 standard (strictly \>12% AND strictly \>200 mL from
+baseline; both inequalities strict per Pellegrino 2005 p. 959).
 
 **Severity grading** — Per Stanojevic 2022, a uniform three-level system
 applied to any z-score:

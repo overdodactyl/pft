@@ -114,7 +114,7 @@ The two standards differ in three ways:
 | Aspect                  | Current (Stanojevic 2022) | Legacy (Pellegrino 2005) |
 |-------------------------|---------------------------|--------------------------|
 | Severity input          | z-score                   | % predicted (FEV1)       |
-| Bronchodilator response | \> 10 % predicted         | \>= 12 % AND \>= 200 mL  |
+| Bronchodilator response | \> 10 % predicted         | \> 12 % AND \> 200 mL    |
 | Pattern flowchart       | Fig 8 / Table 5           | Fig 2                    |
 
 The current standard is the recommended default and is what

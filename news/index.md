@@ -1,7 +1,36 @@
 # Changelog
 
-## pft (development version)
+## pft 1.0.2
 
+Documentation-only patch release. No user-facing behaviour changes. This
+release resolves internal inconsistencies flagged during the SoftwareX
+manuscript review.
+
+- [`pft_bdr_2005()`](https://overdodactyl.github.io/pft/reference/pft_bdr_2005.md):
+  rewrote the description and example to remove “at least 12% / at least
+  200 mL” wording, which conflicted with the implementation and tests.
+  Both the implementation and the Pellegrino et al. ERJ 2005 source
+  (p. 959, “(\>12% of control and \>200 mL)”) use *strictly greater
+  than* 12% AND *strictly greater than* 200 mL; the documentation now
+  says so, and the example demonstrates a boundary case (12% exactly
+  with +300 mL, which is not significant) alongside a clear-significant
+  case and a clear-negative case. The behavior tests already covered
+  this convention and were not changed; additional boundary-condition
+  tests were added for defensiveness.
+- [`pft_interpret()`](https://overdodactyl.github.io/pft/reference/pft_interpret.md):
+  replaced “combines every interpretation primitive in this package into
+  a complete clinical report” with wording that more accurately
+  describes the one-call research workflow, and explicitly noted the
+  helpers that are *not* auto-run
+  ([`pft_gold()`](https://overdodactyl.github.io/pft/reference/pft_gold.md),
+  [`pft_fev1q()`](https://overdodactyl.github.io/pft/reference/pft_fev1q.md),
+  [`pft_quality()`](https://overdodactyl.github.io/pft/reference/pft_quality.md),
+  [`pft_change()`](https://overdodactyl.github.io/pft/reference/pft_change.md),
+  [`pft_dlco_hb_correct()`](https://overdodactyl.github.io/pft/reference/pft_dlco_hb_correct.md)).
+- [`pft_change()`](https://overdodactyl.github.io/pft/reference/pft_change.md)
+  documentation: no wording changes were needed, but the SoftwareX
+  manuscript no longer describes the function as “scalar-valued”; it
+  returns a row-wise tibble with `ccs`, `r_used`, and `is_significant`.
 - Reframed package identity to reflect the multi-standard scope. The
   package title, README, `_pkgdown` home block, `CITATION`, Zenodo
   metadata, paper, and top-level vignette openings no longer describe
@@ -13,8 +42,10 @@
   provenance citations are unchanged.
 - Renamed the `_pkgdown` reference-index section “Predecessor 2005
   standard” to “Legacy interpretive primitives”.
-- Reconciled paper’s GOLD citation from GOLD 2024 to GOLD 2026 to match
-  `R/gold.R` and `R/constants.R`.
+- Vignette wording (`pft.Rmd`, `glossary.Rmd`,
+  `interpretation-guide.Rmd`) updated so the 2005 BDR criterion is
+  quoted as strict `>12% AND >200 mL`, matching implementation and
+  tests.
 
 ## pft 1.0.1
 
@@ -296,9 +327,10 @@ source PDF (`papers/pellegrino_2005/`); the extraction is documented in
 - `pft_severity_2005(pctpred)` grades severity from FEV1 percent
   predicted into the five Pellegrino bands (mild / moderate / moderately
   severe / severe / very severe).
-- `pft_bdr_2005(pre, post)` applies the dual \>=12% AND \>=200 mL
-  criterion from the 2005 standard, without needing the patient’s
-  predicted value.
+- `pft_bdr_2005(pre, post)` applies the dual \>12% AND \>200 mL
+  criterion from the 2005 standard (both inequalities strict per
+  Pellegrino 2005 p. 959), without needing the patient’s predicted
+  value.
 - [`pft_interpret()`](https://overdodactyl.github.io/pft/reference/pft_interpret.md)
   gains a matching `standard = c("2022", "2005")` argument that
   dispatches all three primitives to the 2005 forms in one call. `year`

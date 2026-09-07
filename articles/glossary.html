@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pft</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -186,8 +186,9 @@ into “Obstructed” when FEV1/FVC is below LLN).</p>
 <p><strong>BDR (bronchodilator response)</strong> — Per Stanojevic 2022:
 a change of <strong>more than 10% of the predicted value</strong> in
 FEV1 or FVC between pre- and post-bronchodilator measurements.
-Implemented by <code><a href="../reference/pft_bdr.html">pft_bdr()</a></code>. Replaces the 2005 standard (≥12%
-AND ≥200 mL from baseline).</p>
+Implemented by <code><a href="../reference/pft_bdr.html">pft_bdr()</a></code>. Replaces the 2005 standard
+(strictly &gt;12% AND strictly &gt;200 mL from baseline; both
+inequalities strict per Pellegrino 2005 p. 959).</p>
 <p><strong>Severity grading</strong> — Per Stanojevic 2022, a uniform
 three-level system applied to any z-score:</p>
 <table class="table">

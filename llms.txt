@@ -331,7 +331,7 @@ End-to-end interpretation in a single call, input QC, and clinical-style
 visualisation.
 
 - [`pft_interpret()`](https://overdodactyl.github.io/pft/reference/pft_interpret.md)
-  : Comprehensive ATS/ERS PFT interpretation in one call
+  : One-call ATS/ERS PFT interpretation workflow
 - [`pft_plot()`](https://overdodactyl.github.io/pft/reference/pft_plot.md)
   : Clinical visualisation for a single PFT result
 
