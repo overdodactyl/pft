@@ -14,7 +14,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/overdodactyl/pft/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/overdodactyl/pft/blob/v1.0.2/inst/CITATION)
 
 Johnson P, Helgeson S (2026). *pft: Reference Values and Interpretation
 for Pulmonary Function Tests*.
