@@ -96,12 +96,24 @@ pft_severity_2005 <- function(pctpred) {
 #' the 2022 criterion). The two functions deliberately use distinct
 #' column names so a result frame can carry both without ambiguity.
 #'
+#' @section Boundary convention (why strict `>`):
+#' The Pellegrino et al. ERJ 2005 paper is internally inconsistent on
+#' operator symbols: Table 6 uses inclusive symbols (`>=12%`,
+#' `>=200 mL`), while the running text on p. 959 disambiguates the
+#' rule as `"(>12% of control and >200 mL)"` -- strict `>` on both
+#' criteria. This implementation follows the running-text convention,
+#' matching the more specific of the two source formulations. Callers
+#' who prefer the inclusive Table 6 convention can trivially test
+#' equality themselves against the `pct_change` and `abs_change`
+#' columns; a mixed-convention wrapper is out of scope for this
+#' package.
+#'
 #' @references
 #' Pellegrino R, Viegi G, Brusasco V, et al. Interpretative strategies
 #' for lung function tests. Eur Respir J. 2005;26(5):948-968.
 #' \doi{10.1183/09031936.05.00035205}. Criterion stated in the
 #' "Bronchodilator response" section (p. 958) and disambiguated on
-#' p. 959.
+#' p. 959; Table 6 uses inclusive symbols.
 #'
 #' @seealso [pft_bdr()] for the current Stanojevic 2022 criterion
 #'   (>10% of predicted). Unlike the 2022 form, the 2005 version does

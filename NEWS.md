@@ -1,3 +1,29 @@
+# pft 1.0.3
+
+Documentation-only patch release. No user-facing behaviour changes.
+This release folds in additional refinements from the SoftwareX
+manuscript review (round 2):
+
+* `pft_bdr_2005()`: added an explicit Boundary-convention section to
+  the roxygen docs explaining why the implementation follows the
+  Pellegrino 2005 running-text (strict `>`) formulation over the
+  Table 6 inclusive-symbol formulation. Vignette (`interpretation-guide`)
+  cross-references the note.
+* `pft_interpret()` wording sweep: README table now describes the
+  wrapper as a "one-call research workflow" that runs only the
+  routine 2022 primitives, and the "all functions take a data frame
+  and return a data frame" claim was corrected to name the actual
+  exceptions.
+* `CITATION.cff` and `inst/CITATION` now use the version-specific
+  Zenodo DOI (with the concept DOI called out separately as the
+  version-agnostic identifier).
+* `inst/benchmarks/pft_interpret_benchmark.R` rewritten to run a
+  warm-up plus five measured repetitions and report the median
+  elapsed time, and to use the same physiologically constrained
+  synthetic cohort generator (FEV1 <= FVC, TLC > FVC) that the
+  SoftwareX manuscript now uses for its reclassification example.
+
+
 # pft 1.0.2
 
 Documentation-only patch release. No user-facing behaviour changes.
@@ -350,12 +376,14 @@ extraction is documented in
 
 ## Workflow wrappers
 
-* `pft_interpret(data)` is a single-call workflow that auto-detects
-  which inputs are present and emits a complete Stanojevic
-  2022-compliant interpretation: reference values, z-scores, percent
-  predicted, severity grading, ATS pattern, PRISm flag, and
-  bronchodilator response. This is the recommended entry point for
-  clinical-style reporting.
+* `pft_interpret(data)` is a one-call research workflow that
+  auto-detects which inputs are present and appends the Stanojevic
+  2022 reference values, z-scores, percent predicted, severity
+  grading, ATS pattern, PRISm flag, and bronchodilator response for
+  modalities the caller supplied. Standalone helpers (`pft_gold()`,
+  `pft_fev1q()`, `pft_quality()`, `pft_change()`, and
+  `pft_dlco_hb_correct()`) are exported for stand-alone use and are
+  not run automatically.
 * `pft_plot(result)` generates a clinical-style z-score lollipop plot
   with severity-band shading. Requires `ggplot2` (Suggests).
 

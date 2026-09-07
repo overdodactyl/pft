@@ -7,7 +7,8 @@
 [![Codecov test coverage](https://codecov.io/gh/overdodactyl/pft/graph/badge.svg)](https://app.codecov.io/gh/overdodactyl/pft)
 [![pkgdown](https://github.com/overdodactyl/pft/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/overdodactyl/pft/actions/workflows/pkgdown.yaml)
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-green.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21196107.svg)](https://doi.org/10.5281/zenodo.21196107)
+[![DOI (latest)](https://zenodo.org/badge/DOI/10.5281/zenodo.21196107.svg)](https://doi.org/10.5281/zenodo.21196107)
+[![DOI (v1.0.2)](https://zenodo.org/badge/DOI/10.5281/zenodo.22651011.svg)](https://doi.org/10.5281/zenodo.22651011)
 <!-- badges: end -->
 
 Compute ATS / ERS-compliant reference values, lower/upper limits of normal,
@@ -80,7 +81,7 @@ Spirometry outputs additionally carry a four-digit GLI-year suffix (e.g. `fev1_p
 
 | Function | Purpose | Source |
 |---|---|---|
-| `pft_interpret()` | Single-call wrapper combining every primitive below | Stanojevic 2022 |
+| `pft_interpret()` | One-call research workflow auto-running the reference-value and routine 2022 interpretive stages (see `?pft_interpret` for the exact list; standalone helpers are not run) | Stanojevic 2022 |
 | `pft_classify()` | Normal / Non-specific / Obstructed / Restricted / Mixed | Stanojevic 2022 Fig 8, Tables 5/8 |
 | `pft_volume_subpattern()` | Six lung-volume sub-patterns (Hyperinflation, Simple/Complex restriction, etc.) | Stanojevic 2022 Fig 10 |
 | `pft_severity()` | normal / mild / moderate / severe per measure z-score | Stanojevic 2022 |
@@ -95,8 +96,12 @@ Spirometry outputs additionally carry a four-digit GLI-year suffix (e.g. `fev1_p
 | `pft_plot()` | Single-patient z-score lollipop with severity bands | — |
 | `pft_long()` | Wide → long pivot; `broom::tidy` dispatches to it | — |
 
-All functions take a data frame and return a data frame, so they
-compose with `dplyr` pipelines.
+Most reference-value and interpretive functions take a data frame and
+return a data frame with new columns appended, so they compose with
+`dplyr` pipelines. Exceptions: `pft_change()`, `pft_severity()`,
+`pft_severity_2005()`, `pft_gold()`, `pft_fev1q()`, and
+`pft_quality()` take vector or paired inputs rather than a data
+frame, and `pft_plot()` returns a `ggplot` object.
 
 ## Quick start
 
@@ -190,6 +195,16 @@ truth from the official GLI web calculator at
 [gli-calculator.ersnet.org](http://gli-calculator.ersnet.org).
 
 ## Citations
+
+The tagged v1.0.2 source release is archived on Zenodo at
+[doi:10.5281/zenodo.22651011](https://doi.org/10.5281/zenodo.22651011).
+The Zenodo concept DOI
+[10.5281/zenodo.21196107](https://doi.org/10.5281/zenodo.21196107)
+is version-agnostic and always resolves to the latest archived
+release. Use the version-specific DOI when citing a specific version
+of the software; use the concept DOI when a version-agnostic reference
+is preferred. `citation("pft")` returns a `bibentry` that includes the
+version-specific DOI.
 
 Reference equations:
 

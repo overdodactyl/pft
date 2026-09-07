@@ -8,9 +8,12 @@ bibentry(
   author  = c(person("Pat", "Johnson"),
               person("Scott", "Helgeson")),
   year    = format(Sys.Date(), "%Y"),
-  note    = sprintf("R package version %s", meta$Version),
+  note    = sprintf(paste0("R package version %s (Zenodo concept DOI: ",
+                           "10.5281/zenodo.21196107)"), meta$Version),
   url     = "https://CRAN.R-project.org/package=pft",
-  doi     = "10.5281/zenodo.21196107"
+  # Version-specific DOI for v1.0.2; bump when a new release is
+  # published on Zenodo.
+  doi     = "10.5281/zenodo.22651011"
 )
 
 bibentry(

@@ -1,38 +1,60 @@
 # Benchmark for pft::pft_interpret() cited in the SoftwareX paper.
 #
-# Reported result (paper Sec. 4, "Impact"):
-#   n = 100,000 synthetic records completed in ~4.2 s (~24k rows/s) on an
-#   AMD EPYC 9554P Linux host, R 4.2.2, single serial R session.
+# Protocol (kept minimal so it does not add a runtime dependency):
+#   1. fixed-seed cohort generator, physiologically constrained so
+#      FEV1 <= FVC and TLC > FVC (matches the paper's Section 3.2
+#      generator);
+#   2. one warm-up run at n = 1,000 (results discarded);
+#   3. `reps` measured repetitions at n = 100,000 in a fresh serial
+#      R session, reporting median elapsed time and range;
+#   4. `sessionInfo()` printed for provenance.
 #
 # Re-run with:
 #   Rscript inst/benchmarks/pft_interpret_benchmark.R
 #
-# Prints elapsed time for n = 10,000 and n = 100,000 and reports
-# sessionInfo() so hardware/software can be documented alongside results.
+# Do not add a benchmark package to Imports/Suggests just to time
+# this. `system.time()` is sufficient.
 
 suppressPackageStartupMessages(library(pft))
 
-bench_one <- function(n, seed = 1L) {
+reps <- 5L
+
+make_cohort <- function(n, seed = 1L) {
   set.seed(seed)
-  cohort <- data.frame(
+  fvc      <- runif(n, 2.0, 5.0)
+  fev1fvc  <- runif(n, 0.45, 0.90)
+  data.frame(
     sex              = sample(c("M", "F"), n, replace = TRUE),
     age              = runif(n, 20, 80),
     height           = runif(n, 150, 190),
-    fev1_measured    = runif(n, 1.5, 4.5),
-    fvc_measured     = runif(n, 2.0, 5.5),
-    fev1fvc_measured = runif(n, 0.5, 0.9),
-    tlc_measured     = runif(n, 3.5, 7.5)
+    fvc_measured     = fvc,
+    fev1fvc_measured = fev1fvc,
+    fev1_measured    = fev1fvc * fvc,
+    tlc_measured     = fvc + runif(n, 0.3, 2.5)
   )
-  elapsed <- system.time(pft_interpret(cohort))["elapsed"]
-  cat(sprintf("n = %8d  elapsed = %6.3f s  (%6.0f rows/s)\n",
-              n, elapsed, n / elapsed))
-  invisible(elapsed)
 }
 
-# Warm-up + timed runs
+bench_one <- function(n, seed = 1L) {
+  cohort <- make_cohort(n, seed = seed)
+  system.time(pft_interpret(cohort))[["elapsed"]]
+}
+
+# Warm-up (discarded) so JIT / one-time setup does not bias the first
+# measured n = 100,000 run.
 invisible(bench_one(1000L))
-bench_one(10000L)
-bench_one(100000L)
+
+# Measured repetitions on the paper-cited n = 100,000 cohort. Reseed
+# per-rep so successive runs use the same input.
+elapsed <- vapply(seq_len(reps),
+                  function(i) bench_one(100000L, seed = i),
+                  numeric(1))
+
+cat(sprintf("n = 100,000  reps = %d\n", reps))
+cat(sprintf("elapsed per rep (s): %s\n",
+            paste(sprintf("%.3f", elapsed), collapse = " ")))
+cat(sprintf("median = %.3f s  min = %.3f s  max = %.3f s\n",
+            median(elapsed), min(elapsed), max(elapsed)))
+cat(sprintf("median rate = %.0f rows/s\n", 100000 / median(elapsed)))
 
 cat("\n--- sessionInfo() ---\n")
 print(sessionInfo())
