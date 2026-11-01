@@ -2,17 +2,21 @@
 % Please edit documentation in R/interpretation.R
 \name{pft_bdr}
 \alias{pft_bdr}
-\title{Bronchodilator response per the current ATS/ERS criterion}
+\title{Bronchodilator response per the ERS/ATS 2022 criterion}
 \usage{
 pft_bdr(pre, post, predicted, threshold = BDR_THRESHOLD_PCT_PRED)
 }
 \arguments{
-\item{pre, post}{Numeric vectors of pre- and post-bronchodilator
-measurements (same units, same length).}
+\item{pre}{Numeric vector of baseline measurements obtained before
+bronchodilator administration.}
+
+\item{post}{Numeric vector of the corresponding measurements obtained
+after bronchodilator administration, in the same units and of the
+same length as \code{pre}.}
 
 \item{predicted}{Numeric vector of predicted (median) values for the
-same measure, typically the \verb{<measure>_pred} column from a previous
-call to \code{pft_spirometry()}.}
+same measure and units, typically the \verb{<measure>_pred_<year>}
+column from a previous call to \code{pft_spirometry()}.}
 
 \item{threshold}{Percent-of-predicted change considered significant.
 Defaults to 10 (the Stanojevic 2022 criterion).}
@@ -33,6 +37,19 @@ as a post-bronchodilator increase of more than 10\% of the predicted
 value in either FEV1 or FVC. This replaces the 2005 standard, which
 used a >=12\% AND >=200 mL change from baseline.
 }
+\section{Pre- and post-bronchodilator values}{
+
+\code{pre} is the baseline measurement obtained \strong{before} bronchodilator
+administration; \code{post} is the corresponding measurement obtained
+\strong{after} bronchodilator administration under the laboratory's
+testing protocol. Each \code{pre}/\code{post} pair must refer to the same
+physiologic measure in the same units and belong to the same paired
+assessment. The caller identifies which values are pre and post;
+\code{pft} does not infer test phase from timestamps, values, medication
+records, or curve shape, and it interprets the supplied labels
+literally.
+}
+
 \section{Column naming}{
 
 This function's \code{pct_pred_change} column is \strong{percent-of-predicted}

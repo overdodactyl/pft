@@ -93,9 +93,27 @@
 #' @details
 #' To trigger z-scores and percent-predicted on a measure, include the
 #' corresponding `<measure>_measured` column in `data` (e.g.
-#' `fev1_measured`, `frc_measured`, `dlco_measured`). To trigger BDR,
-#' include `<measure>_pre` and `<measure>_post` columns for any of FEV1,
-#' FVC, FEV1/FVC.
+#' `fev1_measured`, `frc_measured`, `dlco_measured`).
+#'
+#' To trigger BDR, include both columns of one or more of the pairs
+#' `fev1_pre` / `fev1_post`, `fvc_pre` / `fvc_post`, and
+#' `fev1fvc_pre` / `fev1fvc_post`. A `_pre` column holds the baseline
+#' value obtained before bronchodilator administration, and the
+#' matching `_post` column holds the value obtained after
+#' bronchodilator administration under the laboratory's protocol, in
+#' the same units. These labels are interpreted literally: `pft` does
+#' not infer pre/post status from timestamps, values, medication
+#' records, or curve shape, and the `_measured` columns are not used
+#' for BDR. Under `standard = "2022"` the BDR denominator is the
+#' `<measure>_pred_<year>` column, so the spirometry reference values
+#' must be computable for that row.
+#'
+#' Diffusion units follow `SI.units`; measured diffusion columns must
+#' already be in that unit system (see [pft_diffusion()]).
+#'
+#' No fixed number of decimal places is required for any numeric
+#' input. `pft` does not screen measured values for physiologic
+#' plausibility or technical quality; see `vignette("input-format")`.
 #'
 #' All outputs trace to a specific equation, table, or figure in
 #' Stanojevic et al. ERJ 2022 or the underlying GLI reference papers; see

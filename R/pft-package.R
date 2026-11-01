@@ -18,7 +18,7 @@
 #' The ATS/ERS technical standard implemented by [pft_classify()],
 #' [pft_severity()], [pft_bdr()], [pft_prism()], and [pft_change()] is
 #' Stanojevic et al. 2022, which is the most recent interpretive
-#' standard from these societies as of the current package release.
+#' standard from these societies as of this package release.
 #' Older standards (Pellegrino et al. 2005) remain available for
 #' reclassification and comparison work via `pft_severity_2005()`,
 #' `pft_bdr_2005()`, and the `standard = "2005"` argument to
@@ -59,8 +59,18 @@
 #' * **Age** is in years (decimal allowed).
 #' * **Height** is in centimetres.
 #' * **Volumes** (FEV1, FVC, FRC, TLC, RV, ERV, IC, VC) are in litres.
-#' * **DLCO / TLCO** are reported in the units the function emits
-#'   (controlled by `SI.units` in [pft_diffusion()]).
+#' * **DLCO / TLCO** units are selected by the caller with `SI.units`
+#'   in [pft_diffusion()] / [pft_interpret()]: traditional (DLCO,
+#'   mL/min/mmHg) by default, SI (TLCO, mmol/min/kPa) when `TRUE`.
+#'   Measured diffusion columns must already be in the selected unit
+#'   system; units are never inferred from numeric magnitude.
+#' * **Numeric precision**: no fixed number of decimal places is
+#'   required; values are used at the precision supplied.
+#' * **Plausibility**: `pft` checks that required columns are present
+#'   and that ages fall within each source equation's range (out-of-
+#'   range rows return `NA`), but it does not screen measured values
+#'   for physiologic plausibility or technical quality. Callers are
+#'   responsible for validating source data and units.
 #' * **z-scores** use the LMS-based formula
 #'   `z = ((measured / M)^L - 1) / (L * S)` and are SIGNED such that
 #'   values below 0 are below the predicted median.
@@ -113,8 +123,13 @@
 #'   NHANES III and JRS.
 #' * Ethnic groups outside the five recognised by GLI 2012 (Caucasian,
 #'   African American, North-East Asian, South-East Asian, Other/mixed).
-#'   The GLI Global 2022 equations are race-neutral and apply across
-#'   ancestral groups.
+#'   The GLI Global 2022 spirometry equations are race-neutral and
+#'   apply across ancestral groups. This does not extend to lung
+#'   volumes or diffusion: the GLI 2021 static lung-volume equations
+#'   were derived from participants of European ancestry, and the GLI
+#'   2017 TLCO/DLCO equations are described by their source
+#'   publication as being for Caucasians (see the "Applicability"
+#'   sections of [pft_volumes()] and [pft_diffusion()]).
 #' * Pre-school spirometry (ages < 3).
 #' * Bronchial challenge testing (PC20 methacholine, mannitol).
 #' * Cardiopulmonary exercise testing.

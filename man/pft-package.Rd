@@ -25,7 +25,7 @@ retained for cross-standard reclassification analyses.
 The ATS/ERS technical standard implemented by \code{\link[=pft_classify]{pft_classify()}},
 \code{\link[=pft_severity]{pft_severity()}}, \code{\link[=pft_bdr]{pft_bdr()}}, \code{\link[=pft_prism]{pft_prism()}}, and \code{\link[=pft_change]{pft_change()}} is
 Stanojevic et al. 2022, which is the most recent interpretive
-standard from these societies as of the current package release.
+standard from these societies as of this package release.
 Older standards (Pellegrino et al. 2005) remain available for
 reclassification and comparison work via \code{pft_severity_2005()},
 \code{pft_bdr_2005()}, and the \code{standard = "2005"} argument to
@@ -69,8 +69,18 @@ values (\code{"X"}, \code{"Unknown"}, etc.) are treated as missing.
 \item \strong{Age} is in years (decimal allowed).
 \item \strong{Height} is in centimetres.
 \item \strong{Volumes} (FEV1, FVC, FRC, TLC, RV, ERV, IC, VC) are in litres.
-\item \strong{DLCO / TLCO} are reported in the units the function emits
-(controlled by \code{SI.units} in \code{\link[=pft_diffusion]{pft_diffusion()}}).
+\item \strong{DLCO / TLCO} units are selected by the caller with \code{SI.units}
+in \code{\link[=pft_diffusion]{pft_diffusion()}} / \code{\link[=pft_interpret]{pft_interpret()}}: traditional (DLCO,
+mL/min/mmHg) by default, SI (TLCO, mmol/min/kPa) when \code{TRUE}.
+Measured diffusion columns must already be in the selected unit
+system; units are never inferred from numeric magnitude.
+\item \strong{Numeric precision}: no fixed number of decimal places is
+required; values are used at the precision supplied.
+\item \strong{Plausibility}: \code{pft} checks that required columns are present
+and that ages fall within each source equation's range (out-of-
+range rows return \code{NA}), but it does not screen measured values
+for physiologic plausibility or technical quality. Callers are
+responsible for validating source data and units.
 \item \strong{z-scores} use the LMS-based formula
 \code{z = ((measured / M)^L - 1) / (L * S)} and are SIGNED such that
 values below 0 are below the predicted median.
@@ -130,8 +140,13 @@ ECSC, Knudson, Crapo, Hankinson, etc.). Use the rspiro package for
 NHANES III and JRS.
 \item Ethnic groups outside the five recognised by GLI 2012 (Caucasian,
 African American, North-East Asian, South-East Asian, Other/mixed).
-The GLI Global 2022 equations are race-neutral and apply across
-ancestral groups.
+The GLI Global 2022 spirometry equations are race-neutral and
+apply across ancestral groups. This does not extend to lung
+volumes or diffusion: the GLI 2021 static lung-volume equations
+were derived from participants of European ancestry, and the GLI
+2017 TLCO/DLCO equations are described by their source
+publication as being for Caucasians (see the "Applicability"
+sections of \code{\link[=pft_volumes]{pft_volumes()}} and \code{\link[=pft_diffusion]{pft_diffusion()}}).
 \item Pre-school spirometry (ages < 3).
 \item Bronchial challenge testing (PC20 methacholine, mannitol).
 \item Cardiopulmonary exercise testing.

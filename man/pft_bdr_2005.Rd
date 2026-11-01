@@ -7,8 +7,10 @@
 pft_bdr_2005(pre, post)
 }
 \arguments{
-\item{pre, post}{Numeric vectors of pre- and post-bronchodilator
-measurements, in litres, same length.}
+\item{pre, post}{Numeric vectors of baseline (pre-bronchodilator)
+and corresponding post-bronchodilator measurements, in litres,
+same length. As with \code{\link[=pft_bdr]{pft_bdr()}}, the caller identifies which
+values are pre and post; \code{pft} does not infer test phase.}
 }
 \value{
 A data frame with one row per input observation and three

@@ -49,7 +49,7 @@ pft_severity <- function(zscore) {
 }
 
 
-#' @title Bronchodilator response per the current ATS/ERS criterion
+#' @title Bronchodilator response per the ERS/ATS 2022 criterion
 #'
 #' @description
 #' Classifies bronchodilator response (BDR) by the percent change in
@@ -59,11 +59,14 @@ pft_severity <- function(zscore) {
 #' value in either FEV1 or FVC. This replaces the 2005 standard, which
 #' used a >=12% AND >=200 mL change from baseline.
 #'
-#' @param pre,post Numeric vectors of pre- and post-bronchodilator
-#'   measurements (same units, same length).
+#' @param pre Numeric vector of baseline measurements obtained before
+#'   bronchodilator administration.
+#' @param post Numeric vector of the corresponding measurements obtained
+#'   after bronchodilator administration, in the same units and of the
+#'   same length as `pre`.
 #' @param predicted Numeric vector of predicted (median) values for the
-#'   same measure, typically the `<measure>_pred` column from a previous
-#'   call to `pft_spirometry()`.
+#'   same measure and units, typically the `<measure>_pred_<year>`
+#'   column from a previous call to `pft_spirometry()`.
 #' @param threshold Percent-of-predicted change considered significant.
 #'   Defaults to 10 (the Stanojevic 2022 criterion).
 #'
@@ -71,6 +74,17 @@ pft_severity <- function(zscore) {
 #'   - `pct_pred_change`: `(post - pre) / predicted * 100`.
 #'   - `is_significant`: logical, `TRUE` when `pct_pred_change > threshold`.
 #'   `NA` is propagated wherever any of `pre`, `post`, `predicted` is `NA`.
+#'
+#' @section Pre- and post-bronchodilator values:
+#' `pre` is the baseline measurement obtained **before** bronchodilator
+#' administration; `post` is the corresponding measurement obtained
+#' **after** bronchodilator administration under the laboratory's
+#' testing protocol. Each `pre`/`post` pair must refer to the same
+#' physiologic measure in the same units and belong to the same paired
+#' assessment. The caller identifies which values are pre and post;
+#' `pft` does not infer test phase from timestamps, values, medication
+#' records, or curve shape, and it interprets the supplied labels
+#' literally.
 #'
 #' @section Column naming:
 #' This function's `pct_pred_change` column is **percent-of-predicted**
