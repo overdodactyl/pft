@@ -10,11 +10,12 @@
 pulmonary function tests. Reference values come from the GLI family
 of equations (GLI 2012 and GLI Global 2022 spirometry, GLI 2021
 static lung volumes, GLI 2017 TLCO with the 2020 author correction).
-Interpretive primitives implement the current ATS/ERS technical
+Interpretive primitives implement the ERS/ATS 2022 technical
 standard (Stanojevic et al. 2022) for pattern classification,
 severity grading, bronchodilator response, PRISm screening, and
-conditional-change z-scores, alongside GOLD airflow-limitation
-grading, Graham 2019 spirometry quality grades, hemoglobin
+conditional-change z-scores, alongside the GOLD 2026 spirometric
+airflow-limitation grade, the Graham 2019 spirometry session grade
+computed from already-accepted maneuvers, hemoglobin
 correction, the FEV1Q survival index, and a ggplot2-based clinical
 lollipop figure. Pellegrino et al. 2005 legacy primitives are
 retained for cross-standard reclassification analyses.
@@ -102,14 +103,17 @@ The 2020 author correction (\doi{10.1183/13993003.50010-2017}) is
 the version implemented.
 \item \strong{Spirometry acquisition standard 2019}: Graham et al.
 \emph{Am J Respir Crit Care Med} 2019;200(8):e70-e88.
-\doi{10.1164/rccm.201908-1590ST}. Implemented by \code{\link[=pft_quality]{pft_quality()}}.
+\doi{10.1164/rccm.201908-1590ST}. \code{\link[=pft_quality]{pft_quality()}} implements the
+Table 10 session grade from maneuvers already judged acceptable by
+technical review; it does not assess acceptability itself.
 \item \strong{Interpretive strategy 2022}: Stanojevic et al. \emph{Eur Respir J}
 2022;60(1):2101499. \doi{10.1183/13993003.01499-2021}. Implemented
 by \code{\link[=pft_classify]{pft_classify()}}, \code{\link[=pft_severity]{pft_severity()}}, \code{\link[=pft_bdr]{pft_bdr()}}, \code{\link[=pft_prism]{pft_prism()}},
 \code{\link[=pft_change]{pft_change()}}, and \code{\link[=pft_interpret]{pft_interpret()}}.
-\item \strong{COPD severity}: Global Initiative for Chronic Obstructive Lung
-Disease (GOLD). \url{https://goldcopd.org}. Implemented by
-\code{\link[=pft_gold]{pft_gold()}}.
+\item \strong{Spirometric airflow-limitation grade, GOLD 2026}: Global
+Initiative for Chronic Obstructive Lung Disease (GOLD) 2026 report,
+Figure 2.10. \url{https://goldcopd.org}. Implemented by
+\code{\link[=pft_gold]{pft_gold()}}; not a COPD diagnostic function.
 \item \strong{Predecessor interpretive strategy 2005}: Pellegrino et al.
 \emph{Eur Respir J} 2005;26(5):948-68.
 \doi{10.1183/09031936.05.00035205}. Cited for historical comparison

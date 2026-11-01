@@ -93,10 +93,12 @@ The following helpers are exported for stand-alone use and are
 directly when needed:
 
 \itemize{
-\item \code{\link[=pft_gold]{pft_gold()}} -- GOLD 1-4 airflow-limitation grading.
+\item \code{\link[=pft_gold]{pft_gold()}} -- GOLD 2026 spirometric airflow-limitation
+grade (GOLD 1-4).
 \item \code{\link[=pft_fev1q]{pft_fev1q()}} -- FEV1Q survival index (adult-only).
-\item \code{\link[=pft_quality]{pft_quality()}} -- Graham 2019 A-F spirometry acceptability
-grading from per-manoeuvre repeatability values.
+\item \code{\link[=pft_quality]{pft_quality()}} -- Graham 2019 A-F spirometry session grade
+computed from maneuvers already judged acceptable by technical
+review (it does not assess acceptability itself).
 \item \code{\link[=pft_change]{pft_change()}} -- Stanojevic 2022 Box 2 conditional-change
 z-score for paired serial FEV1 z-scores.
 \item \code{\link[=pft_dlco_hb_correct]{pft_dlco_hb_correct()}} -- Cotes 1972 haemoglobin correction
