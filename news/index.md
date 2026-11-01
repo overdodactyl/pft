@@ -2,9 +2,9 @@
 
 ## pft 1.0.4
 
-Documentation and test patch release responding to SoftwareX Reviewer 1
-(manuscript SOFTX-D-26-01201). No changes to computed outputs; every
-exported function returns the same values as in 1.0.3.
+Documentation and test patch release incorporating peer-review feedback.
+No changes to computed outputs; every exported function returns the same
+values as in 1.0.3.
 
 - [`pft_quality()`](https://overdodactyl.github.io/pft/reference/pft_quality.md):
   retitled and reframed as computing the Graham et al. 2019 Table 10
