@@ -24,11 +24,37 @@ classifier (`pft_diffusion_interpret()`).
 `pft_diffusion()` implements the GLI 2017 standard (Stanojevic et al.
 ERJ 2017, with the 2020 author correction applied) for adults and
 children aged 5-90 years (the GLI calculator caps at 85; the
-underlying spline tables extend to 90). By default it emits
-**traditional units**
-(DLCO, KCO, VA in mL/min/mmHg, mL/min/mmHg/L, and L respectively);
-`SI.units = TRUE` switches to SI units (TLCO and KCO in mmol/min/kPa
-and mmol/min/kPa/L). VA is the same column either way.
+underlying spline tables extend to 90).
+
+## Choosing the unit system
+
+The caller chooses the unit system with the `SI.units` argument. It
+applies to both the reference outputs and the measured inputs:
+
+| `SI.units`        | Measured columns read                             | Units                             |
+|-------------------|---------------------------------------------------|-----------------------------------|
+| `FALSE` (default) | `dlco_measured`, `kco_tr_measured`, `va_measured` | mL/min/mmHg, mL/min/mmHg/L, L     |
+| `TRUE`            | `tlco_measured`, `kco_si_measured`, `va_measured` | mmol/min/kPa, mmol/min/kPa/L, L   |
+
+Measured diffusion values **must already be in the selected unit
+system**. `pft` does not infer units from column names or numeric
+magnitude and does not convert measured values between systems.
+Columns that belong to the other system are ignored (for example,
+`dlco_measured` produces no z-score when `SI.units = TRUE`). Values
+entered in the wrong units under the right column name cannot be
+detected and will give incorrect z-scores. VA is in litres either way.
+
+## Source population
+
+The GLI 2017 source publication describes its reference equations as
+being for Caucasians. About 85% of the collated data came from
+Caucasian participants, and there were too few non-Caucasian data to
+derive separate equations. Using the race-neutral GLI Global 2022
+*spirometry* equations does not make the diffusion equations
+race-neutral. Consider whether this source population is appropriate
+for your study population before interpreting the outputs.
+
+## Example
 
 ```{r}
 patient <- data.frame(
