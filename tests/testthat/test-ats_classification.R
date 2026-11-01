@@ -184,7 +184,7 @@ test_that("ats_classification preserves input columns and adds 2 new ones", {
   expect_true(all(c("ats_classification", "ats_pattern_combination") %in% colnames(out)))
 })
 
-## --- Restriction requires a low TLC (SoftwareX Reviewer 1, comment 9) ----
+## --- Restriction requires a low TLC ---------------------------------------
 ##
 ## Regression guard for the documented rule that the 2022 classifier never
 ## labels restriction (or mixed) from spirometry alone, and never from a
