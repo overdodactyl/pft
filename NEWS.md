@@ -1,3 +1,55 @@
+# pft 1.0.4
+
+Documentation and test patch release responding to SoftwareX
+Reviewer 1 (manuscript SOFTX-D-26-01201). No changes to computed
+outputs; every exported function returns the same values as in 1.0.3.
+
+* `pft_quality()`: retitled and reframed as computing the Graham et
+  al. 2019 Table 10 *session grade from already-accepted maneuvers*.
+  The docs now state that maneuver acceptability must first be
+  established by a trained reviewer from the full flow-volume and
+  volume-time curves, that the function cannot assess raw-curve
+  criteria, that its grade supplements rather than replaces technical
+  review, and that FEV1/FVC and pre/post sets are graded separately.
+  The existing `U` -> `F` limitation is explained more precisely.
+* `pft_gold()`: retitled *GOLD 2026 spirometric airflow-limitation
+  grade* (previously "COPD severity"). The docs state that `fev1fvc`
+  must be the post-bronchodilator ratio, that the GOLD fixed-ratio
+  prerequisite is enforced only when it is supplied, and that a GOLD
+  grade is not by itself a COPD diagnosis.
+* `pft_classify()`: new "Restriction requires a low TLC" section.
+  `Restricted` and `Mixed` both require TLC below its LLN; a low FVC
+  alone is never labelled restriction; rows without TLC are never
+  labelled `Restricted` or `Mixed`. New regression tests pin each rule.
+* `pft_volumes()` / `pft_diffusion()`: new Applicability sections
+  stating the GLI 2021 European-ancestry and GLI 2017 Caucasian
+  source populations, and that GLI Global 2022 spirometry does not
+  make these equations race-neutral.
+* `pft_diffusion()`: new Units section. `SI.units` selects the unit
+  system for both outputs and measured inputs; units are never
+  inferred from numeric magnitude or converted, and measured columns
+  from the other unit system are ignored.
+* `pft_bdr()`, `pft_bdr_2005()`, `pft_interpret()`: `pre` / `post`
+  (and the `*_pre` / `*_post` columns) are defined as the baseline
+  value before, and the corresponding value after, bronchodilator
+  administration. The caller assigns these labels and `pft` does not
+  infer test phase.
+* `vignette("input-format")`: new *Precision and plausibility*
+  section. There is no fixed decimal-place requirement; ages outside
+  each equation's spline range return `NA`; `pft` performs no general
+  physiologic plausibility or technical QC screening.
+* `vignette("interpretation-guide")`: fixed the pattern example, whose
+  printed output (row 3 `Mixed`) disagreed with the row-by-row prose
+  (row 3 `Restricted`). The example now produces all five labels in
+  the order described. The pattern bullets now match the implemented
+  lookup.
+* README / pkgdown: dated *Implemented standards* table, a
+  *Maintenance and reproducibility* section, a plain-language
+  explanation of the MIT license, and person-first / phenotype-first
+  wording around airflow obstruction. Unqualified "current ATS/ERS"
+  phrasing was replaced with explicit standard years.
+
+
 # pft 1.0.3
 
 Documentation-only patch release. No user-facing behaviour changes.
