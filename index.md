@@ -262,15 +262,15 @@ ground truth from the official GLI web calculator at
 
 ## Citations
 
-Every tagged release, including v1.0.4, is archived on Zenodo under its
-own version-specific DOI, listed on the Zenodo record. The Zenodo
-concept DOI
+The tagged v1.0.4 source release is archived on Zenodo at
+[doi:10.5281/zenodo.23850844](https://doi.org/10.5281/zenodo.23850844).
+The Zenodo concept DOI
 [10.5281/zenodo.21196107](https://doi.org/10.5281/zenodo.21196107) is
 version-agnostic and always resolves to the latest archived release. Use
 the version-specific DOI when citing a specific version of the software;
 use the concept DOI when a version-agnostic reference is preferred.
-`citation("pft")` returns a `bibentry` with the package version and the
-Zenodo concept DOI.
+`citation("pft")` returns a `bibentry` that includes the
+version-specific DOI.
 
 Reference equations:
 

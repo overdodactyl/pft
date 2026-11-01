@@ -329,8 +329,8 @@ citation("pft")
 #> 
 #>   Johnson P, Helgeson S (2026). _pft: Reference Values and
 #>   Interpretation for Pulmonary Function Tests_.
-#>   doi:10.5281/zenodo.21196107
-#>   <https://doi.org/10.5281/zenodo.21196107>. R package version 1.0.4
+#>   doi:10.5281/zenodo.23850844
+#>   <https://doi.org/10.5281/zenodo.23850844>. R package version 1.0.4
 #>   (Zenodo concept DOI: 10.5281/zenodo.21196107),
 #>   <https://CRAN.R-project.org/package=pft>.
 #> 
