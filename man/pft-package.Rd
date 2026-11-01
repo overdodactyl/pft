@@ -10,11 +10,12 @@
 pulmonary function tests. Reference values come from the GLI family
 of equations (GLI 2012 and GLI Global 2022 spirometry, GLI 2021
 static lung volumes, GLI 2017 TLCO with the 2020 author correction).
-Interpretive primitives implement the current ATS/ERS technical
+Interpretive primitives implement the ERS/ATS 2022 technical
 standard (Stanojevic et al. 2022) for pattern classification,
 severity grading, bronchodilator response, PRISm screening, and
-conditional-change z-scores, alongside GOLD airflow-limitation
-grading, Graham 2019 spirometry quality grades, hemoglobin
+conditional-change z-scores, alongside the GOLD 2026 spirometric
+airflow-limitation grade, the Graham 2019 spirometry session grade
+computed from maneuvers already judged acceptable, hemoglobin
 correction, the FEV1Q survival index, and a ggplot2-based clinical
 lollipop figure. Pellegrino et al. 2005 legacy primitives are
 retained for cross-standard reclassification analyses.
@@ -24,13 +25,13 @@ retained for cross-standard reclassification analyses.
 The ATS/ERS technical standard implemented by \code{\link[=pft_classify]{pft_classify()}},
 \code{\link[=pft_severity]{pft_severity()}}, \code{\link[=pft_bdr]{pft_bdr()}}, \code{\link[=pft_prism]{pft_prism()}}, and \code{\link[=pft_change]{pft_change()}} is
 Stanojevic et al. 2022, which is the most recent interpretive
-standard from these societies as of the current package release.
+standard from these societies as of this package release.
 Older standards (Pellegrino et al. 2005) remain available for
 reclassification and comparison work via \code{pft_severity_2005()},
 \code{pft_bdr_2005()}, and the \code{standard = "2005"} argument to
-\code{\link[=pft_classify]{pft_classify()}} / \code{\link[=pft_interpret]{pft_interpret()}}. \code{pft} is designed to
-incorporate future ATS/ERS, GLI, and GOLD revisions as they are
-published.
+\code{\link[=pft_classify]{pft_classify()}} / \code{\link[=pft_interpret]{pft_interpret()}}. Future ERS/ATS, GLI, or GOLD
+revisions would be introduced only in new versioned releases; no
+standard is updated silently or by calendar date.
 }
 
 \section{Input data format}{
@@ -68,8 +69,18 @@ values (\code{"X"}, \code{"Unknown"}, etc.) are treated as missing.
 \item \strong{Age} is in years (decimal allowed).
 \item \strong{Height} is in centimetres.
 \item \strong{Volumes} (FEV1, FVC, FRC, TLC, RV, ERV, IC, VC) are in litres.
-\item \strong{DLCO / TLCO} are reported in the units the function emits
-(controlled by \code{SI.units} in \code{\link[=pft_diffusion]{pft_diffusion()}}).
+\item \strong{DLCO / TLCO} units are selected by the caller with \code{SI.units}
+in \code{\link[=pft_diffusion]{pft_diffusion()}} / \code{\link[=pft_interpret]{pft_interpret()}}: traditional (DLCO,
+mL/min/mmHg) by default, SI (TLCO, mmol/min/kPa) when \code{TRUE}.
+Measured diffusion columns must already be in the selected unit
+system; units are never inferred from numeric magnitude.
+\item \strong{Numeric precision}: no fixed number of decimal places is
+required; values are used at the precision supplied.
+\item \strong{Plausibility}: \code{pft} checks that required columns are present
+and that ages fall within each source equation's range (out-of-
+range rows return \code{NA}), but it does not screen measured values
+for physiologic plausibility or technical quality. Callers are
+responsible for validating source data and units.
 \item \strong{z-scores} use the LMS-based formula
 \code{z = ((measured / M)^L - 1) / (L * S)} and are SIGNED such that
 values below 0 are below the predicted median.
@@ -102,14 +113,19 @@ The 2020 author correction (\doi{10.1183/13993003.50010-2017}) is
 the version implemented.
 \item \strong{Spirometry acquisition standard 2019}: Graham et al.
 \emph{Am J Respir Crit Care Med} 2019;200(8):e70-e88.
-\doi{10.1164/rccm.201908-1590ST}. Implemented by \code{\link[=pft_quality]{pft_quality()}}.
+\doi{10.1164/rccm.201908-1590ST}. \code{\link[=pft_quality]{pft_quality()}} implements the
+Table 10 session grade from maneuvers already judged acceptable by
+technical review; it does not assess acceptability itself.
 \item \strong{Interpretive strategy 2022}: Stanojevic et al. \emph{Eur Respir J}
 2022;60(1):2101499. \doi{10.1183/13993003.01499-2021}. Implemented
 by \code{\link[=pft_classify]{pft_classify()}}, \code{\link[=pft_severity]{pft_severity()}}, \code{\link[=pft_bdr]{pft_bdr()}}, \code{\link[=pft_prism]{pft_prism()}},
 \code{\link[=pft_change]{pft_change()}}, and \code{\link[=pft_interpret]{pft_interpret()}}.
-\item \strong{COPD severity}: Global Initiative for Chronic Obstructive Lung
-Disease (GOLD). \url{https://goldcopd.org}. Implemented by
-\code{\link[=pft_gold]{pft_gold()}}.
+\item \strong{Spirometric airflow-limitation grade, GOLD 2026}: Global
+Initiative for Chronic Obstructive Lung Disease (GOLD) 2026 report,
+Figure 2.10. \url{https://goldcopd.org}. Implemented by
+\code{\link[=pft_gold]{pft_gold()}} from post-bronchodilator FEV1 percent predicted, for
+use within the GOLD COPD framework; not a COPD diagnostic
+function.
 \item \strong{Predecessor interpretive strategy 2005}: Pellegrino et al.
 \emph{Eur Respir J} 2005;26(5):948-68.
 \doi{10.1183/09031936.05.00035205}. Cited for historical comparison
@@ -126,8 +142,13 @@ ECSC, Knudson, Crapo, Hankinson, etc.). Use the rspiro package for
 NHANES III and JRS.
 \item Ethnic groups outside the five recognised by GLI 2012 (Caucasian,
 African American, North-East Asian, South-East Asian, Other/mixed).
-The GLI Global 2022 equations are race-neutral and apply across
-ancestral groups.
+The GLI Global 2022 spirometry equations are race-neutral and
+apply across ancestral groups. This does not extend to lung
+volumes or diffusion: the GLI 2021 static lung-volume equations
+were derived from participants of European ancestry, and the GLI
+2017 TLCO/DLCO equations are described by their source
+publication as being for Caucasians (see the "Applicability"
+sections of \code{\link[=pft_volumes]{pft_volumes()}} and \code{\link[=pft_diffusion]{pft_diffusion()}}).
 \item Pre-school spirometry (ages < 3).
 \item Bronchial challenge testing (PC20 methacholine, mannitol).
 \item Cardiopulmonary exercise testing.

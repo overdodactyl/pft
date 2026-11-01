@@ -21,7 +21,8 @@
 #' @param year The year of GLI published equations. Valid options are
 #'    2012 (multi-ethnic, requires a `race` column) and 2022 (race-neutral
 #'    "GLI Global"; the `race` column, if present, is ignored). Defaults
-#'    to `2022`, the current ERS/ATS recommendation.
+#'    to `2022` (the race-neutral GLI Global equations, Bowerman et al.
+#'    2023).
 #'
 #' @param sex,age,height,race Column references. By default
 #'    `pft_spirometry()` reads from `sex`, `age`, `height`, and (for GLI

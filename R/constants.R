@@ -64,7 +64,7 @@ SEVERITY_2005_BOUNDARIES <- c(
   severe            = 35
 )
 
-# GOLD COPD severity tier upper bounds (FEV1 % predicted), from
+# GOLD 2026 spirometric airflow-limitation grade upper bounds (FEV1 % predicted), from
 # Figure 2.10 of the GOLD 2026 report ("GOLD Grades and Severity of
 # Airflow Obstruction in COPD (based on post-bronchodilator FEV1)").
 # Each entry is the *upper bound* of the named tier.
@@ -83,10 +83,11 @@ GOLD_BOUNDARIES <- c(
   "GOLD 2" = 80
 )
 
-# ATS/ERS 2019 spirometry quality grade thresholds (best-two
-# repeatability difference, litres). From Graham BL et al. AJRCCM
-# 2019;200(8):e70-e88, Table 10.
-# Adult ( >= 6 yr ) and child ( < 6 yr ) thresholds differ.
+# ATS/ERS 2019 spirometry session-grade thresholds (best-two
+# repeatability difference, litres) for maneuvers already judged
+# acceptable.
+# From Graham BL et al. AJRCCM 2019;200(8):e70-e88, Table 10.
+# Adult (> 6 yr) and child (<= 6 yr) thresholds differ.
 QUALITY_THRESHOLD_ADULT <- c(A = 0.150, C = 0.200, D = 0.250)
 QUALITY_THRESHOLD_CHILD <- c(A = 0.100, C = 0.150, D = 0.200)
 

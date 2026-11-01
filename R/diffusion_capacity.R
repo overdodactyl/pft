@@ -13,8 +13,11 @@
 #'   `dlco`, `kco_tr`, `va` under traditional), the measured value is
 #'   used to compute z-score and percent-predicted (see Value).
 #'
-#' @param SI.units A boolean. Returns the reference values in SI units if TRUE
-#'.  and Traditional units if FALSE.
+#' @param SI.units Logical, default `FALSE`. Selects the unit system for
+#'   both the reference outputs and any measured inputs (see "Units"
+#'   below). `FALSE` (traditional): DLCO in mL/min/mmHg, KCO
+#'   (`kco_tr`) in mL/min/mmHg/L, VA in L. `TRUE` (SI): TLCO in
+#'   mmol/min/kPa, KCO (`kco_si`) in mmol/min/kPa/L, VA in L.
 #'
 #' @param sex,age,height Column references. By default `pft_diffusion()`
 #'   reads from `sex`, `age`, and `height`. Override via a bare name
@@ -31,6 +34,37 @@
 #'   additional columns are emitted:
 #'   - `<measure>_zscore`:  LMS z-score `((measured/M)^L - 1) / (L*S)`.
 #'   - `<measure>_pctpred`: percent predicted `(measured / pred) * 100`.
+#'
+#' @section Units:
+#' The caller selects the unit system with `SI.units`; `pft` does
+#' **not** infer the unit system from column names or numeric
+#' magnitude, and it does not convert measured values between unit
+#' systems. Measured diffusion columns must already be in the selected
+#' system:
+#'
+#' | `SI.units`        | Measured columns read                    | Units                                         |
+#' |-------------------|------------------------------------------|-----------------------------------------------|
+#' | `FALSE` (default) | `dlco_measured`, `kco_tr_measured`, `va_measured` | mL/min/mmHg, mL/min/mmHg/L, L        |
+#' | `TRUE`            | `tlco_measured`, `kco_si_measured`, `va_measured` | mmol/min/kPa, mmol/min/kPa/L, L      |
+#'
+#' Measured columns belonging to the other unit system are left
+#' untouched and do not produce z-scores (for example, a
+#' `dlco_measured` column is ignored when `SI.units = TRUE`). Supplying
+#' values in the wrong units under the right column name (for example,
+#' SI values in `dlco_measured`) cannot be detected and will produce
+#' incorrect z-scores and percent-predicted values.
+#'
+#' @section Applicability (source population):
+#' The GLI 2017 source publication describes its TLCO/DLCO reference
+#' equations as being for Caucasians: about 85% of the collated data
+#' were from Caucasian participants, and the non-Caucasian data were
+#' insufficient to derive separate equations (Stanojevic et al. 2017).
+#' The race-neutral GLI Global 2022 spirometry equations available in
+#' [pft_spirometry()] do **not** make these diffusion equations
+#' race-neutral or multi-ethnic. Users should consider whether the
+#' source reference population is appropriate for the population under
+#' study before interpreting outputs. Ages outside the 5-90 year spline
+#' range return `NA` reference values.
 #'
 #' @references
 #' Stanojevic S, Graham BL, Cooper BG, et al. Official ERS technical standards:

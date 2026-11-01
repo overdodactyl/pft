@@ -183,3 +183,65 @@ test_that("ats_classification preserves input columns and adds 2 new ones", {
   expect_true("patient_id" %in% colnames(out))
   expect_true(all(c("ats_classification", "ats_pattern_combination") %in% colnames(out)))
 })
+
+## --- Restriction requires a low TLC (SoftwareX Reviewer 1, comment 9) ----
+##
+## Regression guard for the documented rule that the 2022 classifier never
+## labels restriction (or mixed) from spirometry alone, and never from a
+## low FVC by itself. See the "Restriction requires a low TLC" section of
+## ?pft_classify.
+
+restriction_case <- function(fev1fvc, tlc) {
+  # Low FEV1 and low FVC throughout; caller sets the ratio and TLC.
+  data.frame(fev1 = 2.0, fev1_lln_2022 = 3.0,
+             fvc  = 2.5, fvc_lln_2022  = 3.5,
+             fev1fvc = fev1fvc, fev1fvc_lln_2022 = 0.70,
+             tlc  = tlc, tlc_lln = 5.0)
+}
+
+test_that("2022: low FVC + preserved ratio + low TLC is Restricted", {
+  out <- pft_classify(restriction_case(fev1fvc = 0.80, tlc = 4.0))
+  expect_equal(out$ats_classification, "Restricted")
+})
+
+test_that("2022: low FVC + preserved ratio + normal TLC is Non-specific, not Restricted", {
+  out <- pft_classify(restriction_case(fev1fvc = 0.80, tlc = 6.0))
+  expect_equal(out$ats_classification, "Non-specific")
+})
+
+test_that("2022: low FVC + preserved ratio + missing TLC is not Restricted", {
+  # TLC value NA
+  out <- pft_classify(restriction_case(fev1fvc = 0.80, tlc = NA_real_))
+  expect_true(is.na(out$ats_classification))
+  expect_equal(out$ats_pattern_combination, "AAN?")
+
+  # TLC columns absent entirely
+  d <- restriction_case(fev1fvc = 0.80, tlc = 4.0)
+  d$tlc <- NULL; d$tlc_lln <- NULL
+  out <- pft_classify(d)
+  expect_true(is.na(out$ats_classification))
+})
+
+test_that("2022: low ratio + low TLC is Mixed", {
+  out <- pft_classify(restriction_case(fev1fvc = 0.55, tlc = 4.0))
+  expect_equal(out$ats_classification, "Mixed")
+})
+
+test_that("2022: low ratio + missing TLC is Obstructed, not Mixed", {
+  out <- pft_classify(restriction_case(fev1fvc = 0.55, tlc = NA_real_))
+  expect_equal(out$ats_classification, "Obstructed")
+  expect_equal(out$ats_pattern_combination, "AAA?")
+})
+
+test_that("2022: preserved ratio + normal FVC + low TLC is Restricted (TLC defines restriction)", {
+  # NNNA: Figure 8 does not reach a TLC check here; the documented
+  # implementation labels it Restricted on the basis of TLC < LLN
+  # (Stanojevic 2022 Figure 10).
+  d <- data.frame(fev1 = 3.5, fev1_lln_2022 = 3.0,
+                  fvc  = 4.5, fvc_lln_2022  = 4.0,
+                  fev1fvc = 0.80, fev1fvc_lln_2022 = 0.70,
+                  tlc  = 4.0, tlc_lln = 5.0)
+  out <- pft_classify(d)
+  expect_equal(out$ats_pattern_combination, "NNNA")
+  expect_equal(out$ats_classification, "Restricted")
+})

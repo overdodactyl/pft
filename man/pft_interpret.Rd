@@ -93,10 +93,12 @@ The following helpers are exported for stand-alone use and are
 directly when needed:
 
 \itemize{
-\item \code{\link[=pft_gold]{pft_gold()}} -- GOLD 1-4 airflow-limitation grading.
+\item \code{\link[=pft_gold]{pft_gold()}} -- GOLD 2026 spirometric airflow-limitation
+grade (GOLD 1-4).
 \item \code{\link[=pft_fev1q]{pft_fev1q()}} -- FEV1Q survival index (adult-only).
-\item \code{\link[=pft_quality]{pft_quality()}} -- Graham 2019 A-F spirometry acceptability
-grading from per-manoeuvre repeatability values.
+\item \code{\link[=pft_quality]{pft_quality()}} -- Graham 2019 A-F spirometry session grade
+computed from maneuvers already judged acceptable by technical
+review (it does not assess acceptability itself).
 \item \code{\link[=pft_change]{pft_change()}} -- Stanojevic 2022 Box 2 conditional-change
 z-score for paired serial FEV1 z-scores.
 \item \code{\link[=pft_dlco_hb_correct]{pft_dlco_hb_correct()}} -- Cotes 1972 haemoglobin correction
@@ -112,9 +114,27 @@ decision-making.
 \details{
 To trigger z-scores and percent-predicted on a measure, include the
 corresponding \verb{<measure>_measured} column in \code{data} (e.g.
-\code{fev1_measured}, \code{frc_measured}, \code{dlco_measured}). To trigger BDR,
-include \verb{<measure>_pre} and \verb{<measure>_post} columns for any of FEV1,
-FVC, FEV1/FVC.
+\code{fev1_measured}, \code{frc_measured}, \code{dlco_measured}).
+
+To trigger BDR, include both columns of one or more of the pairs
+\code{fev1_pre} / \code{fev1_post}, \code{fvc_pre} / \code{fvc_post}, and
+\code{fev1fvc_pre} / \code{fev1fvc_post}. A \verb{_pre} column holds the baseline
+value obtained before bronchodilator administration, and the
+matching \verb{_post} column holds the value obtained after
+bronchodilator administration under the laboratory's protocol, in
+the same units. These labels are interpreted literally: \code{pft} does
+not infer pre/post status from timestamps, values, medication
+records, or curve shape, and the \verb{_measured} columns are not used
+for BDR. Under \code{standard = "2022"} the BDR denominator is the
+\verb{<measure>_pred_<year>} column, so the spirometry reference values
+must be computable for that row.
+
+Diffusion units follow \code{SI.units}; measured diffusion columns must
+already be in that unit system (see \code{\link[=pft_diffusion]{pft_diffusion()}}).
+
+No fixed number of decimal places is required for any numeric
+input. \code{pft} does not screen measured values for physiologic
+plausibility or technical quality; see \code{vignette("input-format")}.
 
 All outputs trace to a specific equation, table, or figure in
 Stanojevic et al. ERJ 2022 or the underlying GLI reference papers; see

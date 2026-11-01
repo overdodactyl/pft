@@ -29,7 +29,8 @@
 #' @param standard Which interpretive standard's classifier to apply.
 #'   `"2022"` (default) follows Stanojevic et al. ERJ 2022 Figure 8 and
 #'   recognises five labels: `Normal`, `Non-specific`, `Obstructed`,
-#'   `Restricted`, `Mixed`. `"2005"` follows Pellegrino et al. ERJ 2005
+#'   `Restricted`, `Mixed`. `Restricted` and `Mixed` both require TLC
+#'   below its LLN (see "Restriction requires a low TLC" below). `"2005"` follows Pellegrino et al. ERJ 2005
 #'   Figure 2 and recognises four labels (`Normal`, `Obstructed`,
 #'   `Restricted`, `Mixed`). The 2005 algorithm only consults TLC when
 #'   FVC is below LLN; when FVC is normal it routes directly to
@@ -53,6 +54,30 @@
 #'     preserved (restriction); `"NNA?"` means FEV1/FVC is below LLN
 #'     and TLC is unknown. The pattern-combination string is
 #'     independent of the `standard` selected.
+#'
+#' @section Restriction requires a low TLC:
+#' Under the default ERS/ATS 2022 path, a restrictive label is never
+#' assigned from spirometry alone, and a low FVC by itself is never
+#' labelled restriction:
+#' * `"Restricted"` requires a preserved FEV1/FVC (\eqn{\ge} LLN)
+#'   **and** TLC below its LLN. A low TLC is the defining criterion
+#'   (Stanojevic 2022 Figure 10). FVC is typically, but not
+#'   necessarily, also low; rows with a normal FVC and a low TLC (the
+#'   `NNNA` / `ANNA` combinations, which Figure 8 does not reach) are
+#'   labelled `"Restricted"` on the basis of the low TLC.
+#' * `"Mixed"` requires FEV1/FVC below its LLN **and** TLC below its
+#'   LLN.
+#' * A low FVC with a preserved FEV1/FVC and a normal TLC is
+#'   `"Non-specific"`, not `"Restricted"`.
+#' * When TLC is unavailable, neither `"Restricted"` nor `"Mixed"` is
+#'   assigned: rows with a preserved ratio are returned as `NA`, and
+#'   rows with a low ratio are labelled `"Obstructed"` (see "Missing
+#'   TLC" below). The spirometry-only PRISm screen is reported
+#'   separately by [pft_prism()].
+#'
+#' The `"Obstructed"` label is a physiologic pattern label (FEV1/FVC
+#' below its LLN); like the other labels, it describes the test result
+#' and is not a disease diagnosis.
 #'
 #' @section Column-name overrides:
 #' Each column-reference argument accepts three forms:

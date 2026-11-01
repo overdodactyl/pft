@@ -2,39 +2,51 @@
 % Please edit documentation in R/gold.R
 \name{pft_gold}
 \alias{pft_gold}
-\title{Grade COPD severity by GOLD criteria}
+\title{GOLD 2026 spirometric airflow-limitation grade}
 \usage{
 pft_gold(fev1_pctpred, fev1fvc = NA_real_)
 }
 \arguments{
-\item{fev1_pctpred}{Numeric vector of FEV1 \% predicted values (e.g.
-the \code{fev1_pctpred} column from \code{\link[=pft_spirometry]{pft_spirometry()}} when measured
-values are supplied).}
+\item{fev1_pctpred}{Numeric vector of \strong{post-bronchodilator} FEV1
+percent-predicted values (e.g. the \code{fev1_pctpred_2022} column from
+\code{\link[=pft_spirometry]{pft_spirometry()}} computed from post-bronchodilator measured FEV1).}
 
-\item{fev1fvc}{Optional numeric vector of post-bronchodilator
-FEV1/FVC ratios (e.g. the \code{fev1fvc_measured} column). When
-supplied, rows with \code{fev1fvc >= 0.7} are returned as
-\code{NA_character_} -- per GOLD 2026 Figure 2.10, the grading applies
-only "In patients with COPD (FEV1/FVC < 0.7)". When omitted (the
-default \code{NA_real_}) or all-NA, no prerequisite check is performed
-and a grade is returned for every non-NA \code{fev1_pctpred}.}
+\item{fev1fvc}{Optional numeric vector of \strong{post-bronchodilator}
+FEV1/FVC ratios, used to enforce the GOLD 2026 fixed-ratio
+prerequisite. When supplied, rows with \code{fev1fvc >= 0.70} are
+returned as \code{NA_character_}, because GOLD 2026 Figure 2.10 applies
+the grades only when post-bronchodilator FEV1/FVC < 0.70. When
+omitted (the default \code{NA_real_}) or all-NA, no prerequisite check
+is performed and a grade is returned for every non-NA
+\code{fev1_pctpred}; this preserves backward-compatible behaviour, and
+the caller is then responsible for restricting use to tests that
+meet the prerequisite.}
 }
 \value{
 Character vector with values \code{"GOLD 1"}, \code{"GOLD 2"},
 \code{"GOLD 3"}, \code{"GOLD 4"}, or \code{NA}. \code{NA} is returned for rows with
 missing \code{fev1_pctpred} OR (when \code{fev1fvc} is supplied) rows that
-fail the airflow-obstruction prerequisite.
+do not meet the fixed-ratio spirometric prerequisite.
 }
 \description{
-Returns the GOLD spirometric severity grade (1-4) for one or more
-patients given their FEV1 expressed as a percent of predicted,
-optionally enforcing the GOLD-mandated prerequisite of confirmed
-airflow obstruction (FEV1/FVC < 0.7).
+Compute the GOLD 2026 spirometric airflow-limitation grade (GOLD 1-4)
+from post-bronchodilator FEV1 percent predicted. This helper
+implements the spirometric grading component of the GOLD COPD
+framework; it does not diagnose COPD.
 }
 \details{
-GOLD severity grades for airflow obstruction (Figure 2.10 of the
-GOLD 2026 report, content page 38):\tabular{lll}{
-   Grade \tab Severity \tab FEV1 \% predicted \cr
+A GOLD grade is \strong{not}, by itself, a diagnosis of COPD. Per the GOLD
+2026 report, a clinical diagnosis of COPD requires clinical context
+(symptoms and/or exposure to risk factors) beyond spirometry, and
+that clinical assessment is outside the scope of \code{pft}. \code{pft_gold()}
+implements only the spirometric grade defined in Figure 2.10 of the
+GOLD 2026 report; it does not implement the GOLD symptom/exacerbation
+assessment or any treatment recommendation.
+
+GOLD 2026 grades of airflow limitation, based on post-bronchodilator
+FEV1 (Figure 2.10 of the GOLD 2026 report, content page 38; labels as
+given by GOLD):\tabular{lll}{
+   Grade \tab GOLD label \tab Post-BD FEV1 \% predicted \cr
    GOLD 1 \tab Mild \tab \verb{>= 80} \cr
    GOLD 2 \tab Moderate \tab \verb{>= 50 and < 80} \cr
    GOLD 3 \tab Severe \tab \verb{>= 30 and < 50} \cr
@@ -42,22 +54,43 @@ GOLD 2026 report, content page 38):\tabular{lll}{
 }
 
 
-GOLD specifies the prerequisite "In patients with COPD (FEV1/FVC <
-0.7)" explicitly above Figure 2.10's grade table; the surrounding
-text (content p. 37) repeats this requirement. Supplying \code{fev1fvc}
-enforces the GOLD fixed-cutoff prerequisite. Callers wanting an
-LLN-based prerequisite instead should use \code{\link[=pft_classify]{pft_classify()}} to
-identify obstructed patients and mask \code{pft_gold()} output by hand.
+GOLD 2026 states the prerequisite "In patients with COPD (FEV1/FVC <
+0.7)" explicitly above Figure 2.10's grade table, and the surrounding
+text (content p. 37) repeats that a post-bronchodilator FEV1/FVC <
+0.7 is required. Supplying \code{fev1fvc} enforces this fixed-ratio
+spirometric prerequisite only; it does not establish a clinical
+diagnosis. Callers wanting an LLN-based airflow-obstruction
+criterion instead should use \code{\link[=pft_classify]{pft_classify()}} to identify tests
+showing airflow obstruction and mask \code{pft_gold()} output by hand.
+
+The grade boundaries are those of the GOLD 2026 report. They are not
+updated automatically; any change to a future GOLD report would be
+introduced in a versioned \code{pft} release.
 }
+\section{Test phase (post-bronchodilator values)}{
+
+GOLD 2026 defines both the grade and its fixed-ratio prerequisite on
+\strong{post-bronchodilator} spirometry: the grade uses post-bronchodilator
+FEV1 percent predicted, and the prerequisite is post-bronchodilator
+FEV1/FVC < 0.70. \code{pft_gold()} does not infer whether a supplied value
+is pre- or post-bronchodilator; the caller is responsible for
+supplying post-bronchodilator values for both arguments.
+}
+
 \examples{
-# Without prerequisite check (backward-compatible): one grade per
+# Post-bronchodilator FEV1 \% predicted for four tests.
+post_fev1_pctpred <- c(85, 65, 40, 25)
+
+# Without the prerequisite check (backward-compatible): one grade per
 # non-NA input.
-pft_gold(c(85, 65, 40, 25))
+pft_gold(post_fev1_pctpred)
 # -> "GOLD 1" "GOLD 2" "GOLD 3" "GOLD 4"
 
-# With prerequisite check: the third patient has FEV1/FVC = 0.75
-# (no airflow obstruction) and is returned NA.
-pft_gold(c(85, 65, 40, 25), fev1fvc = c(0.65, 0.60, 0.75, 0.55))
+# With the fixed-ratio prerequisite: the third test has a
+# post-bronchodilator FEV1/FVC of 0.75 (prerequisite not met) and is
+# returned NA.
+post_fev1fvc <- c(0.65, 0.60, 0.75, 0.55)
+pft_gold(post_fev1_pctpred, fev1fvc = post_fev1fvc)
 # -> "GOLD 1" "GOLD 2" NA "GOLD 4"
 
 }

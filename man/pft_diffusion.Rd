@@ -15,8 +15,11 @@ the active measures (\code{tlco}, \code{kco_si}, \code{va} under SI units;
 \code{dlco}, \code{kco_tr}, \code{va} under traditional), the measured value is
 used to compute z-score and percent-predicted (see Value).}
 
-\item{SI.units}{A boolean. Returns the reference values in SI units if TRUE
-.  and Traditional units if FALSE.}
+\item{SI.units}{Logical, default \code{FALSE}. Selects the unit system for
+both the reference outputs and any measured inputs (see "Units"
+below). \code{FALSE} (traditional): DLCO in mL/min/mmHg, KCO
+(\code{kco_tr}) in mL/min/mmHg/L, VA in L. \code{TRUE} (SI): TLCO in
+mmol/min/kPa, KCO (\code{kco_si}) in mmol/min/kPa/L, VA in L.}
 
 \item{sex, age, height}{Column references. By default \code{pft_diffusion()}
 reads from \code{sex}, \code{age}, and \code{height}. Override via a bare name
@@ -42,6 +45,41 @@ additional columns are emitted:
 for carbon monoxide measured diffusion capacity and European equivalents
 including DLCO (or TLCO), KCO, and VA.
 }
+\section{Units}{
+
+The caller selects the unit system with \code{SI.units}; \code{pft} does
+\strong{not} infer the unit system from column names or numeric
+magnitude, and it does not convert measured values between unit
+systems. Measured diffusion columns must already be in the selected
+system:\tabular{lll}{
+   \code{SI.units} \tab Measured columns read \tab Units \cr
+   \code{FALSE} (default) \tab \code{dlco_measured}, \code{kco_tr_measured}, \code{va_measured} \tab mL/min/mmHg, mL/min/mmHg/L, L \cr
+   \code{TRUE} \tab \code{tlco_measured}, \code{kco_si_measured}, \code{va_measured} \tab mmol/min/kPa, mmol/min/kPa/L, L \cr
+}
+
+
+Measured columns belonging to the other unit system are left
+untouched and do not produce z-scores (for example, a
+\code{dlco_measured} column is ignored when \code{SI.units = TRUE}). Supplying
+values in the wrong units under the right column name (for example,
+SI values in \code{dlco_measured}) cannot be detected and will produce
+incorrect z-scores and percent-predicted values.
+}
+
+\section{Applicability (source population)}{
+
+The GLI 2017 source publication describes its TLCO/DLCO reference
+equations as being for Caucasians: about 85\% of the collated data
+were from Caucasian participants, and the non-Caucasian data were
+insufficient to derive separate equations (Stanojevic et al. 2017).
+The race-neutral GLI Global 2022 spirometry equations available in
+\code{\link[=pft_spirometry]{pft_spirometry()}} do \strong{not} make these diffusion equations
+race-neutral or multi-ethnic. Users should consider whether the
+source reference population is appropriate for the population under
+study before interpreting outputs. Ages outside the 5-90 year spline
+range return \code{NA} reference values.
+}
+
 \examples{
 data <- data.frame(sex=c("M","F"),
                    age=c(30,5.1),

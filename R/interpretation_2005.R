@@ -79,8 +79,10 @@ pft_severity_2005 <- function(pctpred) {
 #' hits either boundary exactly (e.g. exactly 12% or exactly 200 mL)
 #' is *not* significant under this criterion.
 #'
-#' @param pre,post Numeric vectors of pre- and post-bronchodilator
-#'   measurements, in litres, same length.
+#' @param pre,post Numeric vectors of baseline (pre-bronchodilator)
+#'   and corresponding post-bronchodilator measurements, in litres,
+#'   same length. As with [pft_bdr()], the caller identifies which
+#'   values are pre and post; `pft` does not infer test phase.
 #'
 #' @return A data frame with one row per input observation and three
 #'   columns: `pct_change` (i.e. `(post - pre) / pre * 100`),
