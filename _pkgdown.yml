@@ -10,8 +10,9 @@ home:
     An R toolkit for pulmonary function test reference values and
     routine interpretation: GLI-family predicted values, z-scores,
     ATS/ERS pattern classification, severity grading, bronchodilator
-    response, PRISm screening, conditional change scores, GOLD
-    airflow-limitation grading, spirometry quality grading, and
+    response, PRISm screening, conditional change scores, the GOLD
+    2026 spirometric airflow-limitation grade, the Graham 2019
+    spirometry session grade from already-accepted maneuvers, and
     clinical visualisation.
 
 reference:
@@ -28,8 +29,8 @@ reference:
 
   - title: Interpretation primitives
     desc: >
-      Per-measure clinical interpretation primitives implementing the
-      current ATS/ERS interpretive standard.
+      Per-measure interpretation primitives implementing the ERS/ATS
+      2022 interpretive standard (Stanojevic et al. 2022).
     contents:
       - pft_classify
       - pft_volume_subpattern
@@ -44,8 +45,8 @@ reference:
   - title: Legacy interpretive primitives
     desc: >
       Pellegrino 2005 interpretive primitives, provided for
-      reclassification analyses comparing the current interpretive
-      standard against its predecessor. `pft_classify(standard = "2005")`
+      reclassification analyses comparing the ERS/ATS 2022
+      interpretive standard against its predecessor. `pft_classify(standard = "2005")`
       and `pft_interpret(standard = "2005")` route through these.
     contents:
       - pft_severity_2005
@@ -53,8 +54,10 @@ reference:
 
   - title: Clinical extensions
     desc: >
-      Maneuver-level quality grading (ATS/ERS 2019) and COPD-specific
-      severity (GOLD).
+      The Graham 2019 (ATS/ERS) spirometry session grade, computed from
+      maneuvers already judged acceptable by technical review, and the
+      GOLD 2026 spirometric airflow-limitation grade. Neither assesses
+      raw-curve acceptability or establishes a diagnosis.
     contents:
       - pft_quality
       - pft_gold

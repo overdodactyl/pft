@@ -31,7 +31,8 @@ percent-predicted for that measure (see Value).}
 \item{year}{The year of GLI published equations. Valid options are
 2012 (multi-ethnic, requires a \code{race} column) and 2022 (race-neutral
 "GLI Global"; the \code{race} column, if present, is ignored). Defaults
-to \code{2022}, the current ERS/ATS recommendation.}
+to \code{2022} (the race-neutral GLI Global equations, Bowerman et al.
+2023).}
 
 \item{sex, age, height, race}{Column references. By default
 \code{pft_spirometry()} reads from \code{sex}, \code{age}, \code{height}, and (for GLI

@@ -21,17 +21,27 @@ and interpretive pattern classifications for pulmonary function tests in R.
 > standards, but the package itself has not been validated for diagnostic
 > decision-making. All outputs require interpretation by a qualified clinician.
 
-## Guideline currency
+## Implemented standards
 
-The ATS/ERS interpretive algorithm implemented in `pft_classify()`,
-`pft_severity()`, `pft_bdr()`, `pft_prism()`, and `pft_change()` is the
-Stanojevic et al. 2022 technical standard, which is the most recent
-ATS/ERS interpretive standard as of the current release. Predecessor
-standards remain available (`pft_severity_2005()`, `pft_bdr_2005()`,
-and `standard = "2005"` on `pft_classify()` / `pft_interpret()`) so
-users can reclassify or compare across eras. `pft` is designed to
-incorporate future ATS/ERS, GLI, and GOLD revisions as they are
-published.
+Each function implements a specific, dated standard:
+
+| Area | Standard |
+|---|---|
+| Routine interpretation (`pft_classify()`, `pft_severity()`, `pft_bdr()`, `pft_prism()`, `pft_change()`) | ERS/ATS 2022 (Stanojevic et al.) |
+| Spirometry reference equations | GLI 2012 (Quanjer et al.) or GLI Global 2022 (Bowerman et al.) |
+| Static lung-volume reference equations | GLI 2021 (Hall et al.) |
+| Diffusion (TLCO/DLCO) reference equations | GLI 2017 (Stanojevic et al.), with the 2020 author correction |
+| Spirometry session grade (`pft_quality()`) | Graham et al. 2019 (ATS/ERS), Table 10 |
+| Spirometric airflow-limitation grade (`pft_gold()`) | GOLD 2026 report, Figure 2.10 |
+
+ERS/ATS 2022 is the most recent ERS/ATS interpretive standard as of
+this release. The predecessor Pellegrino et al. 2005 standard remains
+available (`pft_severity_2005()`, `pft_bdr_2005()`, and
+`standard = "2005"` on `pft_classify()` / `pft_interpret()`) so users
+can reclassify or compare across eras. Standards are never updated
+silently or by calendar date: any future ERS/ATS, GLI, or GOLD
+revision would be introduced in a new, versioned `pft` release (see
+[Maintenance and reproducibility](#maintenance-and-reproducibility)).
 
 ## Installation
 
@@ -54,16 +64,22 @@ remotes::install_github("overdodactyl/pft")
 pulmonary function tests. Reference values come from the GLI family
 of equations (GLI 2012 and GLI Global 2022 spirometry, GLI 2021
 static lung volumes, GLI 2017 TLCO with the 2020 author correction).
-Interpretive primitives implement the current ATS/ERS technical
+Interpretive primitives implement the ERS/ATS 2022 technical
 standard (Stanojevic et al. 2022) for pattern classification,
 severity grading, bronchodilator response, PRISm, conditional-change
 z-scores and longitudinal slopes; the Pellegrino et al. 2005
 predecessor standard is retained for reclassification and
-cross-standard comparison. The package also computes GOLD 1-4
-airflow-limitation grading, Graham 2019 spirometry acceptability
-grading, the Hughes & Pride diffusion category, lung age, GLI 2012
-vs GLI Global 2022 reclassification, and ggplot2-based
-single-patient and cohort figures.
+cross-standard comparison. The package also computes the GOLD 2026
+spirometric airflow-limitation grade, the Graham 2019 spirometry
+session grade from already-accepted maneuvers, the Hughes & Pride
+diffusion category, lung age, GLI 2012 vs GLI Global 2022
+reclassification, and ggplot2-based single-patient and cohort
+figures.
+
+All outputs describe physiologic patterns and reference-based
+comparisons. `pft` does not diagnose disease, does not assess
+maneuver acceptability from raw curves, and does not screen measured
+values for physiologic plausibility; see `vignette("input-format")`.
 
 ### Reference value functions
 
@@ -91,10 +107,21 @@ Spirometry outputs additionally carry a four-digit GLI-year suffix (e.g. `fev1_p
 | `pft_change()` | Conditional change z-score for two-point serial measurements | Stanojevic 2022 |
 | `pft_fev1q()` | FEV1Q adult-mortality index | Stanojevic 2022 Box 3 |
 | `pft_dlco_hb_correct()` | Hemoglobin correction for DLCO/TLCO | Cotes 1972 / Stanojevic 2017 |
-| `pft_quality()` | Spirometry quality grade (A-F) from a set of maneuvers | Graham 2019 |
-| `pft_gold()` | COPD severity (GOLD 1-4) from FEV1 % predicted | GOLD reports |
+| `pft_quality()` | Graham 2019 session grade (A-F) from already-accepted maneuvers&dagger; | Graham 2019 Table 10 |
+| `pft_gold()` | GOLD 2026 spirometric airflow-limitation grade (GOLD 1-4) from FEV1 % predicted | GOLD 2026 Fig 2.10 |
 | `pft_plot()` | Single-patient z-score lollipop with severity bands | — |
 | `pft_long()` | Wide → long pivot; `broom::tidy` dispatches to it | — |
+
+&dagger; `pft_quality()` assumes every value it receives comes from a
+maneuver that a trained technologist or reviewer has **already judged
+acceptable** from the full flow-volume and volume-time curves. It
+cannot assess acceptability (start/end of test, cough, glottic closure,
+leak, effort, etc.); its grade supplements, and does not replace,
+technical review of the session. FEV1 and FVC, and pre- and
+post-bronchodilator sets, are graded separately.
+
+`pft_classify()` never labels restriction from a low FVC alone:
+`Restricted` and `Mixed` both require a measured TLC below its LLN.
 
 Most reference-value and interpretive functions take a data frame and
 return a data frame with new columns appended, so they compose with
@@ -190,6 +217,21 @@ want to regenerate the data.
 | GLI 2021 lung volumes | `data-raw/build_gli_2021_volumes.R` | ERS supplement workbook + paper Table 3 |
 | GLI 2017 TLCO | `data-raw/build_gli_2017_diffusion.R` | ERS supplement workbooks + paper Table 2 (corrected) |
 
+**Source populations.** The GLI Global 2022 spirometry equations are
+race-neutral. The GLI 2021 static lung-volume equations were derived
+from participants of European ancestry (7,190 observations, ages
+5-80), with insufficient non-European data for multi-ethnic
+equations. The GLI 2017 TLCO/DLCO equations are described by their
+source publication as being for Caucasians, again because
+non-Caucasian data were insufficient. Consider whether each source
+population is appropriate for your study population.
+
+**Diffusion units.** `pft_diffusion()` uses traditional units by
+default (`SI.units = FALSE`: DLCO in mL/min/mmHg); `SI.units = TRUE`
+selects SI units (TLCO in mmol/min/kPa). Measured diffusion columns
+must already be in the selected unit system; units are not inferred
+from numeric magnitude.
+
 The validation tests anchor predicted, LLN, and ULN outputs against ground
 truth from the official GLI web calculator at
 [gli-calculator.ersnet.org](http://gli-calculator.ersnet.org).
@@ -240,9 +282,38 @@ Pattern interpretation:
 Use `citation("pft")` to retrieve the package and dependent reference list as
 a `bibentry` for your own publications.
 
+## Maintenance and reproducibility
+
+* **Small dependency footprint.** `pft` is pure R with two runtime
+  imports, `rlang` and `tibble`; everything else is optional.
+* **Automated checks.** Every change runs the `testthat` suite and
+  `R CMD check` on multiple operating systems and R versions via
+  GitHub Actions, with coverage tracked on Codecov. A scheduled weekly
+  run of the same checks surfaces upstream dependency changes even
+  between releases.
+* **Dependency changes.** If an imported dependency changes
+  incompatibly or becomes obsolete, it will be updated or replaced
+  while preserving the public `pft` API where practical, and the
+  change will ship as a new versioned release.
+* **Versioned standards.** Guideline and reference-equation updates
+  are introduced only in new versioned releases, with tests and
+  documentation, and never change the behaviour of an existing
+  release.
+* **Archival.** Every release is tagged in git and archived on Zenodo
+  under a version-specific DOI, so an analysis can always identify and
+  retrieve the exact implementation it used. The `data-raw/` scripts
+  regenerate the internal reference tables from the source documents,
+  and `renv.lock` records a reproducible development environment.
+* **Community.** Issues and contributions are welcome through the
+  public GitHub repository (see `CONTRIBUTING.md`).
+
 ## License
 
-MIT. See `LICENSE`.
+MIT. See `LICENSE`. The MIT license is a permissive open-source
+license: it allows anyone to use, modify, and redistribute the
+software, including in other projects, provided the copyright and
+license notice are retained. The software is provided without
+warranty. `LICENSE` contains the full legal text.
 
 The numerical reference values reproduced inside this package are facts
 derived from published statistical models and are not themselves

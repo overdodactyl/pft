@@ -21,7 +21,7 @@ pulmonary function tests: predicted values and limits of normal,
 z-scores, percent predicted, ATS/ERS pattern classification,
 severity grading, bronchodilator response, PRISm screening, and
 conditional change scores, all from a data-frame-pipeline API. The
-interpretive primitives implement the current ATS/ERS technical
+interpretive primitives implement the ERS/ATS 2022 technical
 standard (Stanojevic et al. 2022); the predecessor Pellegrino 2005
 primitives are also available for reclassification analyses.
 
@@ -48,8 +48,8 @@ ref[, c("fev1_pred_2022", "fev1_lln_2022", "fev1_uln_2022",
         "fvc_pred_2022",  "fvc_lln_2022",  "fvc_uln_2022")]
 ```
 
-The default is GLI 2022 ("GLI Global"), the race-neutral
-equation set recommended by the current ATS/ERS technical standard.
+The default is GLI 2022 ("GLI Global", Bowerman et al. 2023), the
+race-neutral GLI spirometry equation set.
 To use the predecessor GLI 2012 multi-ethnic equations, pass
 `year = 2012` and include a `race` column.
 
