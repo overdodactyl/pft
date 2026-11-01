@@ -5,7 +5,8 @@ Reviewer 1 (manuscript SOFTX-D-26-01201). No changes to computed
 outputs; every exported function returns the same values as in 1.0.3.
 
 * `pft_quality()`: retitled and reframed as computing the Graham et
-  al. 2019 Table 10 *session grade from already-accepted maneuvers*.
+  al. 2019 Table 10 *session grade from maneuvers already judged
+  acceptable*.
   The docs now state that maneuver acceptability must first be
   established by a trained reviewer from the full flow-volume and
   volume-time curves, that the function cannot assess raw-curve
@@ -13,10 +14,13 @@ outputs; every exported function returns the same values as in 1.0.3.
   review, and that FEV1/FVC and pre/post sets are graded separately.
   The existing `U` -> `F` limitation is explained more precisely.
 * `pft_gold()`: retitled *GOLD 2026 spirometric airflow-limitation
-  grade* (previously "COPD severity"). The docs state that `fev1fvc`
-  must be the post-bronchodilator ratio, that the GOLD fixed-ratio
-  prerequisite is enforced only when it is supplied, and that a GOLD
-  grade is not by itself a COPD diagnosis.
+  grade*, replacing the earlier COPD-severity framing. The docs state
+  that the grade is based on post-bronchodilator FEV1 % predicted, that
+  `fev1fvc` must be the post-bronchodilator ratio, that `pft` does not
+  infer test phase, that the GOLD fixed-ratio prerequisite is enforced
+  only when `fev1fvc` is supplied, and that the helper is for use within
+  the GOLD COPD framework and does not diagnose COPD. No `year`
+  argument was added: only the GOLD 2026 grading is implemented.
 * `pft_classify()`: new "Restriction requires a low TLC" section.
   `Restricted` and `Mixed` both require TLC below its LLN; a low FVC
   alone is never labelled restriction; rows without TLC are never

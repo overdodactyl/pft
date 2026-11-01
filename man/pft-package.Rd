@@ -15,7 +15,7 @@ standard (Stanojevic et al. 2022) for pattern classification,
 severity grading, bronchodilator response, PRISm screening, and
 conditional-change z-scores, alongside the GOLD 2026 spirometric
 airflow-limitation grade, the Graham 2019 spirometry session grade
-computed from already-accepted maneuvers, hemoglobin
+computed from maneuvers already judged acceptable, hemoglobin
 correction, the FEV1Q survival index, and a ggplot2-based clinical
 lollipop figure. Pellegrino et al. 2005 legacy primitives are
 retained for cross-standard reclassification analyses.
@@ -29,9 +29,9 @@ standard from these societies as of this package release.
 Older standards (Pellegrino et al. 2005) remain available for
 reclassification and comparison work via \code{pft_severity_2005()},
 \code{pft_bdr_2005()}, and the \code{standard = "2005"} argument to
-\code{\link[=pft_classify]{pft_classify()}} / \code{\link[=pft_interpret]{pft_interpret()}}. \code{pft} is designed to
-incorporate future ATS/ERS, GLI, and GOLD revisions as they are
-published.
+\code{\link[=pft_classify]{pft_classify()}} / \code{\link[=pft_interpret]{pft_interpret()}}. Future ERS/ATS, GLI, or GOLD
+revisions would be introduced only in new versioned releases; no
+standard is updated silently or by calendar date.
 }
 
 \section{Input data format}{
@@ -123,7 +123,9 @@ by \code{\link[=pft_classify]{pft_classify()}}, \code{\link[=pft_severity]{pft_s
 \item \strong{Spirometric airflow-limitation grade, GOLD 2026}: Global
 Initiative for Chronic Obstructive Lung Disease (GOLD) 2026 report,
 Figure 2.10. \url{https://goldcopd.org}. Implemented by
-\code{\link[=pft_gold]{pft_gold()}}; not a COPD diagnostic function.
+\code{\link[=pft_gold]{pft_gold()}} from post-bronchodilator FEV1 percent predicted, for
+use within the GOLD COPD framework; not a COPD diagnostic
+function.
 \item \strong{Predecessor interpretive strategy 2005}: Pellegrino et al.
 \emph{Eur Respir J} 2005;26(5):948-68.
 \doi{10.1183/09031936.05.00035205}. Cited for historical comparison

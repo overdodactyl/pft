@@ -2,13 +2,13 @@
 % Please edit documentation in R/quality.R
 \name{pft_quality}
 \alias{pft_quality}
-\title{Compute the ATS/ERS 2019 spirometry session grade from already-accepted maneuvers}
+\title{Compute the ATS/ERS 2019 spirometry session grade from maneuvers already judged acceptable}
 \usage{
 pft_quality(values, age = NA_real_)
 }
 \arguments{
 \item{values}{Numeric vector of measurements (litres) from each
-already-accepted maneuver for ONE person, ONE measure (FEV1 or
+maneuver already judged acceptable, for ONE person, ONE measure (FEV1 or
 FVC), and ONE maneuver set (pre- or post-bronchodilator). \code{NA}
 values are dropped. Length 0 is allowed and yields grade \code{"F"}.}
 

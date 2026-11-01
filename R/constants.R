@@ -84,7 +84,8 @@ GOLD_BOUNDARIES <- c(
 )
 
 # ATS/ERS 2019 spirometry session-grade thresholds (best-two
-# repeatability difference, litres) for already-accepted maneuvers.
+# repeatability difference, litres) for maneuvers already judged
+# acceptable.
 # From Graham BL et al. AJRCCM 2019;200(8):e70-e88, Table 10.
 # Adult (> 6 yr) and child (<= 6 yr) thresholds differ.
 QUALITY_THRESHOLD_ADULT <- c(A = 0.150, C = 0.200, D = 0.250)

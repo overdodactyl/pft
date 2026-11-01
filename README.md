@@ -71,7 +71,7 @@ z-scores and longitudinal slopes; the Pellegrino et al. 2005
 predecessor standard is retained for reclassification and
 cross-standard comparison. The package also computes the GOLD 2026
 spirometric airflow-limitation grade, the Graham 2019 spirometry
-session grade from already-accepted maneuvers, the Hughes & Pride
+session grade from maneuvers already judged acceptable, the Hughes & Pride
 diffusion category, lung age, GLI 2012 vs GLI Global 2022
 reclassification, and ggplot2-based single-patient and cohort
 figures.
@@ -107,8 +107,8 @@ Spirometry outputs additionally carry a four-digit GLI-year suffix (e.g. `fev1_p
 | `pft_change()` | Conditional change z-score for two-point serial measurements | Stanojevic 2022 |
 | `pft_fev1q()` | FEV1Q adult-mortality index | Stanojevic 2022 Box 3 |
 | `pft_dlco_hb_correct()` | Hemoglobin correction for DLCO/TLCO | Cotes 1972 / Stanojevic 2017 |
-| `pft_quality()` | Graham 2019 session grade (A-F) from already-accepted maneuvers&dagger; | Graham 2019 Table 10 |
-| `pft_gold()` | GOLD 2026 spirometric airflow-limitation grade (GOLD 1-4) from FEV1 % predicted | GOLD 2026 Fig 2.10 |
+| `pft_quality()` | Graham 2019 session grade (A-F) from maneuvers already judged acceptable&dagger; | Graham 2019 Table 10 |
+| `pft_gold()` | GOLD 2026 spirometric airflow-limitation grade (GOLD 1-4) from post-bronchodilator FEV1 % predicted; does not diagnose COPD | GOLD 2026 Fig 2.10 |
 | `pft_plot()` | Single-patient z-score lollipop with severity bands | — |
 | `pft_long()` | Wide → long pivot; `broom::tidy` dispatches to it | — |
 

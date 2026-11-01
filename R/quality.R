@@ -1,4 +1,4 @@
-#' Compute the ATS/ERS 2019 spirometry session grade from already-accepted maneuvers
+#' Compute the ATS/ERS 2019 spirometry session grade from maneuvers already judged acceptable
 #'
 #' Computes the Graham et al. ATS/ERS 2019 (Table 10) session grade,
 #' A-F, for ONE measure (FEV1 or FVC) from the values of maneuvers that
@@ -32,7 +32,7 @@
 #' maneuver set.
 #'
 #' @param values Numeric vector of measurements (litres) from each
-#'   already-accepted maneuver for ONE person, ONE measure (FEV1 or
+#'   maneuver already judged acceptable, for ONE person, ONE measure (FEV1 or
 #'   FVC), and ONE maneuver set (pre- or post-bronchodilator). `NA`
 #'   values are dropped. Length 0 is allowed and yields grade `"F"`.
 #' @param age Patient age, in years. The repeatability thresholds tighten

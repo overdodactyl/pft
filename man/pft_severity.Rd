@@ -41,7 +41,8 @@ are taken from the "Severity of lung function impairment" section.
 }
 \seealso{
 \code{\link[=pft_classify]{pft_classify()}} for the pattern label that severity sits
-alongside; \code{\link[=pft_gold]{pft_gold()}} for COPD-specific severity from FEV1
-percent predicted; \code{\link[=pft_interpret]{pft_interpret()}} applies this grading to every
+alongside; \code{\link[=pft_gold]{pft_gold()}} for the GOLD 2026 spirometric
+airflow-limitation grade from post-bronchodilator FEV1 percent
+predicted; \code{\link[=pft_interpret]{pft_interpret()}} applies this grading to every
 z-score column in one call.
 }

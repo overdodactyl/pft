@@ -28,8 +28,9 @@
 #' are taken from the "Severity of lung function impairment" section.
 #'
 #' @seealso [pft_classify()] for the pattern label that severity sits
-#'   alongside; [pft_gold()] for COPD-specific severity from FEV1
-#'   percent predicted; [pft_interpret()] applies this grading to every
+#'   alongside; [pft_gold()] for the GOLD 2026 spirometric
+#'   airflow-limitation grade from post-bronchodilator FEV1 percent
+#'   predicted; [pft_interpret()] applies this grading to every
 #'   z-score column in one call.
 #'
 #' @examples

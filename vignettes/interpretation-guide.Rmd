@@ -211,7 +211,9 @@ The package splits its public surface into two kinds of function:
   are designed to compose inside `dplyr::mutate()`.
 
 A cohort run that combines reference values with severity, the GOLD
-2026 airflow-limitation grade, and bronchodilator response:
+2026 airflow-limitation grade, and bronchodilator response. Here the
+`_measured` columns are assumed to hold post-bronchodilator values, as
+`pft_gold()` requires; `pft` does not check the test phase:
 
 ```{r, eval = FALSE}
 library(dplyr)

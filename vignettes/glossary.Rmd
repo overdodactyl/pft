@@ -166,7 +166,7 @@ two-sided 95% normal-limits threshold (Box 2). Implemented by
 
 **Spirometry session grade (A–F, Graham 2019)** — Per Graham et al.
 ATS/ERS 2019 Table 10, a grade computed from the number of
-**already-accepted** maneuvers in a session and the difference between
+maneuvers **already judged acceptable** in a session and the difference between
 the two largest values. Acceptability itself must first be established
 by a trained reviewer from the full flow-volume and volume-time curves;
 the grade describes the number and repeatability of accepted maneuvers

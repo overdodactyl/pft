@@ -163,7 +163,7 @@ test_that("pft_gold: vectorized prerequisite with mixed inputs", {
     fev1fvc = c(0.60, 0.69, 0.75, 0.55)
   )
   # First, second, fourth: FEV1/FVC < 0.7 -> graded.
-  # Third: FEV1/FVC = 0.75 -> NA (not COPD per GOLD).
+  # Third: FEV1/FVC = 0.75 -> NA (GOLD fixed-ratio prerequisite not met).
   expect_equal(out, c("GOLD 1", "GOLD 2", NA, "GOLD 4"))
 })
 
