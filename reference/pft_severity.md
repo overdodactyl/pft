@@ -46,7 +46,8 @@ impairment" section.
 [`pft_classify()`](https://overdodactyl.github.io/pft/reference/pft_classify.md)
 for the pattern label that severity sits alongside;
 [`pft_gold()`](https://overdodactyl.github.io/pft/reference/pft_gold.md)
-for COPD-specific severity from FEV1 percent predicted;
+for the GOLD 2026 spirometric airflow-limitation grade from
+post-bronchodilator FEV1 percent predicted;
 [`pft_interpret()`](https://overdodactyl.github.io/pft/reference/pft_interpret.md)
 applies this grading to every z-score column in one call.
 

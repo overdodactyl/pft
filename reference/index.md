@@ -16,8 +16,8 @@ function takes a data frame in and returns a tibble out.
 
 ## Interpretation primitives
 
-Per-measure clinical interpretation primitives implementing the current
-ATS/ERS interpretive standard.
+Per-measure interpretation primitives implementing the ERS/ATS 2022
+interpretive standard (Stanojevic et al. 2022).
 
 - [`pft_classify()`](https://overdodactyl.github.io/pft/reference/pft_classify.md)
   : Classify ATS spirometry patterns from spirometry and lung-volume
@@ -27,7 +27,7 @@ ATS/ERS interpretive standard.
 - [`pft_severity()`](https://overdodactyl.github.io/pft/reference/pft_severity.md)
   : Grade severity of lung function impairment from a z-score
 - [`pft_bdr()`](https://overdodactyl.github.io/pft/reference/pft_bdr.md)
-  : Bronchodilator response per the current ATS/ERS criterion
+  : Bronchodilator response per the ERS/ATS 2022 criterion
 - [`pft_prism()`](https://overdodactyl.github.io/pft/reference/pft_prism.md)
   : Screen for Preserved Ratio Impaired Spirometry (PRISm)
 - [`pft_change()`](https://overdodactyl.github.io/pft/reference/pft_change.md)
@@ -42,7 +42,7 @@ ATS/ERS interpretive standard.
 ## Legacy interpretive primitives
 
 Pellegrino 2005 interpretive primitives, provided for reclassification
-analyses comparing the current interpretive standard against its
+analyses comparing the ERS/ATS 2022 interpretive standard against its
 predecessor. `pft_classify(standard = "2005")` and
 `pft_interpret(standard = "2005")` route through these.
 
@@ -53,13 +53,16 @@ predecessor. `pft_classify(standard = "2005")` and
 
 ## Clinical extensions
 
-Maneuver-level quality grading (ATS/ERS 2019) and COPD-specific severity
-(GOLD).
+The Graham 2019 (ATS/ERS) spirometry session grade, computed from
+maneuvers already judged acceptable by technical review, and the GOLD
+2026 spirometric airflow-limitation grade. Neither assesses raw-curve
+acceptability or establishes a diagnosis.
 
 - [`pft_quality()`](https://overdodactyl.github.io/pft/reference/pft_quality.md)
-  : Grade spirometry quality per ATS/ERS 2019
+  : Compute the ATS/ERS 2019 spirometry session grade from maneuvers
+  already judged acceptable
 - [`pft_gold()`](https://overdodactyl.github.io/pft/reference/pft_gold.md)
-  : Grade COPD severity by GOLD criteria
+  : GOLD 2026 spirometric airflow-limitation grade
 
 ## Workflow and visualisation
 

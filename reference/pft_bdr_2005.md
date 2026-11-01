@@ -22,8 +22,11 @@ pft_bdr_2005(pre, post)
 
 - pre, post:
 
-  Numeric vectors of pre- and post-bronchodilator measurements, in
-  litres, same length.
+  Numeric vectors of baseline (pre-bronchodilator) and corresponding
+  post-bronchodilator measurements, in litres, same length. As with
+  [`pft_bdr()`](https://overdodactyl.github.io/pft/reference/pft_bdr.md),
+  the caller identifies which values are pre and post; `pft` does not
+  infer test phase.
 
 ## Value
 

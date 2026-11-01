@@ -5,9 +5,9 @@ function tests: predicted values and limits of normal, z-scores, percent
 predicted, ATS/ERS pattern classification, severity grading,
 bronchodilator response, PRISm screening, and conditional change scores,
 all from a data-frame-pipeline API. The interpretive primitives
-implement the current ATS/ERS technical standard (Stanojevic et
-al. 2022); the predecessor Pellegrino 2005 primitives are also available
-for reclassification analyses.
+implement the ERS/ATS 2022 technical standard (Stanojevic et al. 2022);
+the predecessor Pellegrino 2005 primitives are also available for
+reclassification analyses.
 
 The sections below run the pipeline on a single patient and then on a
 small cohort.
@@ -15,7 +15,7 @@ small cohort.
 ``` r
 
 library(pft)
-#> pft 1.0.3 | Research and education use only. Not validated for diagnostic decision-making; all outputs require clinician interpretation. See citation("pft") for the source reference standards.
+#> pft 1.0.4 | Research and education use only. Not validated for diagnostic decision-making; all outputs require clinician interpretation. See citation("pft") for the source reference standards.
 ```
 
 ## 1. Reference values from demographics alone
@@ -40,10 +40,10 @@ ref[, c("fev1_pred_2022", "fev1_lln_2022", "fev1_uln_2022",
 #> # ℹ 1 more variable: fvc_uln_2022 <dbl>
 ```
 
-The default is GLI 2022 (“GLI Global”), the race-neutral equation set
-recommended by the current ATS/ERS technical standard. To use the
-predecessor GLI 2012 multi-ethnic equations, pass `year = 2012` and
-include a `race` column.
+The default is GLI 2022 (“GLI Global”, Bowerman et al. 2023), the
+race-neutral GLI spirometry equation set. To use the predecessor GLI
+2012 multi-ethnic equations, pass `year = 2012` and include a `race`
+column.
 
 The same pattern works for lung volumes and diffusion:
 
@@ -329,8 +329,8 @@ citation("pft")
 #> 
 #>   Johnson P, Helgeson S (2026). _pft: Reference Values and
 #>   Interpretation for Pulmonary Function Tests_.
-#>   doi:10.5281/zenodo.22651275
-#>   <https://doi.org/10.5281/zenodo.22651275>. R package version 1.0.3
+#>   doi:10.5281/zenodo.21196107
+#>   <https://doi.org/10.5281/zenodo.21196107>. R package version 1.0.4
 #>   (Zenodo concept DOI: 10.5281/zenodo.21196107),
 #>   <https://CRAN.R-project.org/package=pft>.
 #> 

@@ -63,55 +63,69 @@ changing input data.
 assigns one of five interpretive patterns per Stanojevic 2022 Figure 8 /
 Table 5:
 
-- **Normal** – FEV1/FVC, FVC, and FEV1 all \>= LLN.
-- **Obstructed** – FEV1/FVC \< LLN.
-- **Restricted** – FEV1/FVC \>= LLN, FVC \< LLN, *and* TLC \< LLN.
+- **Normal** – FEV1/FVC, FVC, and TLC all \>= LLN. (FEV1 is used for
+  severity grading, not pattern assignment.)
+- **Obstructed** – FEV1/FVC \< LLN, TLC \>= LLN.
+- **Restricted** – FEV1/FVC \>= LLN *and* TLC \< LLN. FVC is usually
+  also low, but the low TLC is what defines restriction.
 - **Mixed** – FEV1/FVC \< LLN *and* TLC \< LLN.
 - **Non-specific** – FEV1/FVC \>= LLN, FVC \< LLN, TLC \>= LLN. The
   spirometry-only version of this pattern (TLC unavailable) is PRISm,
   surfaced by
   [`pft_prism()`](https://overdodactyl.github.io/pft/reference/pft_prism.md).
 
-When TLC is missing, the classifier falls back to the spirometry-only
-branches in Table 5 (Normal, Obstructed, Non-specific / PRISm);
-Restricted and Mixed require TLC.
+A low FVC alone is never labelled restriction: **Restricted and Mixed
+both require a measured TLC below its LLN.** When TLC is missing, the
+2022 classifier does not confirm either pattern from spirometry. Rows
+with FEV1/FVC \< LLN are labelled **Obstructed** (Mixed cannot be ruled
+out without TLC, but it is itself an obstructive pattern), and rows with
+a preserved ratio are left `NA` because TLC is exactly the input that
+separates Normal, Non-specific, and Restricted. Use the separate `prism`
+flag from
+[`pft_prism()`](https://overdodactyl.github.io/pft/reference/pft_prism.md)
+for the spirometry-only screen.
+
+As elsewhere in `pft`, these labels describe the physiologic pattern of
+the test, not a disease diagnosis.
 
 ``` r
 
 case <- data.frame(
-  fev1    = c(2.5, 2.5, 1.5, 1.5,  3.5),
+  fev1    = c(2.5, 2.5, 1.8, 1.8,  3.5),
   fev1_lln_2022= c(3.0, 3.0, 2.5, 2.5,  3.0),
   fvc     = c(3.8, 3.8, 2.2, 2.2,  4.5),
   fvc_lln_2022 = c(3.5, 3.5, 2.5, 2.5,  4.0),
-  fev1fvc = c(0.66, 0.66, 0.68, 0.80, 0.78),
+  fev1fvc = c(0.66, 0.66, 0.80, 0.80, 0.78),
   fev1fvc_lln_2022 = 0.70,
-  tlc     = c(6.0, 5.0, 4.0, 4.0,  6.5),
+  tlc     = c(6.0, 5.0, 4.0, 6.0,  6.5),
   tlc_lln = c(5.5, 5.5, 5.5, 5.5,  5.5)
 )
-pft_classify(case)[, c("ats_classification")]
-#> # A tibble: 5 × 1
-#>   ats_classification
-#>   <chr>             
-#> 1 Obstructed        
-#> 2 Mixed             
-#> 3 Mixed             
-#> 4 Restricted        
-#> 5 Normal
+pft_classify(case)[, c("ats_pattern_combination", "ats_classification")]
+#> # A tibble: 5 × 2
+#>   ats_pattern_combination ats_classification
+#>   <chr>                   <chr>             
+#> 1 ANAN                    Obstructed        
+#> 2 ANAA                    Mixed             
+#> 3 AANA                    Restricted        
+#> 4 AANN                    Non-specific      
+#> 5 NNNN                    Normal
 ```
 
-Reading row by row:
+Reading row by row (pattern combination order: FEV1, FVC, FEV1/FVC,
+TLC):
 
 1.  FEV1/FVC \< LLN, TLC normal -\> **Obstructed**.
 2.  FEV1/FVC \< LLN *and* TLC \< LLN -\> **Mixed**.
 3.  FEV1/FVC normal, FVC \< LLN, TLC \< LLN -\> **Restricted**.
-4.  FEV1/FVC normal, FVC \< LLN, TLC normal -\> **Non-specific**.
+4.  FEV1/FVC normal, FVC \< LLN, TLC normal -\> **Non-specific** (the
+    low FVC alone is not labelled restriction).
 5.  Everything \>= LLN -\> **Normal**.
 
-## Choosing between the current and legacy interpretive standards
+## Choosing between the 2022 and 2005 interpretive standards
 
 The two standards differ in three ways:
 
-| Aspect                  | Current (Stanojevic 2022) | Legacy (Pellegrino 2005) |
+| Aspect                  | ERS/ATS 2022 (Stanojevic) | Legacy (Pellegrino 2005) |
 |-------------------------|---------------------------|--------------------------|
 | Severity input          | z-score                   | % predicted (FEV1)       |
 | Bronchodilator response | \> 10 % predicted         | \> 12 % AND \> 200 mL^\* |
@@ -125,7 +139,7 @@ follows the running-text convention, matching the more specific of the
 two source formulations. See
 [`?pft_bdr_2005`](https://overdodactyl.github.io/pft/reference/pft_bdr_2005.md).
 
-The current standard is the recommended default and is what
+The ERS/ATS 2022 standard is the recommended default and is what
 [`pft_interpret()`](https://overdodactyl.github.io/pft/reference/pft_interpret.md)
 applies by default. Use the legacy path when reproducing a historical
 report or matching an EMR template that was built against the older
@@ -139,14 +153,14 @@ predecessor severity and BDR outputs alongside
 
 ``` r
 
-copd <- data.frame(
+obstruction <- data.frame(
   sex = "M", age = 68, height = 175, race = "Caucasian",
   fev1_measured    = 1.6,
   fvc_measured     = 3.0,
   fev1fvc_measured = 1.6 / 3.0,
   tlc_measured     = 6.8
 )
-r <- pft_interpret(copd)
+r <- pft_interpret(obstruction)
 r[, c("ats_classification", "fev1_severity_2022", "fev1_zscore_2022",
        "fev1_pctpred_2022")]
 #> # A tibble: 1 × 4
@@ -155,8 +169,11 @@ r[, c("ats_classification", "fev1_severity_2022", "fev1_zscore_2022",
 #> 1 Obstructed         moderate                      -2.80              53.2
 ```
 
-The pattern is **Obstructed** with **moderate** severity. GOLD staging
-(FEV1 % predicted) classifies this as **GOLD 2**:
+The pattern is **Obstructed** with **moderate** severity. The GOLD 2026
+spirometric airflow-limitation grade (FEV1 % predicted, applied only
+when post-bronchodilator FEV1/FVC \< 0.70) is **GOLD 2**. This example
+treats the measured values as post-bronchodilator; the grade describes
+airflow limitation and is not by itself a COPD diagnosis:
 
 ``` r
 
@@ -210,8 +227,11 @@ r[, c("ats_classification", "prism")]
 #> 1 NA                 TRUE
 ```
 
-The `prism` column is `TRUE`. The label flags the spirometry pattern
-only; downstream clinical interpretation is out of scope.
+The `prism` column is `TRUE`, while `ats_classification` is `NA`: with a
+preserved ratio and no TLC, the classifier cannot distinguish
+Non-specific from Restricted and does not label restriction from the low
+FVC alone. The PRISm flag describes the spirometry pattern only;
+downstream clinical interpretation is out of scope.
 
 ## Applying vector helpers inside a data-frame workflow
 
@@ -238,8 +258,11 @@ The package splits its public surface into two kinds of function:
   per-row tibble. They are designed to compose inside
   [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html).
 
-A cohort run that combines reference values with severity, GOLD staging,
-and bronchodilator response:
+A cohort run that combines reference values with severity, the GOLD 2026
+airflow-limitation grade, and bronchodilator response. Here the
+`_measured` columns are assumed to hold post-bronchodilator values, as
+[`pft_gold()`](https://overdodactyl.github.io/pft/reference/pft_gold.md)
+requires; `pft` does not check the test phase:
 
 ``` r
 

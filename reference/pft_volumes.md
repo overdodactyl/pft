@@ -43,6 +43,22 @@ The original data frame with extra columns appended for each measure:
 
 - `<measure>_pctpred`: percent predicted `(measured / pred) * 100`.
 
+## Applicability (source population)
+
+The GLI 2021 static lung-volume equations were derived from 7,190
+observations from participants of **European ancestry** aged 5-80 years;
+data from non-European ancestry populations were insufficient to develop
+multi-ethnic equations (Hall et al. 2021). The source authors note that
+it is not clear whether these equations are appropriate for people of
+non-European ancestry. The race-neutral GLI Global 2022 spirometry
+equations available in
+[`pft_spirometry()`](https://overdodactyl.github.io/pft/reference/pft_spirometry.md)
+do **not** make these lung-volume equations race-neutral or
+multi-ethnic. Users should consider whether the source reference
+population is appropriate for the population under study before
+interpreting outputs. Ages outside the 5-80 year spline range return
+`NA` reference values.
+
 ## References
 
 Hall GL, Filipow N, Ruppel G, et al. Official ERS technical standard:

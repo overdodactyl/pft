@@ -1,4 +1,4 @@
-# Bronchodilator response per the current ATS/ERS criterion
+# Bronchodilator response per the ERS/ATS 2022 criterion
 
 Classifies bronchodilator response (BDR) by the percent change in the
 measured value relative to the patient's predicted value, as recommended
@@ -15,15 +15,22 @@ pft_bdr(pre, post, predicted, threshold = BDR_THRESHOLD_PCT_PRED)
 
 ## Arguments
 
-- pre, post:
+- pre:
 
-  Numeric vectors of pre- and post-bronchodilator measurements (same
-  units, same length).
+  Numeric vector of baseline measurements obtained before bronchodilator
+  administration.
+
+- post:
+
+  Numeric vector of the corresponding measurements obtained after
+  bronchodilator administration, in the same units and of the same
+  length as `pre`.
 
 - predicted:
 
-  Numeric vector of predicted (median) values for the same measure,
-  typically the `<measure>_pred` column from a previous call to
+  Numeric vector of predicted (median) values for the same measure and
+  units, typically the `<measure>_pred_<year>` column from a previous
+  call to
   [`pft_spirometry()`](https://overdodactyl.github.io/pft/reference/pft_spirometry.md).
 
 - threshold:
@@ -39,6 +46,17 @@ A data frame with one row per input observation and columns:
 
 - `is_significant`: logical, `TRUE` when `pct_pred_change > threshold`.
   `NA` is propagated wherever any of `pre`, `post`, `predicted` is `NA`.
+
+## Pre- and post-bronchodilator values
+
+`pre` is the baseline measurement obtained **before** bronchodilator
+administration; `post` is the corresponding measurement obtained
+**after** bronchodilator administration under the laboratory's testing
+protocol. Each `pre`/`post` pair must refer to the same physiologic
+measure in the same units and belong to the same paired assessment. The
+caller identifies which values are pre and post; `pft` does not infer
+test phase from timestamps, values, medication records, or curve shape,
+and it interprets the supplied labels literally.
 
 ## Column naming
 

@@ -1,9 +1,10 @@
-# Grade spirometry quality per ATS/ERS 2019
+# Compute the ATS/ERS 2019 spirometry session grade from maneuvers already judged acceptable
 
-Assigns one of grades A-F to a set of acceptable spirometry maneuvers
-for a single measure (FEV1 or FVC) per the Graham et al. ATS/ERS 2019
-technical standard, Table 10. Grades depend on the number of acceptable
-maneuvers and the difference between the best two values.
+Computes the Graham et al. ATS/ERS 2019 (Table 10) session grade, A-F,
+for ONE measure (FEV1 or FVC) from the values of maneuvers that have
+**already been judged acceptable**. The grade depends only on the number
+of accepted maneuvers and their repeatability (the difference between
+the two largest values).
 
 ## Usage
 
@@ -15,9 +16,10 @@ pft_quality(values, age = NA_real_)
 
 - values:
 
-  Numeric vector of measurements (litres) from each acceptable maneuver
-  for ONE patient and ONE measure. Length 0 is allowed and yields grade
-  `"F"`.
+  Numeric vector of measurements (litres) from each maneuver already
+  judged acceptable, for ONE person, ONE measure (FEV1 or FVC), and ONE
+  maneuver set (pre- or post-bronchodilator). `NA` values are dropped.
+  Length 0 is allowed and yields grade `"F"`.
 
 - age:
 
@@ -33,6 +35,9 @@ A length-1 character with value `"A"`, `"B"`, `"C"`, `"D"`, `"E"`, or
 `"F"`.
 
 ## Details
+
+**This function does not assess maneuver acceptability or overall test
+quality.** See "Precondition" below.
 
 Grade definitions (Table 10, paper p. e83). Adult thresholds in
 parentheses; child (age \<= 6) thresholds are
@@ -56,10 +61,32 @@ parentheses; child (age \<= 6) thresholds are
 - **F**: 0 acceptable maneuvers.
 
 Grade **U** ("0 acceptable AND \>= 1 usable") from Table 10 is NOT
-currently distinguished from F. Implementing U would require extending
-the API to take a separate vector of usable-but-not- acceptable
-maneuvers; with zero acceptable values, the function returns F
-unconditionally.
+currently distinguished from F. The API receives only accepted values,
+so with zero accepted values it cannot tell 0 acceptable += 1 usable (U)
+apart from 0 acceptable + 0 usable (F), andreturns "F" unconditionally.
+Implementing U would requireextending the API to take a separate vector
+of usable-but-not-acceptable maneuvers.
+
+## Precondition – acceptability must already be established
+
+`values` must contain only measurements from maneuvers that an
+appropriately trained technologist or reviewer has already judged
+acceptable, using the complete flow-volume and volume-time curves and
+the full ATS/ERS 2019 acceptability criteria. `pft_quality()` receives
+scalar values only, so it cannot determine acceptability: it cannot
+evaluate curve morphology, start-of-test or end-of-forced-expiration
+criteria, cough, glottic closure, leak, mouthpiece obstruction, effort,
+or any other feature that requires the raw curves or the testing
+context.
+
+The returned grade therefore **supplements, and does not replace**,
+technical review of the test session. It is not an independent
+assessment of overall PFT quality, and a grade computed from maneuvers
+that were not reviewed for acceptability is not meaningful.
+
+Per Graham et al. 2019 (p. e83), FEV1 and FVC are graded separately, and
+the pre-bronchodilator and post-bronchodilator maneuver sets are graded
+separately. Call `pft_quality()` once per measure per maneuver set.
 
 ## References
 
@@ -74,7 +101,7 @@ Med. 2019;200(8):e70-e88.
 
 [`pft_interpret()`](https://overdodactyl.github.io/pft/reference/pft_interpret.md)
 for the downstream interpretation once acceptable maneuvers have been
-selected.
+selected by technical review.
 
 ## Examples
 

@@ -4,10 +4,11 @@
 function tests. Reference values come from the GLI family of equations
 (GLI 2012 and GLI Global 2022 spirometry, GLI 2021 static lung volumes,
 GLI 2017 TLCO with the 2020 author correction). Interpretive primitives
-implement the current ATS/ERS technical standard (Stanojevic et al.
-2022) for pattern classification, severity grading, bronchodilator
-response, PRISm screening, and conditional-change z-scores, alongside
-GOLD airflow-limitation grading, Graham 2019 spirometry quality grades,
+implement the ERS/ATS 2022 technical standard (Stanojevic et al. 2022)
+for pattern classification, severity grading, bronchodilator response,
+PRISm screening, and conditional-change z-scores, alongside the GOLD
+2026 spirometric airflow-limitation grade, the Graham 2019 spirometry
+session grade computed from maneuvers already judged acceptable,
 hemoglobin correction, the FEV1Q survival index, and a ggplot2-based
 clinical lollipop figure. Pellegrino et al. 2005 legacy primitives are
 retained for cross-standard reclassification analyses.
@@ -22,7 +23,7 @@ The ATS/ERS technical standard implemented by
 and
 [`pft_change()`](https://overdodactyl.github.io/pft/reference/pft_change.md)
 is Stanojevic et al. 2022, which is the most recent interpretive
-standard from these societies as of the current package release. Older
+standard from these societies as of this package release. Older
 standards (Pellegrino et al. 2005) remain available for reclassification
 and comparison work via
 [`pft_severity_2005()`](https://overdodactyl.github.io/pft/reference/pft_severity_2005.md),
@@ -31,8 +32,8 @@ and the `standard = "2005"` argument to
 [`pft_classify()`](https://overdodactyl.github.io/pft/reference/pft_classify.md)
 /
 [`pft_interpret()`](https://overdodactyl.github.io/pft/reference/pft_interpret.md).
-`pft` is designed to incorporate future ATS/ERS, GLI, and GOLD revisions
-as they are published.
+Future ERS/ATS, GLI, or GOLD revisions would be introduced only in new
+versioned releases; no standard is updated silently or by calendar date.
 
 ## Input data format
 
@@ -75,9 +76,22 @@ conventions hold across every exported function:
 
 - **Volumes** (FEV1, FVC, FRC, TLC, RV, ERV, IC, VC) are in litres.
 
-- **DLCO / TLCO** are reported in the units the function emits
-  (controlled by `SI.units` in
-  [`pft_diffusion()`](https://overdodactyl.github.io/pft/reference/pft_diffusion.md)).
+- **DLCO / TLCO** units are selected by the caller with `SI.units` in
+  [`pft_diffusion()`](https://overdodactyl.github.io/pft/reference/pft_diffusion.md)
+  /
+  [`pft_interpret()`](https://overdodactyl.github.io/pft/reference/pft_interpret.md):
+  traditional (DLCO, mL/min/mmHg) by default, SI (TLCO, mmol/min/kPa)
+  when `TRUE`. Measured diffusion columns must already be in the
+  selected unit system; units are never inferred from numeric magnitude.
+
+- **Numeric precision**: no fixed number of decimal places is required;
+  values are used at the precision supplied.
+
+- **Plausibility**: `pft` checks that required columns are present and
+  that ages fall within each source equation's range (out-of- range rows
+  return `NA`), but it does not screen measured values for physiologic
+  plausibility or technical quality. Callers are responsible for
+  validating source data and units.
 
 - **z-scores** use the LMS-based formula
   `z = ((measured / M)^L - 1) / (L * S)` and are SIGNED such that values
@@ -124,8 +138,11 @@ conventions hold across every exported function:
 - **Spirometry acquisition standard 2019**: Graham et al. *Am J Respir
   Crit Care Med* 2019;200(8):e70-e88.
   [doi:10.1164/rccm.201908-1590ST](https://doi.org/10.1164/rccm.201908-1590ST)
-  . Implemented by
-  [`pft_quality()`](https://overdodactyl.github.io/pft/reference/pft_quality.md).
+  .
+  [`pft_quality()`](https://overdodactyl.github.io/pft/reference/pft_quality.md)
+  implements the Table 10 session grade from maneuvers already judged
+  acceptable by technical review; it does not assess acceptability
+  itself.
 
 - **Interpretive strategy 2022**: Stanojevic et al. *Eur Respir J*
   2022;60(1):2101499.
@@ -139,9 +156,12 @@ conventions hold across every exported function:
   and
   [`pft_interpret()`](https://overdodactyl.github.io/pft/reference/pft_interpret.md).
 
-- **COPD severity**: Global Initiative for Chronic Obstructive Lung
-  Disease (GOLD). <https://goldcopd.org>. Implemented by
-  [`pft_gold()`](https://overdodactyl.github.io/pft/reference/pft_gold.md).
+- **Spirometric airflow-limitation grade, GOLD 2026**: Global Initiative
+  for Chronic Obstructive Lung Disease (GOLD) 2026 report, Figure 2.10.
+  <https://goldcopd.org>. Implemented by
+  [`pft_gold()`](https://overdodactyl.github.io/pft/reference/pft_gold.md)
+  from post-bronchodilator FEV1 percent predicted, for use within the
+  GOLD COPD framework; not a COPD diagnostic function.
 
 - **Predecessor interpretive strategy 2005**: Pellegrino et al. *Eur
   Respir J* 2005;26(5):948-68.
@@ -159,8 +179,15 @@ conventions hold across every exported function:
 
 - Ethnic groups outside the five recognised by GLI 2012 (Caucasian,
   African American, North-East Asian, South-East Asian, Other/mixed).
-  The GLI Global 2022 equations are race-neutral and apply across
-  ancestral groups.
+  The GLI Global 2022 spirometry equations are race-neutral and apply
+  across ancestral groups. This does not extend to lung volumes or
+  diffusion: the GLI 2021 static lung-volume equations were derived from
+  participants of European ancestry, and the GLI 2017 TLCO/DLCO
+  equations are described by their source publication as being for
+  Caucasians (see the "Applicability" sections of
+  [`pft_volumes()`](https://overdodactyl.github.io/pft/reference/pft_volumes.md)
+  and
+  [`pft_diffusion()`](https://overdodactyl.github.io/pft/reference/pft_diffusion.md)).
 
 - Pre-school spirometry (ages \< 3).
 
